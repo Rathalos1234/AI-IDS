@@ -1,0 +1,6 @@
+scapy
+netifaces
+pandas
+numpy
+scikit-learn
+joblib
