@@ -1,63 +1,109 @@
-import scapy.all as scapy
+# -*- coding: utf-8 -*-
+"""
+Packet processing and feature engineering for the AI-Powered IDS.
+"""
+from __future__ import annotations
+
+from collections import deque
+from typing import Deque, Dict, Tuple
 import pandas as pd
 import numpy as np
-from scipy.stats import entropy
-from collections import deque
+
+try:
+    from scapy.all import IP, TCP, UDP  # type: ignore
+except Exception:  # pragma: no cover
+    IP = TCP = UDP = object
 
 class PacketProcessor:
-    # Process raw Scapy packets and engineers features for the ML model
-    def __init__(self, window_size=100):
-        self.packet_data = deque(maxlen=window_size)
-        self.features = ['protocol', 'packet_size_log', 'time_diff', 'packet_rate', 'sport', 'dport', 'ip_entropy']
+    """Transforms raw packets into model-ready features."""
 
-    def process_packet(self, packet: scapy.Packet):
-        # Extract key info from a single Scapy packet
+    FEATURES = [
+        'protocol',
+        'packet_size_log',
+        'time_diff',
+        'packet_rate',
+        'sport',
+        'dport',
+        'ip_entropy',
+    ]
+
+    def __init__(self, window_size: int = 500) -> None:
+        self._window_size = int(window_size)
+        self.packet_data: Deque[Dict] = deque(maxlen=self._window_size)
+
+    def set_window_size(self, new_size: int) -> None:
+        """Change the sliding window size safely, preserving recent data."""
+        new_size = max(1, int(new_size))
+        if new_size == self._window_size:
+            return
+        recent = list(self.packet_data)[-new_size:]
+        self.packet_data = deque(recent, maxlen=new_size)
+        self._window_size = new_size
+
+    def process_packet(self, packet) -> None:
+        """Extract fields from a Scapy packet and append to the window."""
         try:
-            if not packet.haslayer(scapy.IP):
+            if not packet.haslayer(IP):
                 return
-            
+            ip_layer = packet[IP]
+            protocol = getattr(ip_layer, 'proto', 0)
+            packet_size = int(len(packet)) if hasattr(packet, '__len__') else 0
+            if packet.haslayer(TCP):
+                sport = int(packet[TCP].sport)
+                dport = int(packet[TCP].dport)
+            elif packet.haslayer(UDP):
+                sport = int(packet[UDP].sport)
+                dport = int(packet[UDP].dport)
+            else:
+                sport = dport = 0
             record = {
-                'timestamp': packet.time,
-                'src_ip': packet[scapy.IP].src,
-                'dest_ip': packet[scapy.IP].dst,
-                'protocol': packet.proto,
-                'packet_size': len(packet),
-                'sport': packet.sport if packet.haslayer(scapy.TCP) or packet.haslayer(scapy.UDP) else 0,
-                'dport': packet.dport if packet.haslayer(scapy.TCP) or packet.haslayer(scapy.UDP) else 0
+                'timestamp': float(getattr(packet, 'time', 0.0)),
+                'src_ip': str(getattr(ip_layer, 'src', '')),
+                'dest_ip': str(getattr(ip_layer, 'dst', '')),
+                'protocol': int(protocol),
+                'packet_size': packet_size,
+                'sport': sport,
+                'dport': dport,
             }
             self.packet_data.append(record)
         except Exception as e:
-            print(f'[!] Error processing packet: {e}')
+            print(f"[PacketProcessor] Failed to process packet: {e}")
 
     def get_dataframe(self) -> pd.DataFrame:
-        # Convert the deque of packet data into a pandas Dataframe
+        """Return a DataFrame view of the current sliding window."""
+        if not self.packet_data:
+            return pd.DataFrame(columns=['timestamp','src_ip','dest_ip','protocol','packet_size','sport','dport'])
         return pd.DataFrame(list(self.packet_data))
-    
-    def _calculate_ip_entropy(self, df: pd.DataFrame, column: str) -> float:
-        # Calculate the Shannon entropy for an IP column
-        if df[column].empty:
+
+    @staticmethod
+    def _shannon_entropy_from_series(series: pd.Series) -> float:
+        """Compute Shannon entropy (base-2) of value distribution in `series`."""
+        if series.empty:
             return 0.0
-        value_counts = df[column].value_counts()
-        probabilities = value_counts / value_counts.sum()
-        return entropy(probabilities, base=2)
-    
-    def engineer_features(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-        # Engineer features from the raw packet DataFrame
-        if df.empty:
-            return pd.DataFrame(), df
-        
+        counts = series.value_counts(dropna=False).astype(float)
+        probs = counts / counts.sum()
+        probs = probs[probs > 0.0]
+        if probs.empty:
+            return 0.0
+        return float(-(probs * np.log2(probs)).sum())
+
+    def engineer_features(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """Create numeric features. Returns (features_df, processed_df)."""
+        if df is None or df.empty:
+            return pd.DataFrame(columns=self.FEATURES), df if df is not None else pd.DataFrame()
         df_processed = df.copy()
-        df_processed['time_diff'] = df_processed['timestamp'].diff().fillna(0)
-        df_processed['packet_size_log'] = np.log1p(df_processed['packet_size'])
-        # Avoid division by zero for packet_rate
-        df_processed['packet_rate'] = 1 / df_processed['time_diff'].replace(0,np.inf)
-        df_processed['ip_entropy'] = self.calculate_ip_entropy(df_processed, 'src_ip')
-
-        # Normalize features
-        for feature in self.features:
-            if feature in df_processed.columns and df_processed[feature].std() > 0:
-                mean = df_processed[feature].mean()
-                std = df_processed[feature].std()
-                df_processed[feature] = (df_processed[feature] - mean) / std
-
-        return df_processed[self.features].fillna(0), df_processed
+        df_processed.sort_values('timestamp', inplace=True, kind='mergesort')
+        df_processed.reset_index(drop=True, inplace=True)
+        df_processed['time_diff'] = df_processed['timestamp'].diff().fillna(0.0)
+        rate = np.where(df_processed['time_diff'] > 0, 1.0 / df_processed['time_diff'], 0.0)
+        df_processed['packet_rate'] = rate
+        df_processed['packet_size_log'] = np.log1p(df_processed['packet_size'].astype(float))
+        try:
+            current_window = self.get_dataframe()
+            entropy_series = current_window['src_ip'] if 'src_ip' in current_window else df_processed['src_ip']
+        except Exception:
+            entropy_series = df_processed['src_ip']
+        entropy_value = self._shannon_entropy_from_series(entropy_series)
+        df_processed['ip_entropy'] = float(entropy_value)
+        features = df_processed.reindex(columns=self.FEATURES).fillna(0.0).astype(float)
+        return features, df_processed

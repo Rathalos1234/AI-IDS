@@ -1,51 +1,63 @@
+# -*- coding: utf-8 -*-
+"""CLI entrypoint for the AI-Powered IDS."""
+from __future__ import annotations
+
 import argparse
 import configparser
+import sys
 from network_monitor import NetworkMonitor
 
-def main():
-    # Main entry point for the AI-IDS app
-    config = configparser.ConfigParser()
-    config.read('config.ini')
+def _load_config(config_path: str) -> configparser.ConfigParser:
+    cfg = configparser.ConfigParser()
+    read = cfg.read(config_path)
+    if not read:
+        print(f"[WARN] Could not read config file at '{config_path}'. Using defaults where possible.")
+    return cfg
 
-    parser = argparse.ArgumentParser(description='AI-Powered Intrusion Detection System')
-    parser.add_argument(
-        'mode',
-        choices=['train', 'monitor'],
-        help='Run in "train" mode to capture packets and create a model, or "monitor" mode to perform real-time detection.'
-    )
-    parser.add_argument(
-        '--interface',
-        type=str,
-        default=config.get('DEFAULT', 'DefaultInterface'),
-        help='Network interface to use'
-    )
-    parser.add_argument(
-        '--count',
-        type=int,
-        default=config.getint('DEFAULT', 'DefaultPacketCount'),
-        help='Number of packets to capture in training mode'
-    )
-    parser.add_argument(
-        '--model',
-        type=str,
-        default='model.joblib',
-        help='Path to save or load the model file'
-    )
+def build_arg_parser(cfg: configparser.ConfigParser) -> argparse.ArgumentParser:
+    default_iface = cfg.get('DEFAULT', 'DefaultInterface', fallback='eth0')
+    default_count = cfg.getint('DEFAULT', 'DefaultPacketCount', fallback=1000)
+    default_model = cfg.get('DEFAULT', 'ModelPath', fallback='models/iforest.joblib')
+    p = argparse.ArgumentParser(description="AI-Powered IDS: Train or monitor network traffic using Isolation Forest.")
+    sub = p.add_subparsers(dest='mode', required=True, help='Sub-commands')
+    pt = sub.add_parser('train', help='Capture packets and train the model.')
+    pt.add_argument('--interface', '-i', default=default_iface, help='Network interface to use.')
+    pt.add_argument('--count', '-c', type=int, default=default_count, help='Number of packets to capture for training.')
+    pt.add_argument('--model', '-m', default=default_model, help='Path to save the trained model (joblib).')
+    pm = sub.add_parser('monitor', help='Start live monitoring with a trained model.')
+    pm.add_argument('--interface', '-i', default=default_iface, help='Network interface to use.')
+    pm.add_argument('--model', '-m', default=default_model, help='Path to the trained model (joblib).')
+    return p
 
-    args = parser.parse_args()
-
+def main(argv=None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    cfg = _load_config('config.ini')
+    args = build_arg_parser(cfg).parse_args(argv)
+    monitor = NetworkMonitor(cfg)
     try:
-        monitor = NetworkMonitor(config)
         if args.mode == 'train':
-            monitor.capture_and_train(args.interface, args.count, args.model)
+            monitor.capture_and_train(interface=args.interface, packet_count=args.count, model_path=args.model)
         elif args.mode == 'monitor':
-            monitor.start_monitoring(args.interface, args.model)
-    except (ValueError, FileNotFoundError, PermissionError) as e:
-        print(f'[!] ERROR: {e}')
-        print('[!] Please run with sudo for packet capture permissions')
+            monitor.start_monitoring(interface=args.interface, model_path=args.model)
+        else:
+            print("Unknown mode. Use 'train' or 'monitor'.")
+            return 2
+    except PermissionError:
+        print("[ERROR] Permission denied. Try running with elevated privileges (e.g., sudo) for packet capture.")
+        return 1
+    except FileNotFoundError as e:
+        print(f"[ERROR] {e}")
+        return 1
+    except ValueError as e:
+        print(f"[ERROR] {e}")
+        return 1
+    except KeyboardInterrupt:
+        print("\nInterrupted by user.")
+        return 0
     except Exception as e:
-        print(f'[!] An unexpected error occurred: {e}')
-
+        print(f"[ERROR] {e}")
+        return 1
+    return 0
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())
