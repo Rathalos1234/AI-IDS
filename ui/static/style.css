@@ -1,0 +1,15 @@
+:root { --bg:#0b0e12; --fg:#e6e9ef; --muted:#9aa1ac; --card:#141923; --green:#3fb950; --yellow:#f2cc60; --red:#e5534b; }
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,Segoe UI,Roboto}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#0e131a;border-bottom:1px solid #1d2430}
+h1{margin:0;font-size:18px} h2{margin-top:12px}
+.container{padding:20px}
+.grid{display:grid;grid-template-columns: 2fr 1fr; gap:16px}
+section{background:var(--card);padding:12px;border-radius:10px;border:1px solid #1f2633}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{padding:6px 8px;border-bottom:1px solid #1f2633}
+thead th{color:var(--muted);text-align:left}
+.inline{display:flex;gap:8px;margin-top:10px}
+input,button{padding:8px;border-radius:8px;border:1px solid #2a3242;background:#0f141c;color:var(--fg)}
+button{cursor:pointer}
+.sev-low{color:var(--green)} .sev-medium{color:var(--yellow)} .sev-high{color:var(--red)}
+form label{display:block;margin:8px 0}

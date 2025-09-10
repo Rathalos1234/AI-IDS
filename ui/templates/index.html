@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2 class="mt-0">Dashboard</h2>
+<div class="grid">
+  <section>
+    <h3>Recent Alerts</h3>
+    <table>
+      <thead><tr><th>ID</th><th>Time</th><th>Src IP</th><th>Label</th><th>Severity</th><th>Kind</th></tr></thead>
+      <tbody>
+      {% for a in alerts %}
+        <tr>
+          <td>{{a.id}}</td>
+          <td>{{a.ts}}</td>
+          <td>{{a.src_ip}}</td>
+          <td>{{a.label}}</td>
+          <td class="sev-{{a.severity}}">{{a.severity}}</td>
+          <td>{{a.kind}}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <section>
+    <h3>Blocks</h3>
+    <table>
+      <thead><tr><th>ID</th><th>Time</th><th>IP</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for b in blocks %}
+        <tr>
+          <td>{{b.id}}</td>
+          <td>{{b.ts}}</td>
+          <td>{{b.ip}}</td>
+          <td>{{b.action}}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <form method="post" action="/block" class="inline">
+      <input type="text" name="ip" placeholder="IP to block" required />
+      <button type="submit">Block IP</button>
+    </form>
+    <form method="post" action="/unblock" class="inline">
+      <input type="text" name="ip" placeholder="IP to unblock" required />
+      <button type="submit">Unblock IP</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

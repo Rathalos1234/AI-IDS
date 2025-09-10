@@ -1,0 +1,50 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  api:
+    build: .
+    command: uvicorn apps.api.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=sqlite:////app/ids.db
+      - JWT_SECRET=dev-secret-change-me
+    depends_on: [redis]
+    ports: ["8000:8000"]
+  worker-capture:
+    build: .
+    command: python -m apps.worker.capture
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - USE_SCAPY=0
+    depends_on: [redis]
+  worker-signature:
+    build: .
+    command: python -m apps.worker.signature
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on: [redis]
+  worker-anomaly:
+    build: .
+    command: python -m apps.worker.anomaly
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on: [redis]
+  worker-response:
+    build: .
+    command: python -m apps.worker.response
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=sqlite:////app/ids.db
+      - JWT_SECRET=dev-secret-change-me
+    depends_on: [redis, api]

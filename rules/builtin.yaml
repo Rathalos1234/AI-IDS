@@ -1,0 +1,21 @@
+#these are the signature based detections (change this shit later and add more parameters)
+- id: syn_flood
+  description: High SYN rate likely flood
+  when:
+    syn_rate_gt: 100
+  severity: high
+  label: DoS
+
+- id: brute_force
+  description: Many failed auths
+  when:
+    failed_auth_rate_gt: 20
+  severity: medium
+  label: Bruteforce
+
+- id: port_scan
+  description: Many unique destination ports
+  when:
+    uniq_dst_ports_gt: 50
+  severity: medium
+  label: PortScan

@@ -1,2 +1,0 @@
-from sklearn.ensemble import IsolationForest
-import argparse
