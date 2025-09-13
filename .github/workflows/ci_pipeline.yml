@@ -1,51 +1,84 @@
-# A name for your workflow, which will appear in the "Actions" tab of your GitHub repo
-name: AI-IDS CI/CD Pipeline
+name: AI-IDS CI
 
-# --- Triggers: When this workflow will run ---
 on:
-  # Run on every push to the 'develop' branch
   push:
-    branches: [ develop ]
-  # Also run on pull requests targeting the 'main' branch
+    branches: [develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
-# --- Jobs: The sequence of tasks to perform ---
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  build-and-test:
-    # Use the latest version of Ubuntu as the virtual machine
+  lint-test:
     runs-on: ubuntu-latest
-
-    # --- Steps: The individual commands to execute ---
     steps:
-      # 1. Check out your repository's code so the workflow can access it
-      - name: Check out code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Set up the Python environment
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10 with pip cache
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
-      # 3. Install dependencies
+      - name: System deps (pcap)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpcap-dev
+
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          # Scapy requires libpcap-dev on the system
-          sudo apt-get update && sudo apt-get install -y libpcap-dev
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install flake8 pytest # Install testing tools
+          python -m pip install --upgrade pip wheel
+          pip install -r requirements.txt
+          # dev/test tools (kept here to make CI reproducible)
+          pip install flake8 mypy bandit pytest pytest-cov
 
-      # 4. Lint with flake8 (Check for style issues)
-      - name: Lint with flake8
-        run: |
-          # Stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # Exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Lint (flake8)
+        run: flake8 .
 
-      # 5. Run tests with pytest
-      - name: Test with pytest
+      - name: Type check (mypy)
         run: |
-          pytest
+          mypy --ignore-missing-imports --pretty anomaly_detector.py packet_processor.py network_monitor.py main.py
+
+      - name: Security scan (bandit)
+        run: bandit -q -r .
+
+      - name: CLI smoke tests (help screens)
+        run: |
+          python -m main --help
+          python main.py train --help
+          python main.py monitor --help
+
+      - name: Unit tests + Coverage (fail <75%)
+        run: |
+          pytest -q --maxfail=1 --disable-warnings \
+            --cov=. --cov-report=xml --cov-report=html --cov-fail-under=75
+
+      - name: Upload coverage artifact (HTML + XML)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            htmlcov/
+
+      - name: Build distribution (if pyproject.toml present)
+        if: ${{ hashFiles('pyproject.toml') != '' }}
+        run: |
+          pip install build
+          python -m build
+
+      - name: Upload dist artifacts
+        if: ${{ hashFiles('pyproject.toml') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
