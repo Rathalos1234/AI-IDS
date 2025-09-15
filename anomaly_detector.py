@@ -2,6 +2,7 @@
 """
 Isolation Forest anomaly detector with persisted scaler.
 """
+
 from __future__ import annotations
 
 import os
@@ -12,9 +13,16 @@ import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 
+
 class AnomalyDetector:
     """Train, persist, and use an Isolation Forest with a StandardScaler."""
-    def __init__(self, contamination: float = 0.05, n_estimators: int = 200, random_state: int = 42) -> None:
+
+    def __init__(
+        self,
+        contamination: float = 0.05,
+        n_estimators: int = 200,
+        random_state: int = 42,
+    ) -> None:
         self.model: Optional[IsolationForest] = None
         self.scaler: Optional[StandardScaler] = None
         self.feature_names: Optional[List[str]] = None
@@ -37,29 +45,37 @@ class AnomalyDetector:
     def _prepare_features(self, df_features: pd.DataFrame) -> np.ndarray:
         if self.model is None or self.scaler is None or self.feature_names is None:
             raise RuntimeError("Model not loaded/trained.")
-        X = df_features.reindex(columns=self.feature_names).fillna(0.0).values.astype(float)
+        X = (
+            df_features.reindex(columns=self.feature_names)
+            .fillna(0.0)
+            .values.astype(float)
+        )
         return self.scaler.transform(X)
 
     def predict(self, df_features: pd.DataFrame):
+        if self.model is None or self.scaler is None or self.feature_names is None:
+            raise RuntimeError("Model not trained or loaded.")
         X = self._prepare_features(df_features)
         preds = self.model.predict(X)  # 1 (inlier) or -1 (outlier)
         return ["Anomaly" if p == -1 else "Normal" for p in preds]
 
     def decision_scores(self, df_features: pd.DataFrame):
+        if self.model is None or self.scaler is None or self.feature_names is None:
+            raise RuntimeError("Model not trained or loaded.")
         X = self._prepare_features(df_features)
         return self.model.decision_function(X)
 
     def save_model(self, path: str) -> None:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         payload = {
-            'model': self.model,
-            'scaler': self.scaler,
-            'feature_names': self.feature_names,
-            'meta': {
-                'contamination': self.contamination,
-                'n_estimators': self.n_estimators,
-                'random_state': self.random_state,
-            }
+            "model": self.model,
+            "scaler": self.scaler,
+            "feature_names": self.feature_names,
+            "meta": {
+                "contamination": self.contamination,
+                "n_estimators": self.n_estimators,
+                "random_state": self.random_state,
+            },
         }
         joblib.dump(payload, path)
 
@@ -67,8 +83,8 @@ class AnomalyDetector:
         if not os.path.exists(path):
             raise FileNotFoundError(f"Model file does not exist: {path}")
         payload: Dict = joblib.load(path)
-        self.model = payload.get('model', None)
-        self.scaler = payload.get('scaler', None)
-        self.feature_names = payload.get('feature_names', None)
+        self.model = payload.get("model", None)
+        self.scaler = payload.get("scaler", None)
+        self.feature_names = payload.get("feature_names", None)
         if self.model is None or self.scaler is None or self.feature_names is None:
             raise RuntimeError("Loaded model bundle is incomplete.")
