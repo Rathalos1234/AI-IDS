@@ -33,7 +33,7 @@ jobs:
       - name: Make scripts executable
         run: chmod +x scripts/test_fast.sh scripts/test_full.sh
       - name: (debug) list files
-        run: ls -la && echo "--- test dir ---" && ls -la test
+        run: ls -la && echo "--- tests dir ---" && ls -la tests
       - name: Run fast gate
         run: bash scripts/test_fast.sh
         env:
@@ -55,7 +55,7 @@ jobs:
       - name: Make scripts executable
         run: chmod +x scripts/test_full.sh
       - name: (debug) list files
-        run: ls -la && echo "--- test dir ---" && ls -la test
+        run: ls -la && echo "--- tests dir ---" && ls -la tests
       - name: Run full suite
         run: bash scripts/test_full.sh
       - name: Append perf snapshot to job summary
