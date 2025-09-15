@@ -31,11 +31,11 @@ jobs:
       - name: Install deps (runtime + test/linters)
         run: pip install -r requirements.txt pytest ruff mypy
       - name: Make scripts executable
-        run: chmod +x test/test_fast.sh test/test_full.sh
+        run: chmod +x tests/test_fast.sh test/test_full.sh
       - name: (debug) list files
         run: ls -la && echo "--- test dir ---" && ls -la test
       - name: Run fast gate
-        run: bash test/test_fast.sh
+        run: bash tests/test_fast.sh
         env:
           LINT_STRICT: "1"
 
@@ -53,19 +53,17 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt pytest
       - name: Make scripts executable
-        run: chmod +x test/test_full.sh
+        run: chmod +x tests/test_full.sh
       - name: (debug) list files
         run: ls -la && echo "--- test dir ---" && ls -la test
       - name: Run full suite
-        run: bash test/test_full.sh
+        run: bash tests/test_full.sh
       - name: Append perf snapshot to job summary
         if: always()
         run: |
           echo "### Perf snapshot (10k rows)" >> $GITHUB_STEP_SUMMARY
           if [ -f sprint_artifacts/pytest_perf.txt ]; then
             tail -n 50 sprint_artifacts/pytest_perf.txt >> $GITHUB_STEP_SUMMARY
-          elif [ -f test/sprint_artifacts/pytest_perf.txt ]; then
-            tail -n 50 test/sprint_artifacts/pytest_perf.txt >> $GITHUB_STEP_SUMMARY
           else
             echo "No perf output found (skipped or failed)" >> $GITHUB_STEP_SUMMARY
           fi
@@ -74,6 +72,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sprint_artifacts
-          path: |
-            sprint_artifacts/**
+          path: sprint_artifacts/**
            
