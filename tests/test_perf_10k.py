@@ -1,17 +1,17 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
+# tests/test_perf_10k.py
 import time
+import tracemalloc
+import pytest
 import pandas as pd
 from packet_processor import PacketProcessor
 from anomaly_detector import AnomalyDetector
 
+TARGET_SECONDS = 3.0  # start generous for S1; tighten in S2
+TARGET_MB = 350
 
-def make_df(n=10_000):
-    rows = []
-    t0 = time.time()
+
+def _make_df(n=10_000):
+    rows, t0 = [], time.time()
     for i in range(n):
         rows.append(
             {
@@ -27,24 +27,24 @@ def make_df(n=10_000):
     return pd.DataFrame(rows)
 
 
-def main():
+@pytest.mark.perf
+def test_process_10k_under_budget():
     pp = PacketProcessor(window_size=15_000)
     pp._local_ips = set()
+    tracemalloc.start()
+    t0 = time.perf_counter()
 
-    t0 = time.time()
-    df = make_df()
+    df = _make_df()
     feats, _ = pp.engineer_features(df)
-    t1 = time.time()
-
     det = AnomalyDetector(contamination=0.05, n_estimators=100, random_state=42)
     det.train(feats)
-    # scores = det.decision_scores(feats)
-    t2 = time.time()
 
-    print(
-        f"feature_engineering_sec={t1 - t0:.3f} train+score_sec={t2 - t1:.3f} rows={len(df)}"
-    )
+    elapsed = time.perf_counter() - t0
+    _, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    peak_mb = peak / (1024 * 1024)
+    rows_sec = len(df) / max(elapsed, 1e-9)
 
-
-if __name__ == "__main__":
-    main()
+    assert elapsed <= TARGET_SECONDS, f"10k took {elapsed:.3f}s > {TARGET_SECONDS}s"
+    assert peak_mb <= TARGET_MB, f"Peak {peak_mb:.1f}MB > {TARGET_MB}MB"
+    print(f"rows/sec={rows_sec:.0f}  time={elapsed:.3f}s  peakMB={peak_mb:.1f}")
