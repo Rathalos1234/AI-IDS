@@ -31,11 +31,11 @@ jobs:
       - name: Install deps (runtime + test/linters)
         run: pip install -r requirements.txt pytest ruff mypy
       - name: Make scripts executable
-        run: chmod +x tests/test_fast.sh test/test_full.sh
+        run: chmod +x scripts/test_fast.sh scripts/test_full.sh
       - name: (debug) list files
         run: ls -la && echo "--- test dir ---" && ls -la test
       - name: Run fast gate
-        run: bash tests/test_fast.sh
+        run: bash scripts/test_fast.sh
         env:
           LINT_STRICT: "1"
 
@@ -53,11 +53,11 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt pytest
       - name: Make scripts executable
-        run: chmod +x tests/test_full.sh
+        run: chmod +x scripts/test_full.sh
       - name: (debug) list files
         run: ls -la && echo "--- test dir ---" && ls -la test
       - name: Run full suite
-        run: bash tests/test_full.sh
+        run: bash scripts/test_full.sh
       - name: Append perf snapshot to job summary
         if: always()
         run: |
