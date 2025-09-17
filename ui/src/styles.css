@@ -1,0 +1,91 @@
+:root{
+  --bg:#0b0f14;
+  --panel:#11161d;
+  --fg:#dfe7f1;
+  --muted:#9fb0c3;
+  --border:#1e2631;
+  --input:#0e141b;
+  --btn:#0f1a26;
+  color:var(--fg);
+  background:var(--bg);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  line-height:1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; }
+#app{ min-height:100vh; }
+
+a{ color:#7aa2ff; text-decoration:none; }
+a:hover{ text-decoration:underline; }
+
+button{ color:var(--fg); background:var(--btn); border:1px solid var(--border); }
+
+.btn-toggle{
+  --h: 34px;
+  height: var(--h);
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+  color: var(--fg);
+  background: var(--panel);
+  cursor: pointer;
+  overflow: hidden;                    /* prevent text sliding out on hover */
+  transition: background .25s ease, border-color .25s ease,
+              color .25s ease, transform .12s ease, box-shadow .2s ease;
+  will-change: transform;
+}
+.btn-toggle:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0,0,0,.18);
+}
+.btn-toggle:focus-visible{
+  outline: 0;
+  box-shadow: 0 0 0 4px color-mix(in lab, #5b8cff 40%, transparent);
+}
+
+/* Make the label swap perfectly centered & same width to avoid jitter */
+.btn-toggle .swap{
+  position: relative;
+  display: grid;                       /* center stack */
+  place-items: center;                 /* vertical + horizontal center */
+  min-width: 90px;                     /* keeps width stable */
+  line-height: var(--h);               /* perfect vertical centering */
+}
+.btn-toggle .front,
+.btn-toggle .back{
+  grid-area: 1 / 1;                    /* overlap */
+  transition: transform .22s cubic-bezier(.2,.7,.2,1), opacity .22s;
+}
+.btn-toggle .front{ opacity: 1; transform: translateY(0); }
+.btn-toggle .back { opacity: 0; transform: translateY(8px); }
+
+.btn-toggle:hover .front{ opacity: 0; transform: translateY(-8px); }
+.btn-toggle:hover .back { opacity: 1; transform: translateY(0); }
+
+.btn-toggle[data-state="block"]{
+  background: #d32f2f;
+  border-color: #d32f2f;
+  color: #fff;
+}
+.btn-toggle[data-state="unblock"]{
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: #fff;
+}
+
+.btn-toggle[data-state="block"]:hover{
+  background: #2e7d32;
+  border-color: #2e7d32;
+}
+.btn-toggle[data-state="unblock"]:hover{
+  background: #d32f2f;
+  border-color: #d32f2f;
+}
