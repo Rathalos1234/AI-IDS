@@ -116,6 +116,6 @@ PY
 ```
 
 ## Troubleshooting
-- **No packets captured / permission denied:** run as root or via Docker with `--cap-add=NET_RAW --cap-add=NET_ADMIN` and `--net=host` (Linux).
+- **No packets captured / permission denied:** run as root.
 - **Parquet file missing:** ensure `SaveRollingParquet=true`, `RollingParquetPath` folder exists, and `pyarrow` is installed; let monitor run for 10–30s.
 - **No SIGNATURE lines:** traffic may not match defaults; try a short port scan (`nmap -Pn -p 20-40 <target>` on a permitted host) or inbound to port 22 from another device.
