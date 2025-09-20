@@ -6,12 +6,18 @@ Isolation Forest anomaly detector with persisted scaler.
 from __future__ import annotations
 
 import os
+
 from typing import Dict, List, Optional
+import hashlib
+from datetime import datetime, timezone
+
 import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
+
+MODEL_BUNDLE_VERSION = "1.0.0"
 
 
 class AnomalyDetector:
@@ -26,6 +32,9 @@ class AnomalyDetector:
         self.model: Optional[IsolationForest] = None
         self.scaler: Optional[StandardScaler] = None
         self.feature_names: Optional[List[str]] = None
+
+        self.meta: Dict[str, object] = {}
+
         self.contamination = float(contamination)
         self.n_estimators = int(n_estimators)
         self.random_state = int(random_state)
@@ -67,6 +76,9 @@ class AnomalyDetector:
 
     def save_model(self, path: str) -> None:
         os.makedirs(os.path.dirname(path), exist_ok=True)
+
+        trained_at = datetime.now(timezone.utc).isoformat()
+
         payload = {
             "model": self.model,
             "scaler": self.scaler,
@@ -75,6 +87,9 @@ class AnomalyDetector:
                 "contamination": self.contamination,
                 "n_estimators": self.n_estimators,
                 "random_state": self.random_state,
+                "version": MODEL_BUNDLE_VERSION,
+                "trained_at": trained_at,
+                "feature_checksum": self._feature_checksum(self.feature_names),
             },
         }
         joblib.dump(payload, path)
@@ -86,5 +101,30 @@ class AnomalyDetector:
         self.model = payload.get("model", None)
         self.scaler = payload.get("scaler", None)
         self.feature_names = payload.get("feature_names", None)
+
+        self.meta = dict(payload.get("meta", {}))
+
         if self.model is None or self.scaler is None or self.feature_names is None:
             raise RuntimeError("Loaded model bundle is incomplete.")
+
+    @staticmethod
+    def _feature_checksum(names: Optional[List[str]]) -> str:
+        if not names:
+            return ""
+        data = ",".join(map(str, names)).encode("utf-8")
+        return hashlib.sha256(data).hexdigest()
+
+    def bundle_metadata(self) -> Dict[str, object]:
+        """Return lightweight, human-readable bundle info."""
+        return {
+            "version": MODEL_BUNDLE_VERSION,
+            "trained_at": self.meta.get("trained_at", ""),
+            "feature_names": list(self.feature_names or []),
+            "feature_count": len(self.feature_names or []),
+            "feature_checksum": self._feature_checksum(self.feature_names),
+            "params": {
+                "contamination": self.contamination,
+                "n_estimators": self.n_estimators,
+                "random_state": self.random_state,
+            },
+        }

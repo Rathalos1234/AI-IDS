@@ -33,4 +33,5 @@ fi
 
 echo "=== pytest (unit tests) ==="
 export PYTHONPATH="${PYTHONPATH:-$PWD}"
-pytest -m "unit" -q
+mkdir -p sprint_artifacts
+pytest -m "unit" -ra -vv --durations=10 | tee sprint_artifacts/pytest_unit.txt

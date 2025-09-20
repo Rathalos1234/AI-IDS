@@ -1,6 +1,7 @@
 import time
 import pandas as pd
 import pytest
+import random
 
 
 def build_packets(
@@ -60,3 +61,17 @@ def df_two_way():
         jitter=0.2,
     )
     return pd.DataFrame(a + b)
+
+
+try:
+    import numpy as np
+except Exception:
+    np = None
+
+
+@pytest.fixture(autouse=True)
+def _seed_everything():
+    random.seed(1337)
+    if np is not None:
+        np.random.seed(1337)
+    yield

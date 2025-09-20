@@ -1,10 +1,13 @@
 name: AI-IDS CI
 
 on:
-  push:
-    branches: [develop]
   pull_request:
-    branches: [main]
+    branches: [main]          # PR gate
+  push:
+    branches: [main, develop] # full suite on pushes
+  schedule:
+    - cron: "0 9 * * *"       # daily (09:00 UTC)
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,71 +17,60 @@ permissions:
   contents: read
 
 jobs:
-  lint-test:
+  fast:
+    name: Lint + Unit (PR gate)
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.10 with pip cache
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
-          cache-dependency-path: |
-            requirements.txt
-            requirements-dev.txt
+          python-version: "3.10"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - name: Install deps (runtime + test/linters)
+        run: pip install -r requirements.txt pytest ruff mypy
+      - name: Make scripts executable
+        run: chmod +x scripts/test_fast.sh scripts/test_full.sh
+      - name: (debug) list files
+        run: ls -la && echo "--- tests dir ---" && ls -la tests
+      - name: Run fast gate
+        run: bash scripts/test_fast.sh
+        env:
+          LINT_STRICT: "1"
 
-      - name: System deps (pcap)
+  full:
+    name: Unit + Integration (+ perf)
+    if: github.event_name != 'pull_request'   # push, schedule, manual
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - name: Install deps
+        run: pip install -r requirements.txt pytest
+      - name: Make scripts executable
+        run: chmod +x scripts/test_full.sh
+      - name: (debug) list files
+        run: ls -la && echo "--- tests dir ---" && ls -la tests
+      - name: Run full suite
+        run: bash scripts/test_full.sh
+      - name: Append perf snapshot to job summary
+        if: always()
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libpcap-dev
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip wheel
-          pip install -r requirements.txt
-          # dev/test tools (kept here to make CI reproducible)
-          pip install flake8 mypy bandit pytest pytest-cov
-
-      - name: Lint (flake8)
-        run: flake8 .
-
-      - name: Type check (mypy)
-        run: |
-          mypy --ignore-missing-imports --pretty anomaly_detector.py packet_processor.py network_monitor.py main.py
-
-      - name: Security scan (bandit)
-        run: bandit -q -r .
-
-      - name: CLI smoke tests (help screens)
-        run: |
-          python -m main --help
-          python main.py train --help
-          python main.py monitor --help
-
-      - name: Unit tests + Coverage (fail <75%)
-        run: |
-          pytest -q --maxfail=1 --disable-warnings \
-            --cov=. --cov-report=xml --cov-report=html --cov-fail-under=75
-
-      - name: Upload coverage artifact (HTML + XML)
+          echo "### Perf snapshot (10k rows)" >> $GITHUB_STEP_SUMMARY
+          if [ -f sprint_artifacts/pytest_perf.txt ]; then
+            tail -n 50 sprint_artifacts/pytest_perf.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No perf output found (skipped or failed)" >> $GITHUB_STEP_SUMMARY
+          fi
+      - name: Upload sprint artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report
-          path: |
-            coverage.xml
-            htmlcov/
-
-      - name: Build distribution (if pyproject.toml present)
-        if: ${{ hashFiles('pyproject.toml') != '' }}
-        run: |
-          pip install build
-          python -m build
-
-      - name: Upload dist artifacts
-        if: ${{ hashFiles('pyproject.toml') != '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-dist
-          path: dist/
+          name: sprint_artifacts
+          path: sprint_artifacts/**
+           

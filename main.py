@@ -7,6 +7,9 @@ import argparse
 import configparser
 import sys
 from network_monitor import NetworkMonitor
+from anomaly_detector import AnomalyDetector
+from config_validation import validate_config
+from typing import Any, Dict, List, cast
 
 
 def _load_config(config_path: str) -> configparser.ConfigParser:
@@ -16,6 +19,8 @@ def _load_config(config_path: str) -> configparser.ConfigParser:
         print(
             f"[WARN] Could not read config file at '{config_path}'. Using defaults where possible."
         )
+    # NEW: fail fast on bad configs
+    validate_config(cfg)
     return cfg
 
 
@@ -54,6 +59,16 @@ def build_arg_parser(cfg: configparser.ConfigParser) -> argparse.ArgumentParser:
         default=default_model,
         help="Path to the trained model (joblib).",
     )
+    pv = sub.add_parser("verify-model", help="Inspect a trained model bundle.")
+    pv.add_argument(
+        "--model",
+        "-m",
+        default=default_model,
+        help="Path to the trained model (joblib).",
+    )
+
+    _ = sub.add_parser("config-validate", help="Validate configuration and exit.")
+
     return p
 
 
@@ -69,6 +84,42 @@ def main(argv=None) -> int:
             )
         elif args.mode == "monitor":
             monitor.start_monitoring(interface=args.interface, model_path=args.model)
+        elif args.mode == "verify-model":
+            # Create a detector aligned with config, load bundle, and print details
+            det = AnomalyDetector(
+                contamination=cfg.getfloat(
+                    "IsolationForest", "Contamination", fallback=0.05
+                ),
+                n_estimators=cfg.getint("IsolationForest", "NEstimators", fallback=200),
+                random_state=cfg.getint("IsolationForest", "RandomState", fallback=42),
+            )
+            det.load_model(args.model)
+
+            info = cast(Dict[str, Any], det.bundle_metadata())
+
+            print("Model bundle info")
+            print("-----------------")
+            print(f"Version:          {info.get('version', '')}")
+            print(f"Trained at:       {info.get('trained_at', '')}")
+
+            params = cast(Dict[str, Any], info.get("params", {}) or {})
+
+            print(
+                f"IF params:        contamination={params.get('contamination')}  "
+                f"n_estimators={params.get('n_estimators')}  random_state={params.get('random_state')}"
+            )
+            print(f"Feature count:    {info.get('feature_count', 0)}")
+            print(f"Feature checksum: {info.get('feature_checksum', '')}")
+
+            names = cast(List[str], info.get("feature_names", []) or [])
+
+            print("Feature order:    " + (", ".join(names) if names else "<none>"))
+            return 0
+
+        elif args.mode == "config-validate":  # NEW
+            print("Config OK")
+            return 0
+
         else:
             print("Unknown mode. Use 'train' or 'monitor'.")
             return 2

@@ -21,6 +21,10 @@ except Exception as e:  # pragma: no cover
 from packet_processor import PacketProcessor
 from anomaly_detector import AnomalyDetector
 
+from typing import Any, Dict, List, cast
+
+from signature_engine import default_engine
+
 
 class NetworkMonitor:
     """Glue code that wires up capture, processing, and the detector."""
@@ -56,6 +60,14 @@ class NetworkMonitor:
         )
         self._packet_counter = 0
 
+        # Rolling features capture (for quick repros/ad-hoc retraining)
+        self.save_rolling = self.config.getboolean(
+            "Training", "SaveRollingParquet", fallback=True
+        )
+        self.rolling_path = self.config.get(
+            "Training", "RollingParquetPath", fallback="data/rolling.parquet"
+        )
+
         thr = self.config.get("Monitoring", "AlertThresholds", fallback="-0.10, -0.05")
         parts = [p.strip() for p in thr.split(",") if p.strip()]
         self._thr_high, self._thr_med = (-0.10, -0.05)
@@ -64,6 +76,10 @@ class NetworkMonitor:
                 self._thr_high, self._thr_med = float(parts[0]), float(parts[1])
             except Exception:
                 pass
+
+        # Signature engine toggle
+        self.enable_sigs = self.config.getboolean("Signatures", "Enable", fallback=True)
+        self.sig_engine = default_engine() if self.enable_sigs else None
 
     @staticmethod
     def _parse_log_level(level_str: str) -> int:
@@ -138,6 +154,41 @@ class NetworkMonitor:
         self._validate_interface(interface)
         self.detector.load_model(model_path)
         self.logger.info(f"Loaded model: {model_path}")
+        # Startup banner with model + thresholds details
+        try:
+            info = self.detector.bundle_metadata()
+            params = info.get("params", {}) or {}
+
+            info = cast(Dict[str, Any], self.detector.bundle_metadata())
+            params = cast(Dict[str, Any], info.get("params", {}) or {})
+
+            self.logger.info(
+                "Model info: version=%s trained_at=%s features=%d checksum=%s",
+                info.get("version", ""),
+                info.get("trained_at", ""),
+                info.get("feature_count", 0),
+                str(info.get("feature_checksum", ""))[:12] + "…",
+            )
+            self.logger.info(
+                "IF params: contamination=%s n_estimators=%s random_state=%s",
+                params.get("contamination"),
+                params.get("n_estimators"),
+                params.get("random_state"),
+            )
+
+            fnames = cast(List[str], info.get("feature_names", []) or [])
+
+            if fnames:
+                self.logger.info("Feature order: %s", ", ".join(map(str, fnames)))
+        except Exception:
+            # Non-fatal; continue monitoring even if banner fails
+            pass
+        self.logger.info(
+            "Alert thresholds: high<=%.3f  medium<=%.3f | online_retrain_interval=%d",
+            self._thr_high,
+            self._thr_med,
+            self.online_retrain_interval,
+        )
         self.logger.info(
             f"Starting live monitoring on '{interface}'. Press Ctrl+C to stop."
         )
@@ -156,6 +207,24 @@ class NetworkMonitor:
             features_df, processed_df = self.processor.engineer_features(window_df)
             if features_df.empty:
                 return
+
+            # Persist engineered rows to a rolling Parquet file (best effort)
+            if self.save_rolling and not processed_df.empty:
+                os.makedirs(os.path.dirname(self.rolling_path) or ".", exist_ok=True)
+                try:
+                    # Prefer append (supported by some pandas/pyarrow combos)
+                    processed_df.to_parquet(
+                        self.rolling_path,
+                        engine="pyarrow",
+                        append=True,  # type: ignore[arg-type]
+                    )
+                except Exception:
+                    # Fallback: overwrite if append isn't supported
+                    try:
+                        processed_df.to_parquet(self.rolling_path, engine="pyarrow")
+                    except Exception:
+                        pass
+
             last_feat = features_df.tail(1)
             pred = self.detector.predict(last_feat)[0]
             self._packet_counter += 1
@@ -205,10 +274,7 @@ class NetworkMonitor:
                     dir_flag = 0
 
                 # New, feature-aligned log line (keep overall shape similar)
-                sev = (
-                    self._severity_from_score(score) if score == score else "unknown"
-                )  # NaN-safe
-
+                sev = self._severity_from_score(score) if score == score else "unknown"
                 msg = (
                     f"ANOMALY: ts={last_row['timestamp']:.6f} "
                     f"{last_row['src_ip']} -> {last_row['dest_ip']} "
@@ -217,7 +283,7 @@ class NetworkMonitor:
                     f"unique_dports_15s={uniq_d} direction={'out' if dir_flag else 'in'} "
                     f"score={score:.3f} severity={sev}"
                 )
-                self.logger.warning(msg)
+                self._emit(msg, sev)  # <-- use severity-aware emitter
                 print(
                     "\n--- ANOMALY DETECTED ---\n"
                     + msg
@@ -237,6 +303,18 @@ class NetworkMonitor:
                         )
                         self.detector.save_model(model_path)
                         self.logger.info("Online retraining complete and model saved.")
+
+            # NEW: signature evaluation (best after we have processed_df/window_df)
+            if self.sig_engine is not None and not processed_df.empty:
+                last_row_dict = processed_df.tail(1).iloc[0].to_dict()
+                for hit in self.sig_engine.evaluate(last_row_dict, window_df):
+                    s_msg = (
+                        f"SIGNATURE: {hit.name} severity={hit.severity} | "
+                        f"{last_row_dict.get('src_ip')} -> {last_row_dict.get('dest_ip')} "
+                        f'dport={int(last_row_dict.get("dport", 0))} desc="{hit.description}"'
+                    )
+                    self._emit(s_msg, hit.severity)
+
         except Exception as e:
             self.logger.error(f"Error during packet analysis: {e}", exc_info=False)
 
@@ -249,3 +327,13 @@ class NetworkMonitor:
             return "low"
         except Exception:
             return "unknown"
+
+    # NEW: centralized severity emitter
+    def _emit(self, msg: str, severity: str) -> None:
+        sev = (severity or "").lower()
+        if sev == "high":
+            self.logger.error(msg)
+        elif sev == "medium":
+            self.logger.warning(msg)
+        else:
+            self.logger.info(msg)

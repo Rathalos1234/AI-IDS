@@ -1,0 +1,25 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-8.4.2, pluggy-1.6.0 -- /home/khoanguyen/AI-IDS/AI-IDS/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/khoanguyen/AI-IDS/AI-IDS
+configfile: pytest.ini
+collecting ... collected 12 items / 3 deselected / 9 selected
+
+tests/test_anomaly_detector.py::test_train_save_load_round_trip PASSED   [ 11%]
+tests/test_anomaly_detector.py::test_reindex_safety_same_predictions PASSED [ 22%]
+tests/test_anomaly_detector.py::test_determinism_with_fixed_seed PASSED  [ 33%]
+tests/test_faults_and_edges.py::test_missing_columns_raises_clear_error PASSED [ 44%]
+tests/test_faults_and_edges.py::test_load_broken_bundle_raises PASSED    [ 55%]
+tests/test_model_bundle.py::test_feature_order_checksum_and_version PASSED [ 66%]
+tests/test_packet_processor.py::test_engineer_features_basic PASSED      [ 77%]
+tests/test_packet_processor.py::test_unique_dports_15s_counts PASSED     [ 88%]
+tests/test_packet_processor.py::test_is_ephemeral_sport_flag PASSED      [100%]
+
+============================= slowest 10 durations =============================
+0.07s call     tests/test_anomaly_detector.py::test_train_save_load_round_trip
+0.04s call     tests/test_anomaly_detector.py::test_determinism_with_fixed_seed
+0.02s call     tests/test_anomaly_detector.py::test_reindex_safety_same_predictions
+0.02s call     tests/test_model_bundle.py::test_feature_order_checksum_and_version
+
+(6 durations < 0.005s hidden.  Use -vv to show these durations.)
+======================= 9 passed, 3 deselected in 0.60s ========================
