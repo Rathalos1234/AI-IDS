@@ -14,8 +14,11 @@ bash scripts/test_full.sh
 
 - Performance smoke (10k synthetic packets):
 
-```bash
-python scripts/perf_10k.py
-```
+  # Preferred (asserts budgets + saves a one-line snapshot)
+  # This is also already included in the test_full.sh script
+  pytest -m perf -k 10k -s | tee sprint_artifacts/pytest_perf.txt
+  
+  # Legacy option:
+  # python3 scripts/perf_10k.py
 
-> Note: Tests that require live capture (Scapy) are auto-skipped unless Scapy is installed.
+**Artifacts:** the scripts write summaries to `sprint_artifacts/`
