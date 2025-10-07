@@ -1,10 +1,14 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { fetchLogs } from '../api'
+import { api } from '../api'
 
-const items = ref([])
-const err = ref(null)
+const items = ref([]); const err = ref(null); const loading = ref(false);
+// PD-27 filters
+const fIp = ref(''); const fSeverity = ref(''); const fType = ref(''); // alert|block
+const fFrom = ref(''); const fTo = ref('');
 let es
+
+
 
 function normalize(e) {
   // unify table shape
@@ -20,12 +24,38 @@ function normalize(e) {
 async function initialLoad() {
   try {
     err.value = null
-    const res = await fetchLogs(200)
+    const res = await api.logs?.({
+      limit: 200,
+      ip: fIp.value || undefined,
+      severity: fSeverity.value || undefined,
+      type: fType.value || undefined,
+      from: fFrom.value || undefined,
+      to: fTo.value || undefined,
+    }) || { items: [] }
     const page = Array.isArray(res) ? res : (res.items || [])
     items.value = page.map(normalize)
   } catch (e) {
     err.value = e?.error || e?.message || 'Failed to load logs'
   }
+}
+
+function exportCsv(){
+  api.exportLogs?.({
+    ip: fIp.value || undefined,
+    severity: fSeverity.value || undefined,
+    type: fType.value || undefined,
+    from: fFrom.value || undefined,
+    to: fTo.value || undefined,
+  }, 'csv');
+}
+function exportJson(){
+  api.exportLogs?.({
+    ip: fIp.value || undefined,
+    severity: fSeverity.value || undefined,
+    type: fType.value || undefined,
+    from: fFrom.value || undefined,
+    to: fTo.value || undefined,
+  }, 'json');
 }
 
 function startSSE() {
@@ -47,6 +77,24 @@ onBeforeUnmount(() => { if (es) es.close() })
 <template>
   <div>
     <h1 style="margin:0 0 16px;">Log History</h1>
+    <!-- PD-27: Filters + Export -->
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0;">
+      <input class="input" v-model="fIp" placeholder="IP (e.g., 192.168.1.10)"/>
+      <select class="input" v-model="fSeverity">
+        <option value="">Severity (any)</option>
+        <option>low</option><option>medium</option><option>high</option><option>critical</option>
+      </select>
+      <select class="input" v-model="fType">
+        <option value="">Type (any)</option>
+        <option value="alert">alert</option>
+        <option value="block">block</option>
+      </select>
+      <input class="input" v-model="fFrom" placeholder="From (ISO) 2025-10-01T00:00:00Z" style="min-width:260px;"/>
+      <input class="input" v-model="fTo" placeholder="To (ISO) 2025-10-31T23:59:59Z" style="min-width:260px;"/>
+      <button class="btn" @click="initialLoad">Apply</button>
+      <button class="btn" @click="exportCsv">Export CSV</button>
+      <button class="btn" @click="exportJson">Export JSON</button>
+    </div>
     <div v-if="err" style="color:#ff8080;margin-bottom:12px;">{{ err }}</div>
 
     <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;">

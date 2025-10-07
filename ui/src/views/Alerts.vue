@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { api } from '../api';
 const items = ref([]), nextCursor = ref(null), limit = 50, err = ref(null), loading = ref(false);
+const base = (localStorage.getItem('API_BASE') || window.API_BASE || '');
 async function load(cursor=null){
   try{
     loading.value=true; err.value=null;
@@ -16,6 +17,10 @@ onMounted(()=>load());
 <template>
   <div>
     <h1 style="margin:0 0 16px;">Alerts</h1>
+    <div style="margin:8px 0; display:flex; gap:8px;">
+      <a class="btn" :href="`${base}/api/logs/export?type=alert&format=csv`" download>Export CSV</a>
+      <a class="btn" :href="`${base}/api/logs/export?type=alert&format=json`" download>Export JSON</a>
+    </div>
     <div v-if="err" style="color:#ff8080;margin-bottom:12px;">{{ err }}</div>
     <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
       <table style="width:100%;border-collapse:collapse;font-size:14px;">

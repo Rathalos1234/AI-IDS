@@ -7,6 +7,7 @@ import Alerts from './views/Alerts.vue';
 import Logs from './views/Logs.vue';
 import BanList from './views/BanList.vue';
 import Settings from './views/Settings.vue';
+import Devices from './views/Devices.vue'
 
 export default createRouter({
   history: createWebHashHistory(),
@@ -18,6 +19,7 @@ export default createRouter({
         { path: '/dashboard', component: Dashboard },
         { path: '/alerts', component: Alerts },
         { path: '/logs', component: Logs },
+        { path: '/devices', component: Devices },
         { path: '/banlist', component: BanList },
         { path: '/settings', component: Settings },
       ]

@@ -7,9 +7,11 @@ from __future__ import annotations
 
 import os
 import logging
+import ipaddress
 import uuid
 from datetime import datetime
 import webdb
+import ipaddress
 
 try:
     import netifaces  # type: ignore
@@ -236,6 +238,18 @@ class NetworkMonitor:
                         processed_df.to_parquet(self.rolling_path, engine="pyarrow")
                     except Exception:
                         pass
+
+            # --- NEW: record devices seen on the network (private IPs only) ---
+            try:
+                last_row_dev = processed_df.tail(1).iloc[0]
+                sip = str(last_row_dev.get("src_ip"))
+                dip = str(last_row_dev.get("dest_ip"))
+                if sip and ipaddress.ip_address(sip).is_private:
+                    webdb.record_device(sip)
+                if dip and ipaddress.ip_address(dip).is_private:
+                    webdb.record_device(dip)
+            except Exception:
+                self.logger.debug("record_device failed", exc_info=True)
 
             last_feat = features_df.tail(1)
             pred = self.detector.predict(last_feat)[0]
