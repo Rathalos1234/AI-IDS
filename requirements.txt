@@ -1,0 +1,9 @@
+Flask
+flask-cors
+scapy
+netifaces
+pyarrow
+pandas
+numpy
+scikit-learn
+joblib

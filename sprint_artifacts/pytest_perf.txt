@@ -1,0 +1,3 @@
+rows/sec=32288  time=0.310s  peakMB=5.7
+.
+1 passed, 11 deselected in 0.74s

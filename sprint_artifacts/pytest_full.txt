@@ -1,0 +1,28 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-8.4.2, pluggy-1.6.0 -- /home/khoanguyen/AI-IDS/AI-IDS/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/khoanguyen/AI-IDS/AI-IDS
+configfile: pytest.ini
+collecting ... collected 12 items / 1 deselected / 11 selected
+
+tests/test_anomaly_detector.py::test_train_save_load_round_trip PASSED   [  9%]
+tests/test_anomaly_detector.py::test_reindex_safety_same_predictions PASSED [ 18%]
+tests/test_anomaly_detector.py::test_determinism_with_fixed_seed PASSED  [ 27%]
+tests/test_faults_and_edges.py::test_missing_columns_raises_clear_error PASSED [ 36%]
+tests/test_faults_and_edges.py::test_load_broken_bundle_raises PASSED    [ 45%]
+tests/test_integration_train_pipeline.py::test_capture_engineer_train_save PASSED [ 54%]
+tests/test_model_bundle.py::test_feature_order_checksum_and_version PASSED [ 63%]
+tests/test_monitor_scapy_optional.py::test_severity_mapping_no_crash PASSED [ 72%]
+tests/test_packet_processor.py::test_engineer_features_basic PASSED      [ 81%]
+tests/test_packet_processor.py::test_unique_dports_15s_counts PASSED     [ 90%]
+tests/test_packet_processor.py::test_is_ephemeral_sport_flag PASSED      [100%]
+
+============================= slowest 10 durations =============================
+0.07s call     tests/test_anomaly_detector.py::test_train_save_load_round_trip
+0.06s call     tests/test_integration_train_pipeline.py::test_capture_engineer_train_save
+0.04s call     tests/test_anomaly_detector.py::test_determinism_with_fixed_seed
+0.02s call     tests/test_anomaly_detector.py::test_reindex_safety_same_predictions
+0.02s call     tests/test_model_bundle.py::test_feature_order_checksum_and_version
+
+(5 durations < 0.005s hidden.  Use -vv to show these durations.)
+======================= 11 passed, 1 deselected in 0.64s =======================
