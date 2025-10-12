@@ -11,7 +11,6 @@ import ipaddress
 import uuid
 from datetime import datetime
 import webdb
-import ipaddress
 
 try:
     import netifaces  # type: ignore
@@ -86,7 +85,6 @@ class NetworkMonitor:
         self.enable_sigs = self.config.getboolean("Signatures", "Enable", fallback=True)
         self.sig_engine = default_engine() if self.enable_sigs else None
 
-        
         # Ensure the Web UI database exists for alert inserts
         try:
             webdb.init()
@@ -310,21 +308,24 @@ class NetworkMonitor:
                     f"score={score:.3f} severity={sev}"
                 )
 
-                
                 self._emit(msg, sev)  # severity-aware logger
 
                 # NEW: sink anomaly to WebDB so the GUI can see it
                 try:
-                    webdb.insert_alert({
-                        "id": str(uuid.uuid4()),
-                        "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-                        "src_ip": str(last_row["src_ip"]),
-                        "label": f"{last_row['dest_ip']}:{int(last_row['dport'])} score={score:.3f}",
-                        "severity": str(sev).upper(),   # LOW/MEDIUM/HIGH
-                        "kind": "ANOMALY",
-                    })
+                    webdb.insert_alert(
+                        {
+                            "id": str(uuid.uuid4()),
+                            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+                            "src_ip": str(last_row["src_ip"]),
+                            "label": f"{last_row['dest_ip']}:{int(last_row['dport'])} score={score:.3f}",
+                            "severity": str(sev).upper(),  # LOW/MEDIUM/HIGH
+                            "kind": "ANOMALY",
+                        }
+                    )
                 except Exception:
-                    self.logger.debug("webdb.insert_alert failed (anomaly)", exc_info=True)
+                    self.logger.debug(
+                        "webdb.insert_alert failed (anomaly)", exc_info=True
+                    )
 
                 print(
                     "\n--- ANOMALY DETECTED ---\n"
@@ -357,19 +358,23 @@ class NetworkMonitor:
                     )
                     self._emit(s_msg, hit.severity)
 
-
                     # NEW: sink signature hit to WebDB (also visible in Log History)
                     try:
-                        webdb.insert_alert({
-                            "id": str(uuid.uuid4()),
-                            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-                            "src_ip": str(last_row_dict.get("src_ip")),
-                            "label": f"{hit.name} {last_row_dict.get('dest_ip')}:{int(last_row_dict.get('dport',0))}",
-                            "severity": str(hit.severity or "").upper(),
-                            "kind": "SIGNATURE",
-                        })
+                        webdb.insert_alert(
+                            {
+                                "id": str(uuid.uuid4()),
+                                "ts": datetime.utcnow().isoformat(timespec="seconds")
+                                + "Z",
+                                "src_ip": str(last_row_dict.get("src_ip")),
+                                "label": f"{hit.name} {last_row_dict.get('dest_ip')}:{int(last_row_dict.get('dport', 0))}",
+                                "severity": str(hit.severity or "").upper(),
+                                "kind": "SIGNATURE",
+                            }
+                        )
                     except Exception:
-                        self.logger.debug("webdb.insert_alert failed (signature)", exc_info=True)
+                        self.logger.debug(
+                            "webdb.insert_alert failed (signature)", exc_info=True
+                        )
 
         except Exception as e:
             self.logger.error(f"Error during packet analysis: {e}", exc_info=False)

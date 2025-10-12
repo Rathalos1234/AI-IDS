@@ -3658,3 +3658,691 @@
 2025-10-05 18:03:11,696 | WARNING | ANOMALY: ts=1759712591.668452 140.82.114.25 -> 192.168.12.152 proto=6 size=91 dport=54484 eph_sport=0 unique_dports_15s=1 direction=in score=-0.077 severity=medium
 2025-10-05 18:03:11,707 | INFO | Online retraining on current window...
 2025-10-05 18:03:11,821 | INFO | Online retraining complete and model saved.
+2025-10-09 17:56:05,487 | INFO | Capturing 10000 packets on 'wlp131s0f0' for training...
+2025-10-09 17:57:29,070 | INFO | Training Isolation Forest...
+2025-10-09 17:57:29,265 | INFO | Model trained and saved to: models/iforest.joblib
+2025-10-09 17:59:37,676 | INFO | Loaded model: models/iforest.joblib
+2025-10-09 17:59:37,676 | INFO | Model info: version=1.0.0 trained_at=2025-10-10T00:57:29.221301+00:00 features=7 checksum=12a274e21180…
+2025-10-09 17:59:37,676 | INFO | IF params: contamination=0.05 n_estimators=200 random_state=42
+2025-10-09 17:59:37,676 | INFO | Feature order: protocol, packet_size_log, time_diff, dport, is_ephemeral_sport, unique_dports_15s, direction
+2025-10-09 17:59:37,676 | INFO | Alert thresholds: high<=-0.100  medium<=-0.050 | online_retrain_interval=100
+2025-10-09 17:59:37,676 | INFO | Starting live monitoring on 'wlp131s0f0'. Press Ctrl+C to stop.
+2025-10-09 18:00:04,325 | INFO | Loaded model: models/iforest.joblib
+2025-10-09 18:00:04,325 | INFO | Model info: version=1.0.0 trained_at=2025-10-10T00:57:29.221301+00:00 features=7 checksum=12a274e21180…
+2025-10-09 18:00:04,325 | INFO | IF params: contamination=0.05 n_estimators=200 random_state=42
+2025-10-09 18:00:04,325 | INFO | Feature order: protocol, packet_size_log, time_diff, dport, is_ephemeral_sport, unique_dports_15s, direction
+2025-10-09 18:00:04,325 | INFO | Alert thresholds: high<=-0.100  medium<=-0.050 | online_retrain_interval=100
+2025-10-09 18:00:04,325 | INFO | Starting live monitoring on 'wlp131s0f0'. Press Ctrl+C to stop.
+2025-10-09 18:00:10,560 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,161 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,191 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,219 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,247 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,428 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,456 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,485 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,584 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,617 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,644 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,669 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,695 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,721 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,741 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,762 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,779 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,798 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,816 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,838 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,856 | WARNING | ANOMALY: ts=1760058010.544351 3.220.42.39 -> 192.168.12.152 proto=17 size=270 dport=48042 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-09 18:00:13,873 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:13,893 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:13,912 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:13,933 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:13,952 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:13,973 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:13,993 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:14,021 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:14,039 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:14,062 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:14,084 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:14,105 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:14,127 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:14,147 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:14,168 | ERROR | ANOMALY: ts=1760058013.640035 192.168.12.152 -> 13.227.180.4 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.105 severity=high
+2025-10-09 18:00:14,408 | INFO | ANOMALY: ts=1760058014.195602 192.168.12.152 -> 104.192.140.17 proto=6 size=74 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.027 severity=low
+2025-10-09 18:00:14,430 | INFO | ANOMALY: ts=1760058014.195602 192.168.12.152 -> 104.192.140.17 proto=6 size=74 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.027 severity=low
+2025-10-09 18:00:14,616 | INFO | Online retraining on current window...
+2025-10-09 18:00:14,727 | INFO | Online retraining complete and model saved.
+2025-10-09 18:00:18,773 | INFO | ANOMALY: ts=1760058018.737690 140.82.112.26 -> 192.168.12.152 proto=6 size=91 dport=47708 eph_sport=0 unique_dports_15s=1 direction=in score=-0.016 severity=low
+2025-10-09 18:00:20,225 | INFO | Online retraining on current window...
+2025-10-09 18:00:20,376 | INFO | Online retraining complete and model saved.
+2025-10-09 18:00:20,647 | INFO | ANOMALY: ts=1760058019.980970 192.168.12.152 -> 13.32.230.9 proto=6 size=105 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.025 severity=low
+2025-10-09 18:00:20,671 | INFO | ANOMALY: ts=1760058019.980970 192.168.12.152 -> 13.32.230.9 proto=6 size=105 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.025 severity=low
+2025-10-09 18:00:21,310 | INFO | Online retraining on current window...
+2025-10-09 18:00:21,428 | INFO | Online retraining complete and model saved.
+2025-10-09 18:00:22,200 | INFO | Online retraining on current window...
+2025-10-09 18:00:22,327 | INFO | Online retraining complete and model saved.
+2025-10-09 18:00:24,063 | ERROR | ANOMALY: ts=1760058023.884136 192.168.12.152 -> 137.151.127.120 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.121 severity=high
+2025-10-09 18:00:24,088 | ERROR | ANOMALY: ts=1760058023.884136 192.168.12.152 -> 137.151.127.120 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.121 severity=high
+2025-10-09 18:00:24,113 | ERROR | ANOMALY: ts=1760058023.884136 192.168.12.152 -> 137.151.127.120 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.121 severity=high
+2025-10-09 18:00:24,144 | ERROR | ANOMALY: ts=1760058023.884136 192.168.12.152 -> 137.151.127.120 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.121 severity=high
+2025-10-09 18:00:24,172 | ERROR | ANOMALY: ts=1760058023.884136 192.168.12.152 -> 137.151.127.120 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.121 severity=high
+2025-10-09 18:00:24,206 | ERROR | ANOMALY: ts=1760058023.884136 192.168.12.152 -> 137.151.127.120 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.121 severity=high
+2025-10-09 18:00:24,238 | ERROR | ANOMALY: ts=1760058023.884136 192.168.12.152 -> 137.151.127.120 proto=6 size=74 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.121 severity=high
+2025-10-09 18:00:24,618 | INFO | Online retraining on current window...
+2025-10-09 18:00:24,775 | INFO | Online retraining complete and model saved.
+2025-10-09 18:00:24,792 | INFO | ANOMALY: ts=1760058023.953783 137.151.127.120 -> 192.168.12.152 proto=6 size=1410 dport=60614 eph_sport=0 unique_dports_15s=2 direction=in score=-0.007 severity=low
+2025-10-09 18:00:25,246 | WARNING | ANOMALY: ts=1760058024.515029 34.117.190.90 -> 192.168.12.152 proto=17 size=211 dport=52666 eph_sport=0 unique_dports_15s=1 direction=in score=-0.065 severity=medium
+2025-10-09 18:00:25,408 | INFO | ANOMALY: ts=1760058024.537683 137.151.127.120 -> 192.168.12.152 proto=6 size=1410 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.019 severity=low
+2025-10-09 18:00:25,438 | INFO | ANOMALY: ts=1760058024.537683 137.151.127.120 -> 192.168.12.152 proto=6 size=1410 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.019 severity=low
+2025-10-09 18:00:25,461 | INFO | ANOMALY: ts=1760058024.537683 137.151.127.120 -> 192.168.12.152 proto=6 size=1410 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.019 severity=low
+2025-10-09 18:00:25,485 | INFO | ANOMALY: ts=1760058024.577204 137.151.127.120 -> 192.168.12.152 proto=6 size=552 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.029 severity=low
+2025-10-09 18:00:25,505 | INFO | ANOMALY: ts=1760058024.577204 137.151.127.120 -> 192.168.12.152 proto=6 size=552 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.029 severity=low
+2025-10-09 18:00:25,525 | INFO | ANOMALY: ts=1760058024.577204 137.151.127.120 -> 192.168.12.152 proto=6 size=552 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.029 severity=low
+2025-10-09 18:00:25,553 | INFO | ANOMALY: ts=1760058024.577204 137.151.127.120 -> 192.168.12.152 proto=6 size=552 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.029 severity=low
+2025-10-09 18:00:25,573 | INFO | ANOMALY: ts=1760058024.577204 137.151.127.120 -> 192.168.12.152 proto=6 size=552 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.029 severity=low
+2025-10-09 18:00:25,596 | INFO | ANOMALY: ts=1760058024.577204 137.151.127.120 -> 192.168.12.152 proto=6 size=552 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.029 severity=low
+2025-10-09 18:00:25,616 | INFO | ANOMALY: ts=1760058024.577204 137.151.127.120 -> 192.168.12.152 proto=6 size=552 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.029 severity=low
+2025-10-09 18:00:25,638 | INFO | ANOMALY: ts=1760058024.577204 137.151.127.120 -> 192.168.12.152 proto=6 size=552 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.029 severity=low
+2025-10-09 18:00:25,659 | INFO | ANOMALY: ts=1760058024.577204 137.151.127.120 -> 192.168.12.152 proto=6 size=552 dport=60642 eph_sport=0 unique_dports_15s=3 direction=in score=-0.029 severity=low
+2025-10-09 18:00:25,689 | ERROR | ANOMALY: ts=1760058024.941313 192.168.12.152 -> 192.168.12.1 proto=17 size=96 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.128 severity=high
+2025-10-09 18:00:25,713 | WARNING | ANOMALY: ts=1760058024.941364 192.168.12.152 -> 192.168.12.1 proto=17 size=88 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.087 severity=medium
+2025-10-09 18:00:25,739 | WARNING | ANOMALY: ts=1760058024.941382 192.168.12.152 -> 192.168.12.1 proto=17 size=90 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.088 severity=medium
+2025-10-09 18:00:25,762 | WARNING | ANOMALY: ts=1760058024.941400 192.168.12.152 -> 192.168.12.1 proto=17 size=96 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.088 severity=medium
+2025-10-09 18:00:25,786 | WARNING | ANOMALY: ts=1760058024.941419 192.168.12.152 -> 192.168.12.1 proto=17 size=90 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.088 severity=medium
+2025-10-09 18:00:25,809 | WARNING | ANOMALY: ts=1760058024.941449 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.086 severity=medium
+2025-10-09 18:00:25,833 | WARNING | ANOMALY: ts=1760058024.941467 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.087 severity=medium
+2025-10-09 18:00:25,859 | WARNING | ANOMALY: ts=1760058024.962334 192.168.12.152 -> 192.168.12.1 proto=17 size=88 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.099 severity=medium
+2025-10-09 18:00:25,889 | WARNING | ANOMALY: ts=1760058024.962462 192.168.12.152 -> 192.168.12.1 proto=17 size=98 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.089 severity=medium
+2025-10-09 18:00:25,915 | WARNING | ANOMALY: ts=1760058024.962535 192.168.12.152 -> 192.168.12.1 proto=17 size=88 dport=53 eph_sport=0 unique_dports_15s=3 direction=out score=-0.087 severity=medium
+2025-10-09 18:00:25,933 | WARNING | ANOMALY: ts=1760058024.964794 192.168.12.1 -> 192.168.12.152 proto=17 size=104 dport=46804 eph_sport=0 unique_dports_15s=1 direction=in score=-0.064 severity=medium
+2025-10-09 18:00:25,953 | WARNING | ANOMALY: ts=1760058024.978609 192.168.12.1 -> 192.168.12.152 proto=17 size=153 dport=33987 eph_sport=0 unique_dports_15s=2 direction=in score=-0.092 severity=medium
+2025-10-09 18:00:25,973 | WARNING | ANOMALY: ts=1760058024.986162 192.168.12.1 -> 192.168.12.152 proto=17 size=116 dport=36948 eph_sport=0 unique_dports_15s=3 direction=in score=-0.090 severity=medium
+2025-10-09 18:00:25,993 | WARNING | ANOMALY: ts=1760058024.986326 192.168.12.1 -> 192.168.12.152 proto=17 size=202 dport=48272 eph_sport=0 unique_dports_15s=4 direction=in score=-0.081 severity=medium
+2025-10-09 18:00:26,034 | WARNING | ANOMALY: ts=1760058024.986326 192.168.12.1 -> 192.168.12.152 proto=17 size=141 dport=40991 eph_sport=0 unique_dports_15s=5 direction=in score=-0.068 severity=medium
+2025-10-09 18:00:26,052 | WARNING | ANOMALY: ts=1760058024.988015 192.168.12.1 -> 192.168.12.152 proto=17 size=114 dport=47801 eph_sport=0 unique_dports_15s=6 direction=in score=-0.084 severity=medium
+2025-10-09 18:00:26,072 | WARNING | ANOMALY: ts=1760058024.988236 192.168.12.1 -> 192.168.12.152 proto=17 size=126 dport=49685 eph_sport=0 unique_dports_15s=7 direction=in score=-0.076 severity=medium
+2025-10-09 18:00:26,092 | WARNING | ANOMALY: ts=1760058024.988236 192.168.12.1 -> 192.168.12.152 proto=17 size=116 dport=54475 eph_sport=0 unique_dports_15s=8 direction=in score=-0.072 severity=medium
+2025-10-09 18:00:26,114 | WARNING | ANOMALY: ts=1760058024.988528 192.168.12.1 -> 192.168.12.152 proto=17 size=114 dport=43571 eph_sport=0 unique_dports_15s=9 direction=in score=-0.069 severity=medium
+2025-10-09 18:00:26,136 | WARNING | ANOMALY: ts=1760058024.988531 192.168.12.1 -> 192.168.12.152 proto=17 size=102 dport=40538 eph_sport=0 unique_dports_15s=10 direction=in score=-0.062 severity=medium
+2025-10-09 18:00:26,147 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=40538 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,164 | WARNING | ANOMALY: ts=1760058024.988531 192.168.12.1 -> 192.168.12.152 proto=17 size=104 dport=48527 eph_sport=0 unique_dports_15s=11 direction=in score=-0.072 severity=medium
+2025-10-09 18:00:26,175 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=48527 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,194 | WARNING | ANOMALY: ts=1760058024.988540 192.168.12.1 -> 192.168.12.152 proto=17 size=266 dport=47529 eph_sport=0 unique_dports_15s=12 direction=in score=-0.085 severity=medium
+2025-10-09 18:00:26,203 | INFO | Online retraining on current window...
+2025-10-09 18:00:26,341 | INFO | Online retraining complete and model saved.
+2025-10-09 18:00:26,341 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47529 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,377 | INFO | ANOMALY: ts=1760058025.173678 192.168.12.152 -> 192.168.12.1 proto=17 size=99 dport=53 eph_sport=1 unique_dports_15s=3 direction=out score=-0.004 severity=low
+2025-10-09 18:00:26,399 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=48915 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,420 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,432 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,452 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,460 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,478 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,487 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,739 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,753 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,777 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,796 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,829 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,842 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,863 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,876 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,899 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,908 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,930 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,940 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,961 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:26,969 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:26,994 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,002 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,040 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,049 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,069 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,082 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,102 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,113 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,134 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,143 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,162 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,172 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,192 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,201 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,223 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,233 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,252 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,260 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,288 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,300 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,320 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,331 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,355 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,363 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,390 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,399 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,432 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,440 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,465 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,475 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,498 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,508 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,533 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,541 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,564 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,573 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,597 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,608 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,638 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,649 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,674 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,682 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:27,709 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:27,716 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:28,931 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:28,948 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:28,979 | INFO | ANOMALY: ts=1760058025.200808 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=53886 eph_sport=0 unique_dports_15s=14 direction=in score=-0.028 severity=low
+2025-10-09 18:00:28,985 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53886 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,029 | WARNING | ANOMALY: ts=1760058028.908563 192.168.12.152 -> 192.168.12.1 proto=17 size=109 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.081 severity=medium
+2025-10-09 18:00:29,124 | INFO | ANOMALY: ts=1760058028.940331 192.168.12.1 -> 192.168.12.152 proto=17 size=165 dport=39749 eph_sport=0 unique_dports_15s=15 direction=in score=-0.015 severity=low
+2025-10-09 18:00:29,133 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=39749 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,155 | INFO | ANOMALY: ts=1760058028.945074 192.168.12.1 -> 192.168.12.152 proto=17 size=198 dport=57786 eph_sport=0 unique_dports_15s=16 direction=in score=-0.019 severity=low
+2025-10-09 18:00:29,166 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=57786 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,181 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=42531 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,197 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37079 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,219 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37079 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,238 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47182 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,255 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38699 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,276 | INFO | ANOMALY: ts=1760058028.946283 192.168.12.152 -> 192.168.12.1 proto=17 size=90 dport=53 eph_sport=1 unique_dports_15s=2 direction=out score=-0.001 severity=low
+2025-10-09 18:00:29,295 | INFO | ANOMALY: ts=1760058028.978139 192.168.12.1 -> 192.168.12.152 proto=17 size=154 dport=50147 eph_sport=0 unique_dports_15s=22 direction=in score=-0.014 severity=low
+2025-10-09 18:00:29,300 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=50147 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,409 | INFO | ANOMALY: ts=1760058029.089621 192.168.12.152 -> 192.168.12.1 proto=17 size=82 dport=53 eph_sport=1 unique_dports_15s=2 direction=out score=-0.013 severity=low
+2025-10-09 18:00:29,438 | INFO | ANOMALY: ts=1760058029.091985 192.168.12.1 -> 192.168.12.152 proto=17 size=258 dport=52551 eph_sport=0 unique_dports_15s=23 direction=in score=-0.017 severity=low
+2025-10-09 18:00:29,444 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=52551 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,465 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:29,480 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,810 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:29,821 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,859 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:29,872 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,892 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:29,902 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:29,934 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:29,942 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:31,889 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:31,901 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:31,928 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:31,939 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:31,959 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:31,968 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:31,989 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:31,997 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:32,034 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:32,042 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:32,065 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:32,071 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:32,093 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:32,099 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:32,121 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:32,129 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:32,150 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:32,158 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:32,180 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:32,189 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:33,369 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:33,384 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:33,410 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:33,421 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:33,440 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:33,448 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:33,468 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:33,478 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:33,500 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:33,510 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:33,531 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:33,540 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:33,558 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:33,568 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:33,586 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:33,594 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:33,613 | INFO | ANOMALY: ts=1760058029.108059 192.168.12.1 -> 192.168.12.152 proto=17 size=194 dport=45110 eph_sport=0 unique_dports_15s=24 direction=in score=-0.015 severity=low
+2025-10-09 18:00:33,620 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45110 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:34,535 | WARNING | ANOMALY: ts=1760058034.507369 192.168.12.152 -> 137.151.127.120 proto=6 size=66 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.070 severity=medium
+2025-10-09 18:00:35,645 | INFO | Online retraining on current window...
+2025-10-09 18:00:35,758 | INFO | Online retraining complete and model saved.
+2025-10-09 18:00:37,888 | WARNING | ANOMALY: ts=1760058037.843863 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=1 unique_dports_15s=2 direction=out score=-0.082 severity=medium
+2025-10-09 18:00:37,949 | WARNING | ANOMALY: ts=1760058037.890665 192.168.12.1 -> 192.168.12.152 proto=17 size=143 dport=60832 eph_sport=0 unique_dports_15s=25 direction=in score=-0.054 severity=medium
+2025-10-09 18:00:37,957 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=60832 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:37,971 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34545 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:37,986 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,000 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,027 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,040 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,054 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,068 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,082 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,097 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,110 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,124 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,138 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,152 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,168 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:38,184 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:41,197 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:41,213 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:41,229 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:41,250 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:42,430 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:42,449 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:43,203 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59581 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:00:44,713 | ERROR | ANOMALY: ts=1760058044.683398 192.168.12.152 -> 137.151.127.120 proto=6 size=66 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.104 severity=high
+2025-10-09 18:00:54,952 | ERROR | ANOMALY: ts=1760058054.923486 192.168.12.152 -> 137.151.127.120 proto=6 size=66 dport=443 eph_sport=1 unique_dports_15s=1 direction=out score=-0.111 severity=high
+2025-10-09 18:01:05,258 | ERROR | ANOMALY: ts=1760058065.163520 192.168.12.152 -> 137.151.127.120 proto=6 size=66 dport=443 eph_sport=1 unique_dports_15s=1 direction=out score=-0.111 severity=high
+2025-10-09 18:04:14,743 | INFO | Capturing 10000 packets on 'wlp131s0f0' for training...
+2025-10-09 18:05:10,210 | INFO | Training Isolation Forest...
+2025-10-09 18:05:10,397 | INFO | Model trained and saved to: models/iforest.joblib
+2025-10-09 18:05:53,099 | INFO | Capturing 10000 packets on 'wlp131s0f0' for training...
+2025-10-09 18:05:54,240 | INFO | Training Isolation Forest...
+2025-10-09 18:05:54,336 | INFO | Model trained and saved to: models/iforest.joblib
+2025-10-09 18:06:01,308 | INFO | Loaded model: models/iforest.joblib
+2025-10-09 18:06:01,309 | INFO | Model info: version=1.0.0 trained_at=2025-10-10T01:05:54.309439+00:00 features=7 checksum=12a274e21180…
+2025-10-09 18:06:01,309 | INFO | IF params: contamination=0.05 n_estimators=200 random_state=42
+2025-10-09 18:06:01,309 | INFO | Feature order: protocol, packet_size_log, time_diff, dport, is_ephemeral_sport, unique_dports_15s, direction
+2025-10-09 18:06:01,309 | INFO | Alert thresholds: high<=-0.100  medium<=-0.050 | online_retrain_interval=100
+2025-10-09 18:06:01,309 | INFO | Starting live monitoring on 'wlp131s0f0'. Press Ctrl+C to stop.
+2025-10-09 18:06:06,104 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=40646 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,135 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=42469 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,152 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37554 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,172 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37554 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,187 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37554 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,211 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37554 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,232 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37554 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,259 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37554 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,298 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34278 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,807 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38266 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,831 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38266 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,853 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38266 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,879 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38266 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,909 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38266 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,927 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38266 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,959 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38266 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:06,981 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38266 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:07,344 | INFO | Online retraining on current window...
+2025-10-09 18:06:07,454 | INFO | Online retraining complete and model saved.
+2025-10-09 18:06:07,464 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=56039 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:07,490 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=50583 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:07,516 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46619 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:07,544 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53415 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:07,588 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47087 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:07,722 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=57847 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:08,028 | INFO | ANOMALY: ts=1760058367.225868 34.120.195.249 -> 192.168.12.152 proto=17 size=1294 dport=59182 eph_sport=0 unique_dports_15s=1 direction=in score=-0.022 severity=low
+2025-10-09 18:06:08,167 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46946 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:08,189 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=55223 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:08,207 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46958 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:08,418 | INFO | Online retraining on current window...
+2025-10-09 18:06:08,538 | INFO | Online retraining complete and model saved.
+2025-10-09 18:06:09,226 | INFO | Online retraining on current window...
+2025-10-09 18:06:09,337 | INFO | Online retraining complete and model saved.
+2025-10-09 18:06:09,394 | INFO | ANOMALY: ts=1760058368.947355 192.168.12.152 -> 23.43.51.143 proto=6 size=66 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.002 severity=low
+2025-10-09 18:06:09,820 | WARNING | ANOMALY: ts=1760058369.721434 192.168.12.152 -> 104.192.140.17 proto=6 size=148 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.066 severity=medium
+2025-10-09 18:06:10,002 | INFO | ANOMALY: ts=1760058369.967559 192.168.12.152 -> 3.33.220.150 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.041 severity=low
+2025-10-09 18:06:10,030 | INFO | ANOMALY: ts=1760058369.967559 192.168.12.152 -> 3.33.220.150 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.041 severity=low
+2025-10-09 18:06:10,048 | INFO | ANOMALY: ts=1760058369.967559 192.168.12.152 -> 3.33.220.150 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.041 severity=low
+2025-10-09 18:06:10,065 | INFO | ANOMALY: ts=1760058369.967559 192.168.12.152 -> 3.33.220.150 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.041 severity=low
+2025-10-09 18:06:10,084 | INFO | ANOMALY: ts=1760058369.967559 192.168.12.152 -> 3.33.220.150 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.041 severity=low
+2025-10-09 18:06:10,103 | INFO | ANOMALY: ts=1760058369.967559 192.168.12.152 -> 3.33.220.150 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.041 severity=low
+2025-10-09 18:06:10,121 | INFO | ANOMALY: ts=1760058369.967559 192.168.12.152 -> 3.33.220.150 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.041 severity=low
+2025-10-09 18:06:10,992 | WARNING | ANOMALY: ts=1760058370.968694 192.168.12.152 -> 34.121.25.40 proto=6 size=105 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.087 severity=medium
+2025-10-09 18:06:11,105 | INFO | ANOMALY: ts=1760058371.088368 192.168.12.152 -> 34.121.25.40 proto=6 size=66 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.002 severity=low
+2025-10-09 18:06:11,865 | WARNING | ANOMALY: ts=1760058371.851450 192.168.12.152 -> 23.43.51.43 proto=6 size=66 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.098 severity=medium
+2025-10-09 18:06:11,914 | INFO | ANOMALY: ts=1760058371.897090 23.43.51.43 -> 192.168.12.152 proto=6 size=66 dport=58028 eph_sport=0 unique_dports_15s=2 direction=in score=-0.007 severity=low
+2025-10-09 18:06:12,396 | WARNING | ANOMALY: ts=1760058372.363376 192.168.12.152 -> 69.173.154.8 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.079 severity=medium
+2025-10-09 18:06:12,433 | INFO | Online retraining on current window...
+2025-10-09 18:06:12,584 | INFO | Online retraining complete and model saved.
+2025-10-09 18:06:13,372 | WARNING | ANOMALY: ts=1760058373.337136 192.168.12.152 -> 192.168.12.1 proto=17 size=98 dport=53 eph_sport=1 unique_dports_15s=2 direction=out score=-0.080 severity=medium
+2025-10-09 18:06:13,408 | WARNING | ANOMALY: ts=1760058373.376862 192.168.12.1 -> 192.168.12.152 proto=17 size=130 dport=58224 eph_sport=0 unique_dports_15s=24 direction=in score=-0.071 severity=medium
+2025-10-09 18:06:13,419 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=58224 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:13,439 | WARNING | ANOMALY: ts=1760058373.376862 192.168.12.1 -> 192.168.12.152 proto=17 size=130 dport=58224 eph_sport=0 unique_dports_15s=24 direction=in score=-0.071 severity=medium
+2025-10-09 18:06:13,446 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=58224 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:13,462 | WARNING | ANOMALY: ts=1760058373.376862 192.168.12.1 -> 192.168.12.152 proto=17 size=130 dport=58224 eph_sport=0 unique_dports_15s=24 direction=in score=-0.071 severity=medium
+2025-10-09 18:06:13,469 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=58224 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:13,487 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:13,493 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:13,532 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:13,540 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:13,562 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:13,570 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:13,592 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:13,600 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:13,622 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:13,631 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:13,883 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:13,893 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:13,911 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:13,924 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,391 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,401 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,425 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,437 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,459 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,465 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,489 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,497 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,521 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,527 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,554 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,560 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,585 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,591 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,613 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,619 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,643 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,650 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,677 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,686 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,714 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,723 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,746 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,757 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,789 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,800 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,825 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,831 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:14,854 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:14,864 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:15,043 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:15,054 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:15,086 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:15,095 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:15,123 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:15,130 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:15,216 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:15,225 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:15,245 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:15,254 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:15,626 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:15,638 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:15,664 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:15,676 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:15,698 | INFO | ANOMALY: ts=1760058373.414928 192.168.12.1 -> 192.168.12.152 proto=17 size=182 dport=47657 eph_sport=0 unique_dports_15s=25 direction=in score=-0.039 severity=low
+2025-10-09 18:06:15,706 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47657 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:16,036 | WARNING | ANOMALY: ts=1760058376.003936 192.168.12.152 -> 34.121.25.40 proto=6 size=105 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.062 severity=medium
+2025-10-09 18:06:17,264 | INFO | ANOMALY: ts=1760058376.953976 192.168.12.152 -> 192.168.12.1 proto=17 size=106 dport=53 eph_sport=1 unique_dports_15s=2 direction=out score=-0.013 severity=low
+2025-10-09 18:06:17,280 | INFO | Online retraining on current window...
+2025-10-09 18:06:17,392 | INFO | Online retraining complete and model saved.
+2025-10-09 18:06:17,617 | INFO | ANOMALY: ts=1760058376.991576 192.168.12.1 -> 192.168.12.152 proto=17 size=154 dport=46205 eph_sport=0 unique_dports_15s=26 direction=in score=-0.034 severity=low
+2025-10-09 18:06:17,628 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46205 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,642 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=57763 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,660 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=48967 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,705 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=48260 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,727 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53578 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,741 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37482 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,755 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=51213 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,770 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=52584 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,785 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=52588 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,800 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=33013 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,815 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=55068 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,837 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=47449 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,855 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=40136 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,870 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=50662 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,885 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=48517 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,899 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=48517 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,915 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45377 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,929 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45377 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,945 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=49588 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,960 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=55218 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,975 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=56893 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:17,996 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=42364 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,022 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=35462 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,052 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53577 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,067 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=53199 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,082 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=42605 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,096 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=38268 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,112 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=37952 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,129 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=59400 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,148 | INFO | ANOMALY: ts=1760058377.005806 192.168.12.1 -> 192.168.12.152 proto=17 size=173 dport=39173 eph_sport=0 unique_dports_15s=55 direction=in score=-0.002 severity=low
+2025-10-09 18:06:18,161 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=39173 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,179 | INFO | ANOMALY: ts=1760058377.005806 192.168.12.1 -> 192.168.12.152 proto=17 size=173 dport=39173 eph_sport=0 unique_dports_15s=55 direction=in score=-0.002 severity=low
+2025-10-09 18:06:18,188 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=39173 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,207 | INFO | ANOMALY: ts=1760058377.005806 192.168.12.1 -> 192.168.12.152 proto=17 size=173 dport=39173 eph_sport=0 unique_dports_15s=55 direction=in score=-0.002 severity=low
+2025-10-09 18:06:18,218 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=39173 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,237 | INFO | ANOMALY: ts=1760058377.015163 192.168.12.1 -> 192.168.12.152 proto=17 size=173 dport=33777 eph_sport=0 unique_dports_15s=56 direction=in score=-0.024 severity=low
+2025-10-09 18:06:18,243 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=33777 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,258 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=42882 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,276 | INFO | ANOMALY: ts=1760058377.022149 192.168.12.1 -> 192.168.12.152 proto=17 size=193 dport=33194 eph_sport=0 unique_dports_15s=58 direction=in score=-0.006 severity=low
+2025-10-09 18:06:18,282 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=33194 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,301 | INFO | ANOMALY: ts=1760058377.029804 192.168.12.1 -> 192.168.12.152 proto=17 size=199 dport=56875 eph_sport=0 unique_dports_15s=59 direction=in score=-0.005 severity=low
+2025-10-09 18:06:18,308 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=56875 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,322 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=45071 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,342 | INFO | ANOMALY: ts=1760058377.030419 192.168.12.1 -> 192.168.12.152 proto=17 size=391 dport=60644 eph_sport=0 unique_dports_15s=61 direction=in score=-0.039 severity=low
+2025-10-09 18:06:18,351 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=60644 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,368 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=41491 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,383 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=42964 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,406 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=44175 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,423 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=44175 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,441 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=44175 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,464 | INFO | ANOMALY: ts=1760058377.045301 192.168.12.1 -> 192.168.12.152 proto=17 size=167 dport=44268 eph_sport=0 unique_dports_15s=65 direction=in score=-0.003 severity=low
+2025-10-09 18:06:18,474 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=44268 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,492 | INFO | ANOMALY: ts=1760058377.045301 192.168.12.1 -> 192.168.12.152 proto=17 size=167 dport=44268 eph_sport=0 unique_dports_15s=65 direction=in score=-0.003 severity=low
+2025-10-09 18:06:18,499 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=44268 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,517 | INFO | ANOMALY: ts=1760058377.045301 192.168.12.1 -> 192.168.12.152 proto=17 size=167 dport=44268 eph_sport=0 unique_dports_15s=65 direction=in score=-0.003 severity=low
+2025-10-09 18:06:18,527 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=44268 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,551 | INFO | ANOMALY: ts=1760058377.084993 192.168.12.1 -> 192.168.12.152 proto=17 size=167 dport=51196 eph_sport=0 unique_dports_15s=66 direction=in score=-0.042 severity=low
+2025-10-09 18:06:18,560 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=51196 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:18,666 | INFO | Online retraining on current window...
+2025-10-09 18:06:18,792 | INFO | Online retraining complete and model saved.
+2025-10-09 18:06:20,079 | ERROR | ANOMALY: ts=1760058380.016158 192.168.12.152 -> 185.199.109.154 proto=6 size=105 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.132 severity=high
+2025-10-09 18:06:22,062 | WARNING | ANOMALY: ts=1760058382.027182 192.168.12.152 -> 99.84.37.170 proto=6 size=105 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.084 severity=medium
+2025-10-09 18:06:22,092 | WARNING | ANOMALY: ts=1760058382.027182 192.168.12.152 -> 99.84.37.170 proto=6 size=105 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.084 severity=medium
+2025-10-09 18:06:23,514 | INFO | ANOMALY: ts=1760058383.496443 140.82.112.26 -> 192.168.12.152 proto=6 size=91 dport=46152 eph_sport=0 unique_dports_15s=1 direction=in score=-0.023 severity=low
+2025-10-09 18:06:24,086 | WARNING | ANOMALY: ts=1760058384.050881 192.168.12.152 -> 99.84.37.170 proto=6 size=105 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.052 severity=medium
+2025-10-09 18:06:24,114 | WARNING | ANOMALY: ts=1760058384.050881 192.168.12.152 -> 99.84.37.170 proto=6 size=105 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.052 severity=medium
+2025-10-09 18:06:24,143 | WARNING | ANOMALY: ts=1760058384.050881 192.168.12.152 -> 99.84.37.170 proto=6 size=105 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.052 severity=medium
+2025-10-09 18:06:24,172 | WARNING | ANOMALY: ts=1760058384.050881 192.168.12.152 -> 99.84.37.170 proto=6 size=105 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.052 severity=medium
+2025-10-09 18:06:24,199 | INFO | ANOMALY: ts=1760058384.090242 99.84.37.170 -> 192.168.12.152 proto=6 size=105 dport=58154 eph_sport=0 unique_dports_15s=3 direction=in score=-0.006 severity=low
+2025-10-09 18:06:24,422 | INFO | Online retraining on current window...
+2025-10-09 18:06:24,535 | INFO | Online retraining complete and model saved.
+2025-10-09 18:06:24,616 | INFO | ANOMALY: ts=1760058384.535848 192.168.12.152 -> 192.168.12.1 proto=17 size=95 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 18:06:24,657 | INFO | ANOMALY: ts=1760058384.569927 192.168.12.1 -> 192.168.12.152 proto=17 size=153 dport=39492 eph_sport=0 unique_dports_15s=44 direction=in score=-0.039 severity=low
+2025-10-09 18:06:24,664 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=39492 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 18:06:24,696 | INFO | ANOMALY: ts=1760058384.579659 34.8.9.231 -> 192.168.12.152 proto=17 size=1294 dport=47029 eph_sport=0 unique_dports_15s=1 direction=in score=-0.030 severity=low
+2025-10-09 18:06:24,714 | INFO | ANOMALY: ts=1760058384.580337 34.8.9.231 -> 192.168.12.152 proto=17 size=1294 dport=47029 eph_sport=0 unique_dports_15s=1 direction=in score=-0.034 severity=low
+2025-10-09 18:06:24,733 | INFO | ANOMALY: ts=1760058384.590042 34.8.9.231 -> 192.168.12.152 proto=17 size=1294 dport=47029 eph_sport=0 unique_dports_15s=1 direction=in score=-0.036 severity=low
+2025-10-09 18:06:24,764 | WARNING | ANOMALY: ts=1760058384.629907 34.8.9.231 -> 192.168.12.152 proto=17 size=613 dport=47029 eph_sport=0 unique_dports_15s=1 direction=in score=-0.052 severity=medium
+2025-10-09 18:06:24,945 | WARNING | ANOMALY: ts=1760058384.928776 34.8.9.231 -> 192.168.12.152 proto=17 size=218 dport=47029 eph_sport=0 unique_dports_15s=1 direction=in score=-0.059 severity=medium
+2025-10-09 18:06:24,972 | WARNING | ANOMALY: ts=1760058384.928776 34.8.9.231 -> 192.168.12.152 proto=17 size=218 dport=47029 eph_sport=0 unique_dports_15s=1 direction=in score=-0.059 severity=medium
+2025-10-09 18:06:25,025 | INFO | ANOMALY: ts=1760058384.960652 34.8.9.231 -> 192.168.12.152 proto=17 size=218 dport=47029 eph_sport=0 unique_dports_15s=1 direction=in score=-0.006 severity=low
+2025-10-09 18:06:26,599 | WARNING | ANOMALY: ts=1760058386.577264 192.168.12.152 -> 104.192.140.15 proto=6 size=258 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.098 severity=medium
+2025-10-09 18:06:27,517 | WARNING | ANOMALY: ts=1760058387.488935 34.121.25.40 -> 192.168.12.152 proto=6 size=105 dport=59038 eph_sport=0 unique_dports_15s=2 direction=in score=-0.050 severity=medium
+2025-10-09 18:06:30,132 | ERROR | ANOMALY: ts=1760058390.014682 192.168.12.152 -> 137.151.127.120 proto=6 size=90 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.122 severity=high
+2025-10-09 18:06:31,098 | WARNING | ANOMALY: ts=1760058391.070702 192.168.12.152 -> 151.101.130.133 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.067 severity=medium
+2025-10-09 18:06:31,120 | WARNING | ANOMALY: ts=1760058391.070702 192.168.12.152 -> 151.101.130.133 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.067 severity=medium
+2025-10-09 18:06:31,144 | WARNING | ANOMALY: ts=1760058391.070702 192.168.12.152 -> 151.101.130.133 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.067 severity=medium
+2025-10-09 18:06:31,166 | WARNING | ANOMALY: ts=1760058391.070702 192.168.12.152 -> 151.101.130.133 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.067 severity=medium
+2025-10-09 18:06:31,184 | WARNING | ANOMALY: ts=1760058391.070702 192.168.12.152 -> 151.101.130.133 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.067 severity=medium
+2025-10-09 18:06:31,203 | WARNING | ANOMALY: ts=1760058391.070702 192.168.12.152 -> 151.101.130.133 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.067 severity=medium
+2025-10-09 18:06:31,220 | WARNING | ANOMALY: ts=1760058391.070702 192.168.12.152 -> 151.101.130.133 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.067 severity=medium
+2025-10-09 18:06:31,237 | WARNING | ANOMALY: ts=1760058391.070702 192.168.12.152 -> 151.101.130.133 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.067 severity=medium
+2025-10-09 18:06:31,255 | WARNING | ANOMALY: ts=1760058391.070702 192.168.12.152 -> 151.101.130.133 proto=6 size=112 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.067 severity=medium
+2025-10-09 18:06:32,361 | WARNING | ANOMALY: ts=1760058392.331470 192.168.12.152 -> 23.43.51.43 proto=6 size=66 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.082 severity=medium
+2025-10-09 18:06:32,454 | INFO | Online retraining on current window...
+2025-10-09 18:06:32,599 | INFO | Online retraining complete and model saved.
+2025-10-09 18:06:37,290 | ERROR | ANOMALY: ts=1760058397.263339 192.168.12.152 -> 91.189.91.157 proto=17 size=90 dport=123 eph_sport=1 unique_dports_15s=3 direction=out score=-0.160 severity=high
+2025-10-09 18:06:37,446 | INFO | ANOMALY: ts=1760058397.422641 91.189.91.157 -> 192.168.12.152 proto=17 size=90 dport=51120 eph_sport=0 unique_dports_15s=1 direction=in score=-0.006 severity=low
+2025-10-09 18:06:38,626 | INFO | ANOMALY: ts=1760058397.422641 91.189.91.157 -> 192.168.12.152 proto=17 size=90 dport=51120 eph_sport=0 unique_dports_15s=1 direction=in score=-0.006 severity=low
+2025-10-09 19:12:38,495 | INFO | Capturing 10000 packets on 'wlp131s0f0' for training...
+2025-10-09 19:13:26,242 | INFO | Training Isolation Forest...
+2025-10-09 19:13:26,413 | INFO | Model trained and saved to: models/iforest.joblib
+2025-10-09 19:14:22,790 | INFO | Capturing 2000 packets on 'wlp131s0f0' for training...
+2025-10-09 19:14:35,078 | INFO | Training Isolation Forest...
+2025-10-09 19:14:35,232 | INFO | Model trained and saved to: models/iforest.joblib
+2025-10-09 19:15:35,811 | INFO | Capturing 2000 packets on 'wlp131s0f0' for training...
+2025-10-09 19:15:48,859 | INFO | Training Isolation Forest...
+2025-10-09 19:15:49,011 | INFO | Model trained and saved to: models/iforest.joblib
+2025-10-09 19:17:09,083 | INFO | Capturing 2000 packets on 'wlp131s0f0' for training...
+2025-10-09 19:17:26,571 | INFO | Training Isolation Forest...
+2025-10-09 19:17:26,761 | INFO | Model trained and saved to: models/iforest.joblib
+2025-10-09 19:18:01,260 | INFO | Capturing 2000 packets on 'wlp131s0f0' for training...
+2025-10-09 19:18:03,746 | INFO | Training Isolation Forest...
+2025-10-09 19:18:03,843 | INFO | Model trained and saved to: models/iforest.joblib
+2025-10-09 19:18:17,272 | INFO | Loaded model: models/iforest.joblib
+2025-10-09 19:18:17,272 | INFO | Model info: version=1.0.0 trained_at=2025-10-10T02:18:03.816518+00:00 features=7 checksum=12a274e21180…
+2025-10-09 19:18:17,272 | INFO | IF params: contamination=0.05 n_estimators=200 random_state=42
+2025-10-09 19:18:17,272 | INFO | Feature order: protocol, packet_size_log, time_diff, dport, is_ephemeral_sport, unique_dports_15s, direction
+2025-10-09 19:18:17,272 | INFO | Alert thresholds: high<=-0.100  medium<=-0.050 | online_retrain_interval=100
+2025-10-09 19:18:17,272 | INFO | Starting live monitoring on 'wlp131s0f0'. Press Ctrl+C to stop.
+2025-10-09 19:18:27,830 | WARNING | ANOMALY: ts=1760062707.781633 192.168.12.152 -> 192.168.12.1 proto=17 size=97 dport=53 eph_sport=1 unique_dports_15s=2 direction=out score=-0.072 severity=medium
+2025-10-09 19:18:28,380 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,403 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,428 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,455 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,478 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,502 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,531 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,558 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,583 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,616 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,644 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,668 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,690 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,718 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,744 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,773 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,801 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,830 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,860 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,888 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,916 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,939 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,966 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:28,995 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:29,055 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:29,088 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:29,119 | INFO | ANOMALY: ts=1760062708.144197 192.168.12.152 -> 192.168.12.1 proto=17 size=89 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.003 severity=low
+2025-10-09 19:18:29,148 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,177 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,205 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,233 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,266 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,293 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,314 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,342 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,371 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,407 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,436 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,466 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,497 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,523 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,549 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,572 | INFO | ANOMALY: ts=1760062708.329723 192.168.12.152 -> 192.168.12.1 proto=17 size=86 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.007 severity=low
+2025-10-09 19:18:29,712 | INFO | ANOMALY: ts=1760062708.603173 192.168.12.152 -> 192.168.12.1 proto=17 size=99 dport=53 eph_sport=0 unique_dports_15s=2 direction=out score=-0.015 severity=low
+2025-10-09 19:18:30,066 | INFO | ANOMALY: ts=1760062709.576760 192.168.12.1 -> 192.168.12.152 proto=17 size=127 dport=39010 eph_sport=0 unique_dports_15s=6 direction=in score=-0.021 severity=low
+2025-10-09 19:18:30,511 | INFO | ANOMALY: ts=1760062710.092370 192.168.12.152 -> 142.250.176.17 proto=6 size=605 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.028 severity=low
+2025-10-09 19:18:30,533 | INFO | ANOMALY: ts=1760062710.092370 192.168.12.152 -> 142.250.176.17 proto=6 size=605 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.028 severity=low
+2025-10-09 19:18:30,555 | INFO | ANOMALY: ts=1760062710.092370 192.168.12.152 -> 142.250.176.17 proto=6 size=605 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.028 severity=low
+2025-10-09 19:18:30,577 | INFO | ANOMALY: ts=1760062710.092370 192.168.12.152 -> 142.250.176.17 proto=6 size=605 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.028 severity=low
+2025-10-09 19:18:30,981 | INFO | ANOMALY: ts=1760062710.702813 192.168.12.152 -> 142.250.68.65 proto=6 size=1976 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,004 | INFO | ANOMALY: ts=1760062710.702813 192.168.12.152 -> 142.250.68.65 proto=6 size=1976 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,034 | INFO | ANOMALY: ts=1760062710.702813 192.168.12.152 -> 142.250.68.65 proto=6 size=1976 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,055 | INFO | ANOMALY: ts=1760062710.702813 192.168.12.152 -> 142.250.68.65 proto=6 size=1976 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,079 | INFO | ANOMALY: ts=1760062710.702813 192.168.12.152 -> 142.250.68.65 proto=6 size=1976 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,102 | INFO | ANOMALY: ts=1760062710.702813 192.168.12.152 -> 142.250.68.65 proto=6 size=1976 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,124 | INFO | ANOMALY: ts=1760062710.702813 192.168.12.152 -> 142.250.68.65 proto=6 size=1976 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,148 | INFO | ANOMALY: ts=1760062710.702813 192.168.12.152 -> 142.250.68.65 proto=6 size=1976 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,645 | INFO | ANOMALY: ts=1760062711.506031 192.168.12.152 -> 142.250.68.65 proto=6 size=130 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,664 | INFO | ANOMALY: ts=1760062711.506031 192.168.12.152 -> 142.250.68.65 proto=6 size=130 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,682 | INFO | ANOMALY: ts=1760062711.506031 192.168.12.152 -> 142.250.68.65 proto=6 size=130 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,701 | INFO | ANOMALY: ts=1760062711.506031 192.168.12.152 -> 142.250.68.65 proto=6 size=130 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,722 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,748 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,770 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,789 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,808 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,828 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,848 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,866 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,885 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,908 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,933 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:31,955 | INFO | ANOMALY: ts=1760062711.506583 192.168.12.152 -> 142.250.68.65 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:32,210 | INFO | ANOMALY: ts=1760062711.807601 192.168.12.152 -> 142.250.176.17 proto=6 size=130 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.010 severity=low
+2025-10-09 19:18:32,229 | INFO | ANOMALY: ts=1760062711.807913 192.168.12.152 -> 142.250.176.17 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.004 severity=low
+2025-10-09 19:18:32,247 | INFO | ANOMALY: ts=1760062711.807913 192.168.12.152 -> 142.250.176.17 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.004 severity=low
+2025-10-09 19:18:32,264 | INFO | ANOMALY: ts=1760062711.807913 192.168.12.152 -> 142.250.176.17 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.004 severity=low
+2025-10-09 19:18:32,283 | INFO | ANOMALY: ts=1760062711.807913 192.168.12.152 -> 142.250.176.17 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.004 severity=low
+2025-10-09 19:18:32,301 | INFO | ANOMALY: ts=1760062711.807913 192.168.12.152 -> 142.250.176.17 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.004 severity=low
+2025-10-09 19:18:32,320 | INFO | ANOMALY: ts=1760062711.807913 192.168.12.152 -> 142.250.176.17 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.004 severity=low
+2025-10-09 19:18:32,346 | INFO | ANOMALY: ts=1760062711.807913 192.168.12.152 -> 142.250.176.17 proto=6 size=175 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.004 severity=low
+2025-10-09 19:18:32,354 | INFO | Online retraining on current window...
+2025-10-09 19:18:32,457 | INFO | Online retraining complete and model saved.
+2025-10-09 19:18:32,621 | INFO | ANOMALY: ts=1760062712.217911 192.168.12.152 -> 142.250.176.2 proto=6 size=105 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.002 severity=low
+2025-10-09 19:18:33,168 | INFO | Online retraining on current window...
+2025-10-09 19:18:33,277 | INFO | Online retraining complete and model saved.
+2025-10-09 19:18:33,466 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=48419 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,481 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=57934 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,511 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,527 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,545 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,560 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,579 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,595 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,610 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,624 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,637 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,650 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,665 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,679 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:33,694 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=34434 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:34,214 | INFO | ANOMALY: ts=1760062714.185156 192.168.12.1 -> 192.168.12.152 proto=17 size=138 dport=46917 eph_sport=0 unique_dports_15s=13 direction=in score=-0.043 severity=low
+2025-10-09 19:18:34,222 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46917 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:34,247 | INFO | ANOMALY: ts=1760062714.185156 192.168.12.1 -> 192.168.12.152 proto=17 size=138 dport=46917 eph_sport=0 unique_dports_15s=13 direction=in score=-0.043 severity=low
+2025-10-09 19:18:34,256 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46917 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:34,279 | INFO | ANOMALY: ts=1760062714.185156 192.168.12.1 -> 192.168.12.152 proto=17 size=138 dport=46917 eph_sport=0 unique_dports_15s=13 direction=in score=-0.043 severity=low
+2025-10-09 19:18:34,286 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46917 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:34,309 | INFO | ANOMALY: ts=1760062714.185156 192.168.12.1 -> 192.168.12.152 proto=17 size=138 dport=46917 eph_sport=0 unique_dports_15s=13 direction=in score=-0.043 severity=low
+2025-10-09 19:18:34,319 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46917 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:34,349 | INFO | ANOMALY: ts=1760062714.185156 192.168.12.1 -> 192.168.12.152 proto=17 size=138 dport=46917 eph_sport=0 unique_dports_15s=13 direction=in score=-0.043 severity=low
+2025-10-09 19:18:34,358 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46917 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:34,384 | INFO | ANOMALY: ts=1760062714.185156 192.168.12.1 -> 192.168.12.152 proto=17 size=138 dport=46917 eph_sport=0 unique_dports_15s=13 direction=in score=-0.043 severity=low
+2025-10-09 19:18:34,391 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46917 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:34,416 | INFO | ANOMALY: ts=1760062714.185156 192.168.12.1 -> 192.168.12.152 proto=17 size=138 dport=46917 eph_sport=0 unique_dports_15s=13 direction=in score=-0.043 severity=low
+2025-10-09 19:18:34,425 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46917 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:34,447 | INFO | ANOMALY: ts=1760062714.185156 192.168.12.1 -> 192.168.12.152 proto=17 size=138 dport=46917 eph_sport=0 unique_dports_15s=13 direction=in score=-0.043 severity=low
+2025-10-09 19:18:34,455 | ERROR | SIGNATURE: port-scan-suspected severity=high | 192.168.12.1 -> 192.168.12.152 dport=46917 desc="Source contacted many unique destination ports over a short window."
+2025-10-09 19:18:34,481 | INFO | Online retraining on current window...
+2025-10-09 19:18:34,628 | INFO | Online retraining complete and model saved.
+2025-10-09 19:18:34,701 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,728 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,749 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,768 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,785 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,803 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,820 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,838 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,855 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,873 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,889 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,906 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,923 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,939 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,957 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,975 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:34,994 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:35,017 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:35,035 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:35,051 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:35,068 | INFO | ANOMALY: ts=1760062714.188377 192.168.12.152 -> 142.250.72.174 proto=6 size=1965 dport=443 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-09 19:18:35,360 | INFO | ANOMALY: ts=1760062714.846292 142.250.72.174 -> 192.168.12.152 proto=6 size=682 dport=58490 eph_sport=0 unique_dports_15s=1 direction=in score=-0.019 severity=low
+2025-10-09 19:18:35,379 | INFO | ANOMALY: ts=1760062714.846292 142.250.72.174 -> 192.168.12.152 proto=6 size=682 dport=58490 eph_sport=0 unique_dports_15s=1 direction=in score=-0.019 severity=low
+2025-10-09 19:18:35,398 | INFO | ANOMALY: ts=1760062714.846292 142.250.72.174 -> 192.168.12.152 proto=6 size=682 dport=58490 eph_sport=0 unique_dports_15s=1 direction=in score=-0.019 severity=low
+2025-10-09 19:18:35,416 | INFO | ANOMALY: ts=1760062714.846292 142.250.72.174 -> 192.168.12.152 proto=6 size=682 dport=58490 eph_sport=0 unique_dports_15s=1 direction=in score=-0.019 severity=low
+2025-10-09 19:18:35,434 | INFO | ANOMALY: ts=1760062714.846292 142.250.72.174 -> 192.168.12.152 proto=6 size=682 dport=58490 eph_sport=0 unique_dports_15s=1 direction=in score=-0.019 severity=low
+2025-10-09 19:18:35,451 | INFO | ANOMALY: ts=1760062714.846292 142.250.72.174 -> 192.168.12.152 proto=6 size=682 dport=58490 eph_sport=0 unique_dports_15s=1 direction=in score=-0.019 severity=low
+2025-10-09 19:18:35,618 | INFO | Online retraining on current window...
+2025-10-09 19:18:35,734 | INFO | Online retraining complete and model saved.
+2025-10-09 19:18:42,849 | WARNING | ANOMALY: ts=1760062722.827778 192.168.12.152 -> 137.151.127.120 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=2 direction=out score=-0.060 severity=medium
+2025-10-10 17:53:48,527 | INFO | Loaded model: models/iforest.joblib
+2025-10-10 17:53:48,528 | INFO | Model info: version=1.0.0 trained_at=2025-10-10T02:18:35.704762+00:00 features=7 checksum=12a274e21180…
+2025-10-10 17:53:48,528 | INFO | IF params: contamination=0.05 n_estimators=200 random_state=42
+2025-10-10 17:53:48,528 | INFO | Feature order: protocol, packet_size_log, time_diff, dport, is_ephemeral_sport, unique_dports_15s, direction
+2025-10-10 17:53:48,528 | INFO | Alert thresholds: high<=-0.100  medium<=-0.050 | online_retrain_interval=100
+2025-10-10 17:53:48,528 | INFO | Starting live monitoring on 'wlp131s0f0'. Press Ctrl+C to stop.

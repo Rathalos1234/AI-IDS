@@ -3,23 +3,45 @@ platform linux -- Python 3.10.12, pytest-8.4.2, pluggy-1.6.0 -- /home/khoanguyen
 cachedir: .pytest_cache
 rootdir: /home/khoanguyen/AI-IDS/AI-IDS
 configfile: pytest.ini
-collecting ... collected 12 items / 3 deselected / 9 selected
+plugins: xdist-3.8.0, cov-7.0.0
+collecting ... collected 29 items / 4 deselected / 25 selected
 
-tests/test_anomaly_detector.py::test_train_save_load_round_trip PASSED   [ 11%]
-tests/test_anomaly_detector.py::test_reindex_safety_same_predictions PASSED [ 22%]
-tests/test_anomaly_detector.py::test_determinism_with_fixed_seed PASSED  [ 33%]
-tests/test_faults_and_edges.py::test_missing_columns_raises_clear_error PASSED [ 44%]
-tests/test_faults_and_edges.py::test_load_broken_bundle_raises PASSED    [ 55%]
-tests/test_model_bundle.py::test_feature_order_checksum_and_version PASSED [ 66%]
-tests/test_packet_processor.py::test_engineer_features_basic PASSED      [ 77%]
-tests/test_packet_processor.py::test_unique_dports_15s_counts PASSED     [ 88%]
-tests/test_packet_processor.py::test_is_ephemeral_sport_flag PASSED      [100%]
+tests/test_anomaly_detector.py::test_train_save_load_round_trip PASSED   [  4%]
+tests/test_anomaly_detector.py::test_reindex_safety_same_predictions PASSED [  8%]
+tests/test_anomaly_detector.py::test_determinism_with_fixed_seed PASSED  [ 12%]
+tests/test_api_contract_sprint2.py::test_stats_devices_events_heads PASSED [ 16%]
+tests/test_api_flask.py::test_health_ok PASSED                           [ 20%]
+tests/test_api_logs_export_filters_sprint2.py::test_logs_filters_contract PASSED [ 24%]
+tests/test_api_logs_export_filters_sprint2.py::test_logs_export_csv_and_json PASSED [ 28%]
+tests/test_api_scan_sprint2.py::test_scan_start_and_status_contract PASSED [ 32%]
+tests/test_api_trusted_temp_bans_sprint2.py::test_trusted_crud_and_temp_ban_contract PASSED [ 36%]
+tests/test_auth_gating_lockout_sprint2.py::test_auth_gating_and_session_cookie PASSED [ 40%]
+tests/test_auth_gating_lockout_sprint2.py::test_lockout_after_failed_attempts PASSED [ 44%]
+tests/test_cli_golden_text.py::test_config_validate_ok_uses_repo_config PASSED [ 48%]
+tests/test_cli_golden_text.py::test_verify_model_prints_expected_fields PASSED [ 52%]
+tests/test_config_validation_sprint2.py::test_config_validation_ok PASSED [ 56%]
+tests/test_config_validation_sprint2.py::test_threshold_order_invalid PASSED [ 60%]
+tests/test_config_validation_sprint2.py::test_invalid_log_level PASSED   [ 64%]
+tests/test_config_validation_sprint2.py::test_nonpositive_window_size PASSED [ 68%]
+tests/test_faults_and_edges.py::test_missing_columns_raises_clear_error PASSED [ 72%]
+tests/test_faults_and_edges.py::test_load_broken_bundle_raises PASSED    [ 76%]
+tests/test_model_bundle.py::test_feature_order_checksum_and_version PASSED [ 80%]
+tests/test_ops_endpoints_sprint2.py::test_ops_health_and_retention_and_backup PASSED [ 84%]
+tests/test_packet_processor.py::test_engineer_features_basic PASSED      [ 88%]
+tests/test_packet_processor.py::test_unique_dports_15s_counts PASSED     [ 92%]
+tests/test_packet_processor.py::test_is_ephemeral_sport_flag PASSED      [ 96%]
+tests/test_webdb.py::test_schema_init_and_list PASSED                    [100%]
 
 ============================= slowest 10 durations =============================
 0.07s call     tests/test_anomaly_detector.py::test_train_save_load_round_trip
 0.04s call     tests/test_anomaly_detector.py::test_determinism_with_fixed_seed
+0.03s call     tests/test_api_trusted_temp_bans_sprint2.py::test_trusted_crud_and_temp_ban_contract
 0.02s call     tests/test_anomaly_detector.py::test_reindex_safety_same_predictions
+0.02s call     tests/test_cli_golden_text.py::test_verify_model_prints_expected_fields
 0.02s call     tests/test_model_bundle.py::test_feature_order_checksum_and_version
+0.01s call     tests/test_auth_gating_lockout_sprint2.py::test_auth_gating_and_session_cookie
+0.01s call     tests/test_api_logs_export_filters_sprint2.py::test_logs_export_csv_and_json
+0.01s call     tests/test_auth_gating_lockout_sprint2.py::test_lockout_after_failed_attempts
 
-(6 durations < 0.005s hidden.  Use -vv to show these durations.)
-======================= 9 passed, 3 deselected in 0.82s ========================
+(1 durations < 0.005s hidden.  Use -vv to show these durations.)
+======================= 25 passed, 4 deselected in 0.74s =======================

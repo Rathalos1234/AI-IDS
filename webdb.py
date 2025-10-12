@@ -1,9 +1,11 @@
 import sqlite3
 from contextlib import closing
 from pathlib import Path
-from typing import Optional, Dict, Any, List
-from datetime import datetime, timedelta, timezone
-import uuid, hashlib, os
+from typing import Optional, Any
+from datetime import datetime, timedelta
+import uuid
+import hashlib
+import os
 
 DB = Path("ids_web.db")
 SCHEMA = """
@@ -118,28 +120,29 @@ def insert_alert(a):
         con.commit()
 
 
-def insert_block(b):
-    with closing(_con()) as con:
-        con.execute(
-            "INSERT OR REPLACE INTO blocks (id, ts, ip, action, reason) VALUES (?,?,?,?,?)",
-            (b["id"], b["ts"], b["ip"], b["action"], b.get("reason", "")),
-        )
-        con.commit()
+# def insert_block(b):
+#    with closing(_con()) as con:
+#        con.execute(
+#            "INSERT OR REPLACE INTO blocks (id, ts, ip, action, reason) VALUES (?,?,?,?,?)",
+#            (b["id"], b["ts"], b["ip"], b["action"], b.get("reason", "")),
+#        )
+#        con.commit()
 
 
 # -----------------------
 # New convenience helpers
 # -----------------------
 
+
 def add_alert(
     *,
     src_ip: str,
-    dest_ip: str = "",   # ignored by current schema (kept for API compatibility)
-    dport: int = 0,      # ignored
+    dest_ip: str = "",  # ignored by current schema (kept for API compatibility)
+    dport: int = 0,  # ignored
     severity: str,
     kind: str,
     label: str = "",
-    message: str = "",   # ignored
+    message: str = "",  # ignored
     ts: Optional[str] = None,
 ) -> str:
     """
@@ -147,20 +150,20 @@ def add_alert(
     """
     rid = uuid.uuid4().hex
     ts = ts or datetime.utcnow().isoformat(timespec="seconds") + "Z"
-    insert_alert({
-        "id": rid,
-        "ts": ts,
-        "src_ip": src_ip,
-        "label": label or kind,
-        "severity": severity,
-        "kind": kind,
-    })
+    insert_alert(
+        {
+            "id": rid,
+            "ts": ts,
+            "src_ip": src_ip,
+            "label": label or kind,
+            "severity": severity,
+            "kind": kind,
+        }
+    )
     return rid
 
+
 # ---- Device inventory (additive table; safe) ----
-
-
-
 
 
 def list_log_events(limit: int = 200):
@@ -179,18 +182,20 @@ def list_log_events(limit: int = 200):
         )
         return [dict(r) for r in rows]
 
+
 # --- add below your existing list_log_events() (or replace it with this superset) ---
 def list_log_events_filtered(
     *,
     limit: int = 200,
     ip: str | None = None,
-    severity: str | None = None,   # e.g., low|medium|high|critical (case-insensitive)
-    kind: str | None = None,       # 'alert' or 'block'
-    ts_from: str | None = None,    # ISO 8601 (inclusive)
-    ts_to: str | None = None       # ISO 8601 (inclusive)
+    severity: str | None = None,  # e.g., low|medium|high|critical (case-insensitive)
+    kind: str | None = None,  # 'alert' or 'block'
+    ts_from: str | None = None,  # ISO 8601 (inclusive)
+    ts_to: str | None = None,  # ISO 8601 (inclusive)
 ):
-    clauses = []
-    params = []
+    # clauses = []
+    # params = []
+    params: list[Any] = []
 
     # We UNION alerts + blocks into a normalized view with a few columns
     base = """
@@ -230,70 +235,99 @@ def list_log_events_filtered(
 
 # ---- Optional DB-backed auth helpers (not required by your current API) ----
 
+
 def _hash_password(pw: str) -> str:
     return hashlib.sha256(pw.encode("utf-8")).hexdigest()
+
 
 def ensure_admin(username: str = "admin", password: Optional[str] = None) -> None:
     pw = password or os.environ.get("ADMIN_PASSWORD")
     if not pw:
         return
     with closing(_con()) as con:
-        r = con.execute("SELECT username FROM auth_users WHERE username=?", (username,)).fetchone()
+        r = con.execute(
+            "SELECT username FROM auth_users WHERE username=?", (username,)
+        ).fetchone()
         if r is None:
             con.execute(
                 "INSERT INTO auth_users (username, password_hash, created_at) VALUES (?, ?, ?)",
-                (username, _hash_password(pw), datetime.utcnow().isoformat(timespec='seconds') + "Z"),
+                (
+                    username,
+                    _hash_password(pw),
+                    datetime.utcnow().isoformat(timespec="seconds") + "Z",
+                ),
             )
             con.commit()
 
+
 def verify_login(username: str, password: str) -> bool:
     with closing(_con()) as con:
-        row = con.execute("SELECT password_hash FROM auth_users WHERE username=?", (username,)).fetchone()
+        row = con.execute(
+            "SELECT password_hash FROM auth_users WHERE username=?", (username,)
+        ).fetchone()
         if not row:
             return False
         return _hash_password(password) == row["password_hash"]
 
-def register_failure(username: str, lock_after: int = 5, lock_minutes: int = 15) -> None:
+
+def register_failure(
+    username: str, lock_after: int = 5, lock_minutes: int = 15
+) -> None:
     now = datetime.utcnow()
     with closing(_con()) as con:
-        r = con.execute("SELECT * FROM auth_lockout WHERE username=?", (username,)).fetchone()
+        r = con.execute(
+            "SELECT * FROM auth_lockout WHERE username=?", (username,)
+        ).fetchone()
         if r is None:
             con.execute(
                 "INSERT INTO auth_lockout (username, fail_count, last_fail_at) VALUES (?, ?, ?)",
-                (username, 1, now.isoformat(timespec='seconds') + "Z"),
+                (username, 1, now.isoformat(timespec="seconds") + "Z"),
             )
         else:
             count = int(r["fail_count"]) + 1
             locked_until = None
             if count >= lock_after:
-                locked_until = (now + timedelta(minutes=lock_minutes)).isoformat(timespec='seconds') + "Z"
+                locked_until = (now + timedelta(minutes=lock_minutes)).isoformat(
+                    timespec="seconds"
+                ) + "Z"
                 count = 0
             con.execute(
                 "UPDATE auth_lockout SET fail_count=?, last_fail_at=?, locked_until=? WHERE username=?",
-                (count, now.isoformat(timespec='seconds') + "Z", locked_until, username),
+                (
+                    count,
+                    now.isoformat(timespec="seconds") + "Z",
+                    locked_until,
+                    username,
+                ),
             )
         con.commit()
+
 
 def clear_failures(username: str) -> None:
     with closing(_con()) as con:
         con.execute("DELETE FROM auth_lockout WHERE username=?", (username,))
         con.commit()
 
+
 def is_locked(username: str) -> Optional[str]:
     with closing(_con()) as con:
-        r = con.execute("SELECT locked_until FROM auth_lockout WHERE username=?", (username,)).fetchone()
+        r = con.execute(
+            "SELECT locked_until FROM auth_lockout WHERE username=?", (username,)
+        ).fetchone()
         if not r:
             return None
         lu = r["locked_until"]
         if not lu:
             return None
         return lu
-    
+
 
 # ---------------- Devices ----------------
 
+
 def _now():
     return datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
 
 def upsert_device(ip: str, name: str = ""):
     """Create if missing; always refresh last_seen; set name if provided."""
@@ -311,10 +345,12 @@ def upsert_device(ip: str, name: str = ""):
         )
         con.commit()
 
+
 def set_device_name(ip: str, name: str):
     with closing(_con()) as con:
         con.execute("UPDATE devices SET name = ? WHERE ip = ?", (name, ip))
         con.commit()
+
 
 def list_devices(limit: int = 200):
     with closing(_con()) as con:
@@ -324,10 +360,12 @@ def list_devices(limit: int = 200):
         )
         return [dict(r) for r in rows]
 
+
 def record_device(ip: str, name: str = ""):
     if not ip:
         return
     upsert_device(ip, name or "")
+
 
 # --- Scan results helpers ---
 def set_device_scan(ip: str, ports_csv: str, risk: str = ""):
@@ -347,6 +385,7 @@ def set_device_scan(ip: str, ports_csv: str, risk: str = ""):
         )
         con.commit()
 
+
 def upsert_trusted_ip(ip: str, note: str = ""):
     with closing(_con()) as con:
         con.execute(
@@ -355,19 +394,23 @@ def upsert_trusted_ip(ip: str, note: str = ""):
         )
         con.commit()
 
+
 def remove_trusted_ip(ip: str):
     with closing(_con()) as con:
         con.execute("DELETE FROM trusted_ips WHERE ip=?", (ip,))
         con.commit()
 
+
 def list_trusted_ips():
     with closing(_con()) as con:
         return [dict(r) for r in con.execute("SELECT * FROM trusted_ips ORDER BY ip")]
+
 
 def is_trusted(ip: str) -> bool:
     with closing(_con()) as con:
         r = con.execute("SELECT 1 FROM trusted_ips WHERE ip=?", (ip,)).fetchone()
         return bool(r)
+
 
 # auto-expire temporary bans: if latest action for an IP is a 'block' with past expires_at
 def expire_bans(now_iso: str):
@@ -393,24 +436,39 @@ def expire_bans(now_iso: str):
             )
         con.commit()
 
+
 # (tweak) widen insert_block to support expires_at
 def insert_block(b):
     with closing(_con()) as con:
         con.execute(
             "INSERT OR REPLACE INTO blocks (id, ts, ip, action, reason, expires_at) VALUES (?,?,?,?,?,?)",
-            (b["id"], b["ts"], b["ip"], b["action"], b.get("reason", ""), b.get("expires_at", "")),
+            (
+                b["id"],
+                b["ts"],
+                b["ip"],
+                b["action"],
+                b.get("reason", ""),
+                b.get("expires_at", ""),
+            ),
         )
         con.commit()
+
 
 # optional retention helper (used by PD-29)
 def prune_old(days_alerts: int | None = None, days_blocks: int | None = None) -> dict:
     out = {"alerts": 0, "blocks": 0}
     with closing(_con()) as con:
         if days_alerts and days_alerts > 0:
-            cur = con.execute("DELETE FROM alerts WHERE ts < datetime('now', ?)", (f'-{int(days_alerts)} days',))
+            cur = con.execute(
+                "DELETE FROM alerts WHERE ts < datetime('now', ?)",
+                (f"-{int(days_alerts)} days",),
+            )
             out["alerts"] = cur.rowcount
         if days_blocks and days_blocks > 0:
-            cur = con.execute("DELETE FROM blocks WHERE ts < datetime('now', ?)", (f'-{int(days_blocks)} days',))
+            cur = con.execute(
+                "DELETE FROM blocks WHERE ts < datetime('now', ?)",
+                (f"-{int(days_blocks)} days",),
+            )
             out["blocks"] = cur.rowcount
         con.commit()
     return out

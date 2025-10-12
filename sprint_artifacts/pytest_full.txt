@@ -3,26 +3,47 @@ platform linux -- Python 3.10.12, pytest-8.4.2, pluggy-1.6.0 -- /home/khoanguyen
 cachedir: .pytest_cache
 rootdir: /home/khoanguyen/AI-IDS/AI-IDS
 configfile: pytest.ini
-collecting ... collected 12 items / 1 deselected / 11 selected
+plugins: xdist-3.8.0, cov-7.0.0
+collecting ... collected 29 items / 1 deselected / 28 selected
 
-tests/test_anomaly_detector.py::test_train_save_load_round_trip PASSED   [  9%]
-tests/test_anomaly_detector.py::test_reindex_safety_same_predictions PASSED [ 18%]
-tests/test_anomaly_detector.py::test_determinism_with_fixed_seed PASSED  [ 27%]
-tests/test_faults_and_edges.py::test_missing_columns_raises_clear_error PASSED [ 36%]
-tests/test_faults_and_edges.py::test_load_broken_bundle_raises PASSED    [ 45%]
-tests/test_integration_train_pipeline.py::test_capture_engineer_train_save PASSED [ 54%]
-tests/test_model_bundle.py::test_feature_order_checksum_and_version PASSED [ 63%]
-tests/test_monitor_scapy_optional.py::test_severity_mapping_no_crash PASSED [ 72%]
-tests/test_packet_processor.py::test_engineer_features_basic PASSED      [ 81%]
-tests/test_packet_processor.py::test_unique_dports_15s_counts PASSED     [ 90%]
-tests/test_packet_processor.py::test_is_ephemeral_sport_flag PASSED      [100%]
+tests/test_anomaly_detector.py::test_train_save_load_round_trip PASSED   [  3%]
+tests/test_anomaly_detector.py::test_reindex_safety_same_predictions PASSED [  7%]
+tests/test_anomaly_detector.py::test_determinism_with_fixed_seed PASSED  [ 10%]
+tests/test_api_contract_sprint2.py::test_stats_devices_events_heads PASSED [ 14%]
+tests/test_api_flask.py::test_health_ok PASSED                           [ 17%]
+tests/test_api_logs_export_filters_sprint2.py::test_logs_filters_contract PASSED [ 21%]
+tests/test_api_logs_export_filters_sprint2.py::test_logs_export_csv_and_json PASSED [ 25%]
+tests/test_api_scan_sprint2.py::test_scan_start_and_status_contract PASSED [ 28%]
+tests/test_api_trusted_temp_bans_sprint2.py::test_trusted_crud_and_temp_ban_contract PASSED [ 32%]
+tests/test_auth_gating_lockout_sprint2.py::test_auth_gating_and_session_cookie PASSED [ 35%]
+tests/test_auth_gating_lockout_sprint2.py::test_lockout_after_failed_attempts PASSED [ 39%]
+tests/test_banlist_integration.py::test_block_ip_round_trip PASSED       [ 42%]
+tests/test_cli_golden_text.py::test_config_validate_ok_uses_repo_config PASSED [ 46%]
+tests/test_cli_golden_text.py::test_verify_model_prints_expected_fields PASSED [ 50%]
+tests/test_config_validation_sprint2.py::test_config_validation_ok PASSED [ 53%]
+tests/test_config_validation_sprint2.py::test_threshold_order_invalid PASSED [ 57%]
+tests/test_config_validation_sprint2.py::test_invalid_log_level PASSED   [ 60%]
+tests/test_config_validation_sprint2.py::test_nonpositive_window_size PASSED [ 64%]
+tests/test_faults_and_edges.py::test_missing_columns_raises_clear_error PASSED [ 67%]
+tests/test_faults_and_edges.py::test_load_broken_bundle_raises PASSED    [ 71%]
+tests/test_integration_train_pipeline.py::test_capture_engineer_train_save PASSED [ 75%]
+tests/test_model_bundle.py::test_feature_order_checksum_and_version PASSED [ 78%]
+tests/test_monitor_scapy_optional.py::test_severity_mapping_no_crash PASSED [ 82%]
+tests/test_ops_endpoints_sprint2.py::test_ops_health_and_retention_and_backup PASSED [ 85%]
+tests/test_packet_processor.py::test_engineer_features_basic PASSED      [ 89%]
+tests/test_packet_processor.py::test_unique_dports_15s_counts PASSED     [ 92%]
+tests/test_packet_processor.py::test_is_ephemeral_sport_flag PASSED      [ 96%]
+tests/test_webdb.py::test_schema_init_and_list PASSED                    [100%]
 
 ============================= slowest 10 durations =============================
 0.07s call     tests/test_anomaly_detector.py::test_train_save_load_round_trip
 0.06s call     tests/test_integration_train_pipeline.py::test_capture_engineer_train_save
 0.04s call     tests/test_anomaly_detector.py::test_determinism_with_fixed_seed
+0.03s call     tests/test_api_trusted_temp_bans_sprint2.py::test_trusted_crud_and_temp_ban_contract
 0.02s call     tests/test_anomaly_detector.py::test_reindex_safety_same_predictions
+0.02s call     tests/test_cli_golden_text.py::test_verify_model_prints_expected_fields
 0.02s call     tests/test_model_bundle.py::test_feature_order_checksum_and_version
-
-(5 durations < 0.005s hidden.  Use -vv to show these durations.)
-======================= 11 passed, 1 deselected in 0.64s =======================
+0.01s call     tests/test_banlist_integration.py::test_block_ip_round_trip
+0.01s call     tests/test_auth_gating_lockout_sprint2.py::test_auth_gating_and_session_cookie
+0.01s call     tests/test_api_logs_export_filters_sprint2.py::test_logs_export_csv_and_json
+======================= 28 passed, 1 deselected in 0.82s =======================
