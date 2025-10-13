@@ -19,9 +19,9 @@ Covers packet feature extraction, anomaly scoring, and alert formatting for runn
 **Entry / Exit criteria**  
 - Entry: build passes; model bundle loads; seed data available.  
 - Exit (S1 targets):  
-  - Unit & integration pass rate ≥ 95%  
-  - Perf: 10k rows in ≤ **TODO: set target, e.g., 2.0s** and peak memory ≤ **TODO**  
-  - No unhandled exceptions on corrupt packet paths  
+  - Unit & integration **pass rate ≥ 95%**
+  - Perf: 10k rows in ≤ **3.0s** and peak memory ≤ **350MB** (matches `tests/test_perf_10k.py` guardrail)  
+  - No unhandled exceptions on corrupt packet paths
   - Ephemeral-port predicate holds on randomized samples
 
 **Traceability (feature ↔ test cases)**
@@ -35,6 +35,8 @@ Covers packet feature extraction, anomaly scoring, and alert formatting for runn
 | End-to-end packet→alert                     | Integration      | INT-01                           |
 | Corrupt/partial packet handling             | Fault-injection  | FE-01                             |
 | 10k perf snapshot                           | Perf smoke       | PERF-10K-01                      |
+| Alerts UI filtering & export controls       | Manual UI        | UI-ALERTS-01, UI-ALERTS-02       |
+| Alerts UI real-time event stream handling   | Manual/stream    | UI-ALERTS-03                     |
 
 **Planned data**  
 - Synthetic packets (fixtures)  

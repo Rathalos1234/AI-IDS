@@ -5,6 +5,13 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta, timezone
 import uuid, hashlib, os
 
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _iso_utc(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
 DB = Path("ids_web.db")
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -137,7 +144,7 @@ def add_alert(
     Rich signature compatible with the API sink, but stores only the 6 columns your table has.
     """
     rid = uuid.uuid4().hex
-    ts = ts or datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    ts = ts or _iso_utc(_utcnow())
     insert_alert({
         "id": rid,
         "ts": ts,
@@ -228,7 +235,7 @@ def ensure_admin(username: str = "admin", password: Optional[str] = None) -> Non
         if r is None:
             con.execute(
                 "INSERT INTO auth_users (username, password_hash, created_at) VALUES (?, ?, ?)",
-                (username, _hash_password(pw), datetime.utcnow().isoformat(timespec='seconds') + "Z"),
+                (username, _hash_password(pw), _iso_utc(_utcnow())),
             )
             con.commit()
 
@@ -240,23 +247,24 @@ def verify_login(username: str, password: str) -> bool:
         return _hash_password(password) == row["password_hash"]
 
 def register_failure(username: str, lock_after: int = 5, lock_minutes: int = 15) -> None:
-    now = datetime.utcnow()
+    now = _utcnow()
+    now_str = _iso_utc(now)
     with closing(_con()) as con:
         r = con.execute("SELECT * FROM auth_lockout WHERE username=?", (username,)).fetchone()
         if r is None:
             con.execute(
                 "INSERT INTO auth_lockout (username, fail_count, last_fail_at) VALUES (?, ?, ?)",
-                (username, 1, now.isoformat(timespec='seconds') + "Z"),
+                (username, 1, now_str),
             )
         else:
             count = int(r["fail_count"]) + 1
             locked_until = None
             if count >= lock_after:
-                locked_until = (now + timedelta(minutes=lock_minutes)).isoformat(timespec='seconds') + "Z"
+                locked_until = _iso_utc(now + timedelta(minutes=lock_minutes))
                 count = 0
             con.execute(
                 "UPDATE auth_lockout SET fail_count=?, last_fail_at=?, locked_until=? WHERE username=?",
-                (count, now.isoformat(timespec='seconds') + "Z", locked_until, username),
+                (count, now_str, locked_until, username),
             )
         con.commit()
 
@@ -278,7 +286,7 @@ def is_locked(username: str) -> Optional[str]:
 # ---------------- Devices ----------------
 
 def _now():
-    return datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    return _iso_utc(_utcnow())
 
 def upsert_device(ip: str, name: str = ""):
     """Create if missing; always refresh last_seen; set name if provided."""

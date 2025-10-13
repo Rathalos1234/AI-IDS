@@ -10,7 +10,7 @@ import math
 import random
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 import webdb
 from typing import Any, Dict, List, Set, cast
 import ipaddress
@@ -19,6 +19,13 @@ from firewall import capabilities as firewall_capabilities
 from firewall import ensure_block as firewall_ensure_block
 from packet_processor import IP, TCP, UDP, PacketProcessor
 from signature_engine import default_engine
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _iso_utc(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 try:
     import netifaces  # type: ignore
@@ -433,7 +440,7 @@ class NetworkMonitor:
                 try:
                     webdb.insert_alert({
                         "id": str(uuid.uuid4()),
-                        "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+                        "ts": _iso_utc(_utcnow()),
                         "src_ip": str(last_row["src_ip"]),
                         "label": (
                             f"{dest_ip}:{_as_int(last_row.get('dport'))} "
@@ -480,7 +487,7 @@ class NetworkMonitor:
                     try:
                         webdb.insert_alert({
                             "id": str(uuid.uuid4()),
-                            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+                            "ts": _iso_utc(_utcnow()),
                             "src_ip": str(last_row_dict.get("src_ip")),
                             "label": (
                                 f"{hit.name} {last_row_dict.get('dest_ip')}:"
@@ -548,7 +555,7 @@ class NetworkMonitor:
                 webdb.insert_block(
                     {
                         "id": str(uuid.uuid4()),
-                        "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+                        "ts": _iso_utc(_utcnow()),
                         "ip": ip,
                         "action": "block",
                         "reason": f"auto-{severity}",

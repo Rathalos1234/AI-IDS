@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask import session, abort, g
 from flask_cors import CORS
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os, configparser
 import uuid
 import webdb
@@ -22,8 +22,15 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 webdb.init()
 
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _iso_utc(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
 # --- PD-29: record app start for uptime ---
-_APP_STARTED = datetime.utcnow()
+_APP_STARTED = _utcnow()
 
 
 # =========================
@@ -58,8 +65,7 @@ def _compute_expiry(body: dict) -> str:
         mins = int(mins)
         if mins <= 0:
             return ""
-        return datetime.utcnow().isoformat(timespec="seconds") + "Z" if mins == 0 else \
-               (datetime.utcnow() + timedelta(minutes=mins)).isoformat(timespec="seconds") + "Z"
+        return _iso_utc(_utcnow()) if mins == 0 else _iso_utc(_utcnow() + timedelta(minutes=mins))
     except Exception:
         return ""
     
@@ -106,12 +112,12 @@ def _is_locked(username: str):
     if not rec or not rec.get("locked_until"):
         return None
     until = datetime.fromisoformat(rec["locked_until"])
-    if until > datetime.utcnow():
-        return until.isoformat() + "Z"
+    if until > _utcnow():
+        return _iso_utc(until)
     return None
 
 def _register_failure(username: str):
-    now = datetime.utcnow()
+    now = _utcnow()
     rec = _LOCKS.get(username, {"fail_count": 0, "locked_until": None})
     count = int(rec.get("fail_count", 0)) + 1
     locked_until = rec.get("locked_until")
@@ -129,7 +135,7 @@ def _verify_login(username: str, password: str) -> bool:
 
 def _cleanup_tokens(now: Optional[datetime] = None) -> None:
     """Remove expired tokens from the in-memory registry."""
-    now = now or datetime.utcnow()
+    now = now or _utcnow()
     with _TOKENS_LOCK:
         for token, meta in list(_TOKENS.items()):
             expires_at = meta.get("expires_at")
@@ -139,7 +145,7 @@ def _cleanup_tokens(now: Optional[datetime] = None) -> None:
 
 def _issue_token(username: str) -> tuple[str, datetime]:
     """Create a bearer token tied to the user with an expiration timestamp."""
-    expires_at = datetime.utcnow() + timedelta(seconds=TOKEN_TTL)
+    expires_at = _utcnow() + timedelta(seconds=TOKEN_TTL)
     token = uuid.uuid4().hex
     with _TOKENS_LOCK:
         _TOKENS[token] = {"username": username, "expires_at": expires_at}
@@ -167,7 +173,7 @@ def _resolve_token(token: Optional[str]) -> tuple[Optional[str], Optional[dateti
         if not isinstance(expires_at, datetime):
             _TOKENS.pop(token, None)
             return None, None, "invalid"
-        if expires_at <= datetime.utcnow():
+        if expires_at <= _utcnow():
             _TOKENS.pop(token, None)
             return None, None, "expired"
         return str(meta.get("username")), expires_at, None
@@ -204,7 +210,7 @@ def _current_user() -> Optional[str]:
     if username:
         g._auth_user = username
         g._auth_token = None
-        g._auth_expires = datetime.utcnow() + timedelta(seconds=SESSION_TTL)
+        g._auth_expires = _utcnow() + timedelta(seconds=SESSION_TTL)
         g._auth_error = None
         return username
 
@@ -287,7 +293,7 @@ def alerts():
 @app.get("/api/blocks")
 def blocks():
     # Auto-expire temporary bans before listing
-    now_iso = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    now_iso = _iso_utc(_utcnow())
     if _supports_expire_bans():
         try:
             webdb.expire_bans(now_iso)
@@ -331,7 +337,7 @@ def post_block():
     webdb.delete_action_by_ip(ip, "block")
     webdb.insert_block({
         "id": str(uuid.uuid4()),
-        "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "ts": _iso_utc(_utcnow()),
         "ip": ip,
         "action": "block",
         "reason": (body.get("reason") or "").strip(),
@@ -361,7 +367,7 @@ def post_block_with_reason():
     webdb.delete_action_by_ip(ip, "block")
     webdb.insert_block({
         "id": str(uuid.uuid4()),
-        "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "ts": _iso_utc(_utcnow()),
         "ip": ip,
         "action": "block",
         "reason": reason,
@@ -387,7 +393,7 @@ def post_unblock():
     webdb.insert_block({
         "id": str(uuid.uuid4()),
         # use UTC for consistent ordering across endpoints
-        "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "ts": _iso_utc(_utcnow()),
         "ip": ip,
         "action": "unblock",
         "reason": reason,
@@ -428,7 +434,7 @@ def stats():
     return jsonify({
         "ok": True,
         "counts": {"alerts_200": len(a), "blocks_200": len(b)},
-        "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z"
+        "ts": _iso_utc(_utcnow())
     })
 
 # =========================
@@ -513,8 +519,8 @@ def healthz():
         db_ok = False
     return jsonify({
         "ok": db_ok,
-        "uptime_sec": int((datetime.utcnow() - _APP_STARTED).total_seconds()),
-        "time": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "uptime_sec": int((_utcnow() - _APP_STARTED).total_seconds()),
+        "time": _iso_utc(_utcnow()),
     }), (200 if db_ok else 500)
 
 @app.post("/api/retention/run")
@@ -538,7 +544,7 @@ def backup_db():
     require_auth()
     db_path = str(webdb.DB)
     tmpdir = tempfile.mkdtemp(prefix="idsdb_")
-    fname = f"ids_web_{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.sqlite"
+    fname = f"ids_web_{_utcnow().strftime('%Y%m%dT%H%M%SZ')}.sqlite"
     tmpfile = os.path.join(tmpdir, fname)
     shutil.copyfile(db_path, tmpfile)
     # stream the temp copy; OS/tempdir cleanup is fine for dev
@@ -643,7 +649,7 @@ def _scan_job(target_ips: list[str], ports: list[int], timeout_ms: int):
     with _SCAN_LOCK:
         _SCAN.update({
             "status": "running",
-            "started": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "started": _iso_utc(_utcnow()),
             "finished": None,
             "progress": 0,
             "total": len(target_ips),
@@ -659,12 +665,12 @@ def _scan_job(target_ips: list[str], ports: list[int], timeout_ms: int):
                 _SCAN["progress"] = done
         with _SCAN_LOCK:
             _SCAN["status"] = "done"
-            _SCAN["finished"] = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+            _SCAN["finished"] = _iso_utc(_utcnow())
     except Exception as e:
         with _SCAN_LOCK:
             _SCAN["status"] = "error"
             _SCAN["message"] = str(e)
-            _SCAN["finished"] = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+            _SCAN["finished"] = _iso_utc(_utcnow())
 
 @app.post("/api/scan")
 def start_scan():
