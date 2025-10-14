@@ -44,4 +44,4 @@ tests/test_webdb.py::test_schema_init_and_list PASSED                    [100%]
 0.01s call     tests/test_auth_gating_lockout_sprint2.py::test_lockout_after_failed_attempts
 
 (1 durations < 0.005s hidden.  Use -vv to show these durations.)
-======================= 25 passed, 4 deselected in 0.74s =======================
+======================= 25 passed, 4 deselected in 0.73s =======================

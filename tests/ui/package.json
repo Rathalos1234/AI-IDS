@@ -1,0 +1,18 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "description": "- Node 18+ - Install: `npm i -D @playwright/test && npx playwright install --with-deps`",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}

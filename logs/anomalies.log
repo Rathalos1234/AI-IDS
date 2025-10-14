@@ -4346,3 +4346,496 @@
 2025-10-10 17:53:48,528 | INFO | Feature order: protocol, packet_size_log, time_diff, dport, is_ephemeral_sport, unique_dports_15s, direction
 2025-10-10 17:53:48,528 | INFO | Alert thresholds: high<=-0.100  medium<=-0.050 | online_retrain_interval=100
 2025-10-10 17:53:48,528 | INFO | Starting live monitoring on 'wlp131s0f0'. Press Ctrl+C to stop.
+2025-10-13 17:53:09,098 | INFO | Loaded model: models/iforest.joblib
+2025-10-13 17:53:09,101 | INFO | Model info: version=1.0.0 trained_at=2025-10-10T02:18:35.704762+00:00 features=7 checksum=12a274e21180…
+2025-10-13 17:53:09,101 | INFO | IF params: contamination=0.05 n_estimators=200 random_state=42
+2025-10-13 17:53:09,101 | INFO | Feature order: protocol, packet_size_log, time_diff, dport, is_ephemeral_sport, unique_dports_15s, direction
+2025-10-13 17:53:09,101 | INFO | Alert thresholds: high<=-0.100  medium<=-0.050 | online_retrain_interval=100
+2025-10-13 17:53:09,101 | INFO | Starting live monitoring on 'wlp131s0f0'. Press Ctrl+C to stop.
+2025-10-13 17:53:09,177 | INFO | ANOMALY: ts=1760403189.114232 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.006 severity=low
+2025-10-13 17:53:09,197 | INFO | ANOMALY: ts=1760403189.114254 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.006 severity=low
+2025-10-13 17:53:09,215 | INFO | ANOMALY: ts=1760403189.124429 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.014 severity=low
+2025-10-13 17:53:09,232 | INFO | ANOMALY: ts=1760403189.124448 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.006 severity=low
+2025-10-13 17:53:09,249 | INFO | ANOMALY: ts=1760403189.133660 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.014 severity=low
+2025-10-13 17:53:09,265 | INFO | ANOMALY: ts=1760403189.133669 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.006 severity=low
+2025-10-13 17:53:09,288 | INFO | ANOMALY: ts=1760403189.141731 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.011 severity=low
+2025-10-13 17:53:09,304 | INFO | ANOMALY: ts=1760403189.141739 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.006 severity=low
+2025-10-13 17:53:09,330 | INFO | ANOMALY: ts=1760403189.152108 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.014 severity=low
+2025-10-13 17:53:09,347 | INFO | ANOMALY: ts=1760403189.152130 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.006 severity=low
+2025-10-13 17:53:09,363 | INFO | ANOMALY: ts=1760403189.162405 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.014 severity=low
+2025-10-13 17:53:09,381 | INFO | ANOMALY: ts=1760403189.162420 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.006 severity=low
+2025-10-13 17:53:09,398 | INFO | ANOMALY: ts=1760403189.174256 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.014 severity=low
+2025-10-13 17:53:09,414 | INFO | ANOMALY: ts=1760403189.174273 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.006 severity=low
+2025-10-13 17:53:09,431 | INFO | ANOMALY: ts=1760403189.180344 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.014 severity=low
+2025-10-13 17:53:09,451 | INFO | ANOMALY: ts=1760403189.180355 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.006 severity=low
+2025-10-13 17:53:09,468 | INFO | ANOMALY: ts=1760403189.184112 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.013 severity=low
+2025-10-13 17:53:09,485 | INFO | ANOMALY: ts=1760403189.184123 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.023 severity=low
+2025-10-13 17:53:09,502 | INFO | ANOMALY: ts=1760403189.193236 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.034 severity=low
+2025-10-13 17:53:09,519 | INFO | ANOMALY: ts=1760403189.199465 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.034 severity=low
+2025-10-13 17:53:09,543 | INFO | ANOMALY: ts=1760403189.206670 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.027 severity=low
+2025-10-13 17:53:09,560 | INFO | ANOMALY: ts=1760403189.213753 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.034 severity=low
+2025-10-13 17:53:09,577 | INFO | ANOMALY: ts=1760403189.213764 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.023 severity=low
+2025-10-13 17:53:09,594 | INFO | ANOMALY: ts=1760403189.213767 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,610 | INFO | ANOMALY: ts=1760403189.263354 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.046 severity=low
+2025-10-13 17:53:09,626 | INFO | ANOMALY: ts=1760403189.263381 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.025 severity=low
+2025-10-13 17:53:09,642 | INFO | ANOMALY: ts=1760403189.263386 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,660 | INFO | ANOMALY: ts=1760403189.263390 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,690 | INFO | ANOMALY: ts=1760403189.309244 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.045 severity=low
+2025-10-13 17:53:09,706 | INFO | ANOMALY: ts=1760403189.309262 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.025 severity=low
+2025-10-13 17:53:09,722 | INFO | ANOMALY: ts=1760403189.309266 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,746 | INFO | ANOMALY: ts=1760403189.309268 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,763 | INFO | ANOMALY: ts=1760403189.349215 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.044 severity=low
+2025-10-13 17:53:09,779 | INFO | ANOMALY: ts=1760403189.349232 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.025 severity=low
+2025-10-13 17:53:09,796 | INFO | ANOMALY: ts=1760403189.349235 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,813 | INFO | ANOMALY: ts=1760403189.349238 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,837 | INFO | ANOMALY: ts=1760403189.394962 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.025 severity=low
+2025-10-13 17:53:09,854 | INFO | ANOMALY: ts=1760403189.394966 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,871 | INFO | ANOMALY: ts=1760403189.394969 192.168.12.152 -> 104.29.157.28 proto=17 size=1229 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,888 | INFO | ANOMALY: ts=1760403189.394972 192.168.12.152 -> 104.29.157.28 proto=17 size=1229 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,911 | INFO | ANOMALY: ts=1760403189.439728 192.168.12.152 -> 104.29.157.28 proto=17 size=1229 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.045 severity=low
+2025-10-13 17:53:09,928 | INFO | ANOMALY: ts=1760403189.439758 192.168.12.152 -> 104.29.157.28 proto=17 size=1229 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.025 severity=low
+2025-10-13 17:53:09,948 | INFO | ANOMALY: ts=1760403189.439764 192.168.12.152 -> 104.29.157.28 proto=17 size=1229 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,965 | INFO | ANOMALY: ts=1760403189.439770 192.168.12.152 -> 104.29.157.28 proto=17 size=1229 dport=19302 eph_sport=1 unique_dports_15s=1 direction=out score=-0.020 severity=low
+2025-10-13 17:53:09,998 | INFO | ANOMALY: ts=1760403189.480428 192.168.12.152 -> 104.29.157.28 proto=17 size=1229 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.044 severity=low
+2025-10-13 17:53:10,021 | INFO | ANOMALY: ts=1760403189.480455 192.168.12.152 -> 104.29.157.28 proto=17 size=1229 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.028 severity=low
+2025-10-13 17:53:10,037 | INFO | ANOMALY: ts=1760403189.480462 192.168.12.152 -> 104.29.157.28 proto=17 size=1229 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.025 severity=low
+2025-10-13 17:53:10,055 | INFO | ANOMALY: ts=1760403189.480467 192.168.12.152 -> 104.29.157.28 proto=17 size=1187 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.023 severity=low
+2025-10-13 17:53:10,085 | INFO | ANOMALY: ts=1760403189.525235 192.168.12.152 -> 104.29.157.28 proto=17 size=1187 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.039 severity=low
+2025-10-13 17:53:10,101 | INFO | ANOMALY: ts=1760403189.525259 192.168.12.152 -> 104.29.157.28 proto=17 size=1187 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,118 | INFO | ANOMALY: ts=1760403189.525265 192.168.12.152 -> 104.29.157.28 proto=17 size=1187 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.023 severity=low
+2025-10-13 17:53:10,134 | INFO | ANOMALY: ts=1760403189.525270 192.168.12.152 -> 104.29.157.28 proto=17 size=1187 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.023 severity=low
+2025-10-13 17:53:10,150 | INFO | ANOMALY: ts=1760403189.565719 192.168.12.152 -> 104.29.157.28 proto=17 size=1187 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.042 severity=low
+2025-10-13 17:53:10,166 | INFO | ANOMALY: ts=1760403189.565748 192.168.12.152 -> 104.29.157.28 proto=17 size=1187 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,184 | INFO | ANOMALY: ts=1760403189.565751 192.168.12.152 -> 104.29.157.28 proto=17 size=1188 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.023 severity=low
+2025-10-13 17:53:10,202 | INFO | ANOMALY: ts=1760403189.565758 192.168.12.152 -> 104.29.157.28 proto=17 size=1093 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.023 severity=low
+2025-10-13 17:53:10,227 | INFO | ANOMALY: ts=1760403189.606272 192.168.12.152 -> 104.29.157.28 proto=17 size=1093 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.037 severity=low
+2025-10-13 17:53:10,245 | INFO | ANOMALY: ts=1760403189.606318 192.168.12.152 -> 104.29.157.28 proto=17 size=1093 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.029 severity=low
+2025-10-13 17:53:10,264 | INFO | ANOMALY: ts=1760403189.606324 192.168.12.152 -> 104.29.157.28 proto=17 size=1094 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.027 severity=low
+2025-10-13 17:53:10,282 | INFO | ANOMALY: ts=1760403189.606329 192.168.12.152 -> 104.29.157.28 proto=17 size=1094 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.027 severity=low
+2025-10-13 17:53:10,298 | INFO | ANOMALY: ts=1760403189.606334 192.168.12.152 -> 104.29.157.28 proto=17 size=873 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,328 | INFO | ANOMALY: ts=1760403189.653610 192.168.12.152 -> 104.29.157.28 proto=17 size=873 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.033 severity=low
+2025-10-13 17:53:10,345 | INFO | ANOMALY: ts=1760403189.653663 192.168.12.152 -> 104.29.157.28 proto=17 size=874 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.027 severity=low
+2025-10-13 17:53:10,363 | INFO | ANOMALY: ts=1760403189.653668 192.168.12.152 -> 104.29.157.28 proto=17 size=1175 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,382 | INFO | ANOMALY: ts=1760403189.653673 192.168.12.152 -> 104.29.157.28 proto=17 size=1176 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,398 | INFO | ANOMALY: ts=1760403189.653677 192.168.12.152 -> 104.29.157.28 proto=17 size=1176 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,416 | INFO | ANOMALY: ts=1760403189.698427 192.168.12.152 -> 104.29.157.28 proto=17 size=1176 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.045 severity=low
+2025-10-13 17:53:10,433 | INFO | ANOMALY: ts=1760403189.698446 192.168.12.152 -> 104.29.157.28 proto=17 size=1148 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.029 severity=low
+2025-10-13 17:53:10,449 | INFO | ANOMALY: ts=1760403189.698450 192.168.12.152 -> 104.29.157.28 proto=17 size=1148 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,466 | INFO | ANOMALY: ts=1760403189.698453 192.168.12.152 -> 104.29.157.28 proto=17 size=1148 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,490 | INFO | ANOMALY: ts=1760403189.716312 192.168.12.152 -> 104.29.157.28 proto=17 size=1039 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.031 severity=low
+2025-10-13 17:53:10,513 | INFO | ANOMALY: ts=1760403189.747203 192.168.12.152 -> 104.29.157.28 proto=17 size=1039 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.037 severity=low
+2025-10-13 17:53:10,530 | INFO | ANOMALY: ts=1760403189.747227 192.168.12.152 -> 104.29.157.28 proto=17 size=1040 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.029 severity=low
+2025-10-13 17:53:10,550 | INFO | ANOMALY: ts=1760403189.747232 192.168.12.152 -> 104.29.157.28 proto=17 size=1091 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.027 severity=low
+2025-10-13 17:53:10,566 | INFO | ANOMALY: ts=1760403189.747247 192.168.12.152 -> 104.29.157.28 proto=17 size=1092 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.029 severity=low
+2025-10-13 17:53:10,583 | INFO | ANOMALY: ts=1760403189.747252 192.168.12.152 -> 104.29.157.28 proto=17 size=1092 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.027 severity=low
+2025-10-13 17:53:10,613 | INFO | ANOMALY: ts=1760403189.793806 192.168.12.152 -> 104.29.157.28 proto=17 size=1092 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.040 severity=low
+2025-10-13 17:53:10,630 | INFO | ANOMALY: ts=1760403189.793818 192.168.12.152 -> 104.29.157.28 proto=17 size=1092 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.028 severity=low
+2025-10-13 17:53:10,647 | INFO | ANOMALY: ts=1760403189.793823 192.168.12.152 -> 104.29.157.28 proto=17 size=1137 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,665 | INFO | ANOMALY: ts=1760403189.793826 192.168.12.152 -> 104.29.157.28 proto=17 size=1137 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,682 | INFO | ANOMALY: ts=1760403189.793830 192.168.12.152 -> 104.29.157.28 proto=17 size=1138 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:10,688 | INFO | Online retraining on current window...
+2025-10-13 17:53:10,791 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:11,232 | INFO | ANOMALY: ts=1760403190.504378 104.29.152.132 -> 192.168.12.152 proto=17 size=114 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.047 severity=low
+2025-10-13 17:53:11,473 | INFO | Online retraining on current window...
+2025-10-13 17:53:11,581 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:11,887 | WARNING | ANOMALY: ts=1760403191.505105 104.29.152.132 -> 192.168.12.152 proto=17 size=94 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.066 severity=medium
+2025-10-13 17:53:11,991 | INFO | ANOMALY: ts=1760403191.615664 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.022 severity=low
+2025-10-13 17:53:12,037 | WARNING | ANOMALY: ts=1760403191.671470 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.067 severity=medium
+2025-10-13 17:53:12,162 | ERROR | ANOMALY: ts=1760403191.852443 162.159.136.234 -> 192.168.12.152 proto=6 size=449 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.186 severity=high
+2025-10-13 17:53:12,181 | ERROR | ANOMALY: ts=1760403191.852488 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.178 severity=high
+2025-10-13 17:53:12,316 | INFO | Online retraining on current window...
+2025-10-13 17:53:12,427 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:12,548 | INFO | ANOMALY: ts=1760403192.185539 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.030 severity=low
+2025-10-13 17:53:12,629 | INFO | ANOMALY: ts=1760403192.290995 104.29.157.28 -> 192.168.12.152 proto=17 size=90 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.027 severity=low
+2025-10-13 17:53:12,701 | INFO | ANOMALY: ts=1760403192.378427 192.168.12.152 -> 104.29.152.132 proto=17 size=261 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.020 severity=low
+2025-10-13 17:53:12,826 | INFO | ANOMALY: ts=1760403192.504559 104.29.152.132 -> 192.168.12.152 proto=17 size=94 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.043 severity=low
+2025-10-13 17:53:12,913 | INFO | ANOMALY: ts=1760403192.591532 192.168.12.152 -> 104.29.152.132 proto=17 size=264 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.037 severity=low
+2025-10-13 17:53:13,033 | INFO | ANOMALY: ts=1760403192.657198 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.017 severity=low
+2025-10-13 17:53:13,184 | INFO | Online retraining on current window...
+2025-10-13 17:53:13,298 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:13,892 | INFO | ANOMALY: ts=1760403193.504305 104.29.152.132 -> 192.168.12.152 proto=17 size=94 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.045 severity=low
+2025-10-13 17:53:14,014 | INFO | Online retraining on current window...
+2025-10-13 17:53:14,128 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:14,161 | INFO | ANOMALY: ts=1760403193.659315 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.029 severity=low
+2025-10-13 17:53:14,848 | INFO | Online retraining on current window...
+2025-10-13 17:53:14,962 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:15,151 | ERROR | ANOMALY: ts=1760403194.502647 104.29.152.132 -> 192.168.12.152 proto=17 size=114 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.124 severity=high
+2025-10-13 17:53:15,253 | INFO | ANOMALY: ts=1760403194.631685 104.29.157.28 -> 192.168.12.152 proto=17 size=90 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.004 severity=low
+2025-10-13 17:53:15,280 | WARNING | ANOMALY: ts=1760403194.659745 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.073 severity=medium
+2025-10-13 17:53:15,612 | INFO | ANOMALY: ts=1760403194.828181 192.168.12.152 -> 104.29.157.28 proto=17 size=50 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:53:15,657 | INFO | ANOMALY: ts=1760403194.840508 104.29.157.28 -> 192.168.12.152 proto=17 size=106 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.022 severity=low
+2025-10-13 17:53:15,727 | INFO | Online retraining on current window...
+2025-10-13 17:53:15,841 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:15,882 | WARNING | ANOMALY: ts=1760403194.965514 192.168.12.152 -> 104.29.157.28 proto=17 size=129 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.074 severity=medium
+2025-10-13 17:53:16,014 | INFO | ANOMALY: ts=1760403195.051459 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.029 severity=low
+2025-10-13 17:53:16,060 | ERROR | ANOMALY: ts=1760403195.072027 162.159.136.234 -> 192.168.12.152 proto=6 size=301 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.150 severity=high
+2025-10-13 17:53:16,077 | ERROR | ANOMALY: ts=1760403195.072045 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.106 severity=high
+2025-10-13 17:53:16,492 | INFO | ANOMALY: ts=1760403195.504550 104.29.152.132 -> 192.168.12.152 proto=17 size=94 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.047 severity=low
+2025-10-13 17:53:16,592 | WARNING | ANOMALY: ts=1760403195.594743 104.29.152.132 -> 192.168.12.152 proto=17 size=50 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.081 severity=medium
+2025-10-13 17:53:16,619 | INFO | Online retraining on current window...
+2025-10-13 17:53:16,732 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:16,801 | INFO | ANOMALY: ts=1760403195.694528 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.001 severity=low
+2025-10-13 17:53:16,856 | ERROR | ANOMALY: ts=1760403195.853267 192.168.12.152 -> 104.29.157.28 proto=17 size=114 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.116 severity=high
+2025-10-13 17:53:16,936 | INFO | ANOMALY: ts=1760403195.935928 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.001 severity=low
+2025-10-13 17:53:17,026 | INFO | ANOMALY: ts=1760403196.021907 192.168.12.152 -> 104.29.157.28 proto=17 size=118 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.003 severity=low
+2025-10-13 17:53:17,070 | INFO | ANOMALY: ts=1760403196.088685 192.168.12.152 -> 104.29.157.28 proto=17 size=152 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.032 severity=low
+2025-10-13 17:53:17,138 | INFO | ANOMALY: ts=1760403196.137640 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.001 severity=low
+2025-10-13 17:53:17,355 | INFO | ANOMALY: ts=1760403196.350865 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.011 severity=low
+2025-10-13 17:53:17,469 | INFO | ANOMALY: ts=1760403196.455204 104.29.157.28 -> 192.168.12.152 proto=17 size=114 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.009 severity=low
+2025-10-13 17:53:17,515 | WARNING | ANOMALY: ts=1760403196.499909 104.29.152.132 -> 192.168.12.152 proto=17 size=94 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.084 severity=medium
+2025-10-13 17:53:17,536 | INFO | Online retraining on current window...
+2025-10-13 17:53:17,648 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:17,744 | ERROR | ANOMALY: ts=1760403196.733587 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.101 severity=high
+2025-10-13 17:53:17,783 | INFO | ANOMALY: ts=1760403196.765858 104.29.157.28 -> 192.168.12.152 proto=17 size=118 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.043 severity=low
+2025-10-13 17:53:17,877 | WARNING | ANOMALY: ts=1760403196.890329 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.056 severity=medium
+2025-10-13 17:53:18,382 | INFO | Online retraining on current window...
+2025-10-13 17:53:18,494 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:18,619 | ERROR | ANOMALY: ts=1760403197.655049 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.109 severity=high
+2025-10-13 17:53:18,900 | INFO | ANOMALY: ts=1760403197.961136 104.29.157.28 -> 192.168.12.152 proto=17 size=114 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.013 severity=low
+2025-10-13 17:53:18,925 | ERROR | ANOMALY: ts=1760403197.970683 162.159.136.234 -> 192.168.12.152 proto=6 size=213 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.129 severity=high
+2025-10-13 17:53:19,129 | INFO | ANOMALY: ts=1760403198.175748 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.020 severity=low
+2025-10-13 17:53:19,229 | INFO | ANOMALY: ts=1760403198.259992 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.001 severity=low
+2025-10-13 17:53:19,288 | INFO | Online retraining on current window...
+2025-10-13 17:53:19,400 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:19,488 | ERROR | ANOMALY: ts=1760403198.495766 192.168.12.152 -> 104.29.157.28 proto=17 size=114 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.105 severity=high
+2025-10-13 17:53:19,548 | INFO | ANOMALY: ts=1760403198.586469 192.168.12.152 -> 104.29.152.132 proto=17 size=266 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.022 severity=low
+2025-10-13 17:53:20,055 | INFO | ANOMALY: ts=1760403199.139701 104.29.157.28 -> 192.168.12.152 proto=17 size=114 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.047 severity=low
+2025-10-13 17:53:20,130 | INFO | Online retraining on current window...
+2025-10-13 17:53:20,242 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:20,288 | INFO | ANOMALY: ts=1760403199.262363 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.027 severity=low
+2025-10-13 17:53:20,309 | INFO | ANOMALY: ts=1760403199.268638 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.033 severity=low
+2025-10-13 17:53:20,344 | ERROR | ANOMALY: ts=1760403199.405805 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.133 severity=high
+2025-10-13 17:53:20,437 | INFO | ANOMALY: ts=1760403199.495646 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.046 severity=low
+2025-10-13 17:53:20,801 | WARNING | ANOMALY: ts=1760403199.855177 104.29.157.28 -> 192.168.12.152 proto=17 size=50 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.085 severity=medium
+2025-10-13 17:53:20,891 | INFO | ANOMALY: ts=1760403199.934936 104.29.157.28 -> 192.168.12.152 proto=17 size=126 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.046 severity=low
+2025-10-13 17:53:21,039 | INFO | Online retraining on current window...
+2025-10-13 17:53:21,150 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:21,210 | WARNING | ANOMALY: ts=1760403200.246698 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.075 severity=medium
+2025-10-13 17:53:21,238 | INFO | ANOMALY: ts=1760403200.261150 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.028 severity=low
+2025-10-13 17:53:21,299 | WARNING | ANOMALY: ts=1760403200.338425 192.168.12.152 -> 104.29.152.132 proto=17 size=50 dport=19334 eph_sport=0 unique_dports_15s=2 direction=out score=-0.081 severity=medium
+2025-10-13 17:53:21,318 | ERROR | ANOMALY: ts=1760403200.355059 104.29.152.132 -> 192.168.12.152 proto=17 size=50 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.149 severity=high
+2025-10-13 17:53:21,370 | INFO | ANOMALY: ts=1760403200.445498 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.035 severity=low
+2025-10-13 17:53:21,402 | INFO | ANOMALY: ts=1760403200.495109 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.035 severity=low
+2025-10-13 17:53:21,441 | INFO | ANOMALY: ts=1760403200.542918 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.032 severity=low
+2025-10-13 17:53:21,474 | WARNING | ANOMALY: ts=1760403200.561397 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.076 severity=medium
+2025-10-13 17:53:21,542 | INFO | ANOMALY: ts=1760403200.643907 192.168.12.152 -> 104.29.157.28 proto=17 size=1228 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.038 severity=low
+2025-10-13 17:53:21,576 | INFO | ANOMALY: ts=1760403200.668666 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.044 severity=low
+2025-10-13 17:53:21,594 | INFO | ANOMALY: ts=1760403200.673784 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.018 severity=low
+2025-10-13 17:53:21,628 | INFO | ANOMALY: ts=1760403200.734942 192.168.12.152 -> 104.29.157.28 proto=17 size=1045 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.036 severity=low
+2025-10-13 17:53:21,667 | WARNING | ANOMALY: ts=1760403200.766040 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.071 severity=medium
+2025-10-13 17:53:21,708 | INFO | ANOMALY: ts=1760403200.831589 192.168.12.152 -> 104.29.157.28 proto=17 size=984 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.031 severity=low
+2025-10-13 17:53:21,740 | INFO | ANOMALY: ts=1760403200.890514 192.168.12.152 -> 104.29.157.28 proto=17 size=1080 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.030 severity=low
+2025-10-13 17:53:21,774 | INFO | ANOMALY: ts=1760403200.900795 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.020 severity=low
+2025-10-13 17:53:21,800 | INFO | ANOMALY: ts=1760403200.944578 192.168.12.152 -> 104.29.157.28 proto=17 size=629 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.001 severity=low
+2025-10-13 17:53:21,818 | INFO | ANOMALY: ts=1760403200.977805 192.168.12.152 -> 104.29.157.28 proto=17 size=546 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.002 severity=low
+2025-10-13 17:53:21,842 | INFO | ANOMALY: ts=1760403201.014532 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.021 severity=low
+2025-10-13 17:53:21,860 | ERROR | ANOMALY: ts=1760403201.014554 104.29.152.132 -> 192.168.12.152 proto=17 size=257 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.118 severity=high
+2025-10-13 17:53:21,879 | ERROR | ANOMALY: ts=1760403201.014554 104.29.152.132 -> 192.168.12.152 proto=17 size=263 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.116 severity=high
+2025-10-13 17:53:21,895 | ERROR | ANOMALY: ts=1760403201.014562 162.159.136.234 -> 192.168.12.152 proto=6 size=254 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.153 severity=high
+2025-10-13 17:53:21,915 | WARNING | ANOMALY: ts=1760403201.014579 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.053 severity=medium
+2025-10-13 17:53:21,931 | ERROR | ANOMALY: ts=1760403201.042291 104.29.152.132 -> 192.168.12.152 proto=17 size=267 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.138 severity=high
+2025-10-13 17:53:21,950 | ERROR | ANOMALY: ts=1760403201.042292 104.29.152.132 -> 192.168.12.152 proto=17 size=274 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.125 severity=high
+2025-10-13 17:53:21,974 | ERROR | ANOMALY: ts=1760403201.053540 104.29.152.132 -> 192.168.12.152 proto=17 size=272 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.114 severity=high
+2025-10-13 17:53:21,990 | ERROR | ANOMALY: ts=1760403201.073389 104.29.152.132 -> 192.168.12.152 proto=17 size=278 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.147 severity=high
+2025-10-13 17:53:22,012 | ERROR | ANOMALY: ts=1760403201.100659 104.29.152.132 -> 192.168.12.152 proto=17 size=286 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.148 severity=high
+2025-10-13 17:53:22,043 | ERROR | ANOMALY: ts=1760403201.109153 104.29.152.132 -> 192.168.12.152 proto=17 size=271 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.110 severity=high
+2025-10-13 17:53:22,061 | WARNING | ANOMALY: ts=1760403201.126279 104.29.157.28 -> 192.168.12.152 proto=17 size=90 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.070 severity=medium
+2025-10-13 17:53:22,080 | ERROR | ANOMALY: ts=1760403201.136403 104.29.152.132 -> 192.168.12.152 proto=17 size=262 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.102 severity=high
+2025-10-13 17:53:22,103 | ERROR | ANOMALY: ts=1760403201.167933 104.29.152.132 -> 192.168.12.152 proto=17 size=278 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.147 severity=high
+2025-10-13 17:53:22,128 | ERROR | ANOMALY: ts=1760403201.199802 104.29.152.132 -> 192.168.12.152 proto=17 size=259 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.143 severity=high
+2025-10-13 17:53:22,156 | ERROR | ANOMALY: ts=1760403201.210468 104.29.152.132 -> 192.168.12.152 proto=17 size=260 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.105 severity=high
+2025-10-13 17:53:22,173 | INFO | ANOMALY: ts=1760403201.242643 192.168.12.152 -> 104.29.157.28 proto=17 size=225 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.002 severity=low
+2025-10-13 17:53:22,191 | INFO | ANOMALY: ts=1760403201.272332 192.168.12.152 -> 104.29.157.28 proto=17 size=209 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.002 severity=low
+2025-10-13 17:53:22,208 | WARNING | ANOMALY: ts=1760403201.287072 104.29.157.28 -> 192.168.12.152 proto=17 size=90 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.061 severity=medium
+2025-10-13 17:53:22,224 | WARNING | ANOMALY: ts=1760403201.287072 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.063 severity=medium
+2025-10-13 17:53:22,240 | WARNING | ANOMALY: ts=1760403201.287072 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.063 severity=medium
+2025-10-13 17:53:22,256 | ERROR | ANOMALY: ts=1760403201.287102 104.29.152.132 -> 192.168.12.152 proto=17 size=259 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.118 severity=high
+2025-10-13 17:53:22,273 | ERROR | ANOMALY: ts=1760403201.287666 104.29.152.132 -> 192.168.12.152 proto=17 size=255 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.115 severity=high
+2025-10-13 17:53:22,289 | ERROR | ANOMALY: ts=1760403201.287666 104.29.152.132 -> 192.168.12.152 proto=17 size=267 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.118 severity=high
+2025-10-13 17:53:22,307 | ERROR | ANOMALY: ts=1760403201.295620 104.29.152.132 -> 192.168.12.152 proto=17 size=276 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.104 severity=high
+2025-10-13 17:53:22,330 | ERROR | ANOMALY: ts=1760403201.309302 104.29.152.132 -> 192.168.12.152 proto=17 size=258 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.103 severity=high
+2025-10-13 17:53:22,335 | INFO | Online retraining on current window...
+2025-10-13 17:53:22,447 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:22,487 | INFO | ANOMALY: ts=1760403201.334467 104.29.152.132 -> 192.168.12.152 proto=17 size=256 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.003 severity=low
+2025-10-13 17:53:22,577 | INFO | ANOMALY: ts=1760403201.392492 104.29.152.132 -> 192.168.12.152 proto=17 size=237 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.014 severity=low
+2025-10-13 17:53:22,634 | INFO | ANOMALY: ts=1760403201.420580 104.29.152.132 -> 192.168.12.152 proto=17 size=274 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.001 severity=low
+2025-10-13 17:53:22,665 | INFO | ANOMALY: ts=1760403201.434994 104.29.152.132 -> 192.168.12.152 proto=17 size=285 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.015 severity=low
+2025-10-13 17:53:22,746 | INFO | ANOMALY: ts=1760403201.500432 104.29.152.132 -> 192.168.12.152 proto=17 size=114 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.027 severity=low
+2025-10-13 17:53:22,819 | INFO | ANOMALY: ts=1760403201.552252 104.29.152.132 -> 192.168.12.152 proto=17 size=252 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.029 severity=low
+2025-10-13 17:53:22,858 | INFO | ANOMALY: ts=1760403201.570719 104.29.152.132 -> 192.168.12.152 proto=17 size=275 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.000 severity=low
+2025-10-13 17:53:23,067 | INFO | ANOMALY: ts=1760403201.752298 104.29.152.132 -> 192.168.12.152 proto=17 size=250 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.018 severity=low
+2025-10-13 17:53:23,127 | INFO | ANOMALY: ts=1760403201.794300 104.29.152.132 -> 192.168.12.152 proto=17 size=247 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.003 severity=low
+2025-10-13 17:53:23,146 | ERROR | ANOMALY: ts=1760403201.794312 162.159.136.234 -> 192.168.12.152 proto=6 size=106 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.104 severity=high
+2025-10-13 17:53:23,166 | ERROR | ANOMALY: ts=1760403201.794327 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.123 severity=high
+2025-10-13 17:53:23,191 | INFO | ANOMALY: ts=1760403201.810198 104.29.152.132 -> 192.168.12.152 proto=17 size=249 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.003 severity=low
+2025-10-13 17:53:23,265 | WARNING | ANOMALY: ts=1760403201.999253 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.086 severity=medium
+2025-10-13 17:53:23,315 | INFO | Online retraining on current window...
+2025-10-13 17:53:23,427 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:23,464 | INFO | ANOMALY: ts=1760403202.169847 104.29.152.132 -> 192.168.12.152 proto=17 size=214 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.015 severity=low
+2025-10-13 17:53:23,517 | INFO | ANOMALY: ts=1760403202.245927 104.29.152.132 -> 192.168.12.152 proto=17 size=205 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.001 severity=low
+2025-10-13 17:53:23,564 | ERROR | ANOMALY: ts=1760403202.451870 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.127 severity=high
+2025-10-13 17:53:23,618 | INFO | ANOMALY: ts=1760403202.499265 104.29.152.132 -> 192.168.12.152 proto=17 size=94 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.023 severity=low
+2025-10-13 17:53:23,636 | INFO | ANOMALY: ts=1760403202.511269 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.025 severity=low
+2025-10-13 17:53:23,669 | INFO | ANOMALY: ts=1760403202.529339 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.019 severity=low
+2025-10-13 17:53:23,702 | INFO | ANOMALY: ts=1760403202.551803 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.019 severity=low
+2025-10-13 17:53:23,775 | ERROR | ANOMALY: ts=1760403202.646703 13.227.180.4 -> 192.168.12.152 proto=6 size=166 dport=40740 eph_sport=0 unique_dports_15s=1 direction=in score=-0.104 severity=high
+2025-10-13 17:53:23,800 | ERROR | ANOMALY: ts=1760403202.684400 13.227.180.4 -> 192.168.12.152 proto=6 size=66 dport=40740 eph_sport=0 unique_dports_15s=1 direction=in score=-0.155 severity=high
+2025-10-13 17:53:23,840 | INFO | ANOMALY: ts=1760403202.740607 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.043 severity=low
+2025-10-13 17:53:23,934 | INFO | ANOMALY: ts=1760403202.925224 192.168.12.152 -> 104.29.157.28 proto=17 size=932 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.009 severity=low
+2025-10-13 17:53:23,973 | ERROR | ANOMALY: ts=1760403202.961371 162.159.136.234 -> 192.168.12.152 proto=6 size=385 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.144 severity=high
+2025-10-13 17:53:24,152 | ERROR | ANOMALY: ts=1760403203.330925 162.159.136.234 -> 192.168.12.152 proto=6 size=338 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.128 severity=high
+2025-10-13 17:53:24,170 | ERROR | ANOMALY: ts=1760403203.330945 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.135 severity=high
+2025-10-13 17:53:24,285 | WARNING | ANOMALY: ts=1760403203.432323 192.168.12.152 -> 104.29.152.132 proto=17 size=94 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.092 severity=medium
+2025-10-13 17:53:24,328 | INFO | Online retraining on current window...
+2025-10-13 17:53:24,441 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:24,460 | ERROR | ANOMALY: ts=1760403203.536599 162.159.136.234 -> 192.168.12.152 proto=6 size=226 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.126 severity=high
+2025-10-13 17:53:24,482 | ERROR | ANOMALY: ts=1760403203.536628 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.154 severity=high
+2025-10-13 17:53:24,699 | ERROR | ANOMALY: ts=1760403203.940782 162.159.136.234 -> 192.168.12.152 proto=6 size=224 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.109 severity=high
+2025-10-13 17:53:24,718 | ERROR | ANOMALY: ts=1760403203.940799 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.151 severity=high
+2025-10-13 17:53:24,971 | ERROR | ANOMALY: ts=1760403204.091238 162.159.136.234 -> 192.168.12.152 proto=6 size=211 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.114 severity=high
+2025-10-13 17:53:24,993 | ERROR | ANOMALY: ts=1760403204.091258 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.154 severity=high
+2025-10-13 17:53:25,246 | INFO | Online retraining on current window...
+2025-10-13 17:53:25,359 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:25,407 | INFO | ANOMALY: ts=1760403204.324649 162.159.136.234 -> 192.168.12.152 proto=6 size=211 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.020 severity=low
+2025-10-13 17:53:25,428 | INFO | ANOMALY: ts=1760403204.447469 192.168.12.152 -> 104.29.157.28 proto=17 size=114 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.021 severity=low
+2025-10-13 17:53:26,087 | WARNING | ANOMALY: ts=1760403205.360915 104.29.152.132 -> 192.168.12.152 proto=17 size=50 dport=44985 eph_sport=0 unique_dports_15s=1 direction=in score=-0.073 severity=medium
+2025-10-13 17:53:26,127 | INFO | ANOMALY: ts=1760403205.460548 162.159.136.234 -> 192.168.12.152 proto=6 size=240 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.020 severity=low
+2025-10-13 17:53:26,144 | WARNING | ANOMALY: ts=1760403205.460579 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.079 severity=medium
+2025-10-13 17:53:26,160 | INFO | Online retraining on current window...
+2025-10-13 17:53:26,274 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:26,816 | INFO | ANOMALY: ts=1760403206.074805 162.159.136.234 -> 192.168.12.152 proto=6 size=268 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.027 severity=low
+2025-10-13 17:53:26,834 | WARNING | ANOMALY: ts=1760403206.074832 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.064 severity=medium
+2025-10-13 17:53:26,996 | INFO | Online retraining on current window...
+2025-10-13 17:53:27,109 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:27,187 | INFO | ANOMALY: ts=1760403206.394758 192.168.12.152 -> 104.29.152.132 proto=17 size=145 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.003 severity=low
+2025-10-13 17:53:27,229 | INFO | ANOMALY: ts=1760403206.415916 192.168.12.152 -> 104.29.152.132 proto=17 size=205 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.002 severity=low
+2025-10-13 17:53:27,253 | INFO | ANOMALY: ts=1760403206.436831 192.168.12.152 -> 104.29.152.132 proto=17 size=209 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.002 severity=low
+2025-10-13 17:53:27,278 | INFO | ANOMALY: ts=1760403206.438032 192.168.12.152 -> 104.29.152.132 proto=17 size=158 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.004 severity=low
+2025-10-13 17:53:27,318 | INFO | ANOMALY: ts=1760403206.479784 192.168.12.152 -> 104.29.152.132 proto=17 size=149 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.006 severity=low
+2025-10-13 17:53:27,364 | INFO | ANOMALY: ts=1760403206.500470 192.168.12.152 -> 104.29.152.132 proto=17 size=234 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.002 severity=low
+2025-10-13 17:53:27,382 | INFO | ANOMALY: ts=1760403206.501368 192.168.12.152 -> 104.29.152.132 proto=17 size=275 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.001 severity=low
+2025-10-13 17:53:27,476 | INFO | ANOMALY: ts=1760403206.543535 192.168.12.152 -> 104.29.152.132 proto=17 size=290 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.005 severity=low
+2025-10-13 17:53:27,529 | INFO | ANOMALY: ts=1760403206.564236 162.159.136.234 -> 192.168.12.152 proto=6 size=112 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.007 severity=low
+2025-10-13 17:53:27,547 | INFO | ANOMALY: ts=1760403206.564262 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.048 severity=low
+2025-10-13 17:53:27,580 | INFO | ANOMALY: ts=1760403206.565004 192.168.12.152 -> 104.29.152.132 proto=17 size=288 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.003 severity=low
+2025-10-13 17:53:27,599 | INFO | ANOMALY: ts=1760403206.566436 192.168.12.152 -> 104.29.152.132 proto=17 size=280 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.001 severity=low
+2025-10-13 17:53:27,686 | INFO | ANOMALY: ts=1760403206.629007 192.168.12.152 -> 104.29.152.132 proto=17 size=274 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.002 severity=low
+2025-10-13 17:53:27,962 | INFO | Online retraining on current window...
+2025-10-13 17:53:28,076 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:28,107 | INFO | ANOMALY: ts=1760403206.843023 192.168.12.152 -> 104.29.152.132 proto=17 size=264 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.035 severity=low
+2025-10-13 17:53:28,135 | INFO | ANOMALY: ts=1760403206.860673 162.159.136.234 -> 192.168.12.152 proto=6 size=198 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.037 severity=low
+2025-10-13 17:53:28,226 | INFO | ANOMALY: ts=1760403206.949739 192.168.12.152 -> 104.29.152.132 proto=17 size=279 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.000 severity=low
+2025-10-13 17:53:28,279 | WARNING | ANOMALY: ts=1760403207.114718 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.070 severity=medium
+2025-10-13 17:53:28,435 | INFO | ANOMALY: ts=1760403207.341352 192.168.12.152 -> 104.29.152.132 proto=17 size=94 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.031 severity=low
+2025-10-13 17:53:28,845 | INFO | ANOMALY: ts=1760403207.866085 192.168.12.152 -> 104.29.152.132 proto=17 size=273 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.001 severity=low
+2025-10-13 17:53:28,868 | INFO | Online retraining on current window...
+2025-10-13 17:53:28,982 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:29,016 | WARNING | ANOMALY: ts=1760403207.894894 162.159.136.234 -> 192.168.12.152 proto=6 size=202 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.065 severity=medium
+2025-10-13 17:53:29,098 | WARNING | ANOMALY: ts=1760403208.081497 104.29.157.28 -> 192.168.12.152 proto=17 size=114 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.079 severity=medium
+2025-10-13 17:53:29,371 | WARNING | ANOMALY: ts=1760403208.449420 162.159.136.234 -> 192.168.12.152 proto=6 size=927 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.075 severity=medium
+2025-10-13 17:53:29,718 | INFO | Online retraining on current window...
+2025-10-13 17:53:29,869 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:29,930 | WARNING | ANOMALY: ts=1760403208.989866 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.075 severity=medium
+2025-10-13 17:53:30,610 | INFO | Online retraining on current window...
+2025-10-13 17:53:30,723 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:30,813 | WARNING | ANOMALY: ts=1760403209.871224 192.168.12.152 -> 104.29.152.132 proto=17 size=277 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.081 severity=medium
+2025-10-13 17:53:31,445 | INFO | Online retraining on current window...
+2025-10-13 17:53:31,558 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:31,586 | INFO | ANOMALY: ts=1760403210.565578 104.29.157.28 -> 192.168.12.152 proto=17 size=114 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.023 severity=low
+2025-10-13 17:53:31,619 | INFO | ANOMALY: ts=1760403210.597270 192.168.12.152 -> 104.29.157.28 proto=17 size=133 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.018 severity=low
+2025-10-13 17:53:31,661 | WARNING | ANOMALY: ts=1760403210.733750 192.168.12.152 -> 104.29.157.28 proto=17 size=317 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.083 severity=medium
+2025-10-13 17:53:31,951 | ERROR | ANOMALY: ts=1760403211.033376 162.159.136.234 -> 192.168.12.152 proto=6 size=108 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.109 severity=high
+2025-10-13 17:53:32,109 | ERROR | ANOMALY: ts=1760403211.175809 162.159.136.234 -> 192.168.12.152 proto=6 size=108 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.109 severity=high
+2025-10-13 17:53:32,295 | INFO | ANOMALY: ts=1760403211.343508 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=2 direction=out score=-0.037 severity=low
+2025-10-13 17:53:32,327 | INFO | ANOMALY: ts=1760403211.364453 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=2 direction=out score=-0.039 severity=low
+2025-10-13 17:53:32,367 | INFO | Online retraining on current window...
+2025-10-13 17:53:32,478 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:32,542 | ERROR | ANOMALY: ts=1760403211.560117 104.29.157.28 -> 192.168.12.152 proto=17 size=106 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.103 severity=high
+2025-10-13 17:53:32,571 | INFO | ANOMALY: ts=1760403211.600426 192.168.12.152 -> 104.29.157.28 proto=17 size=1245 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.047 severity=low
+2025-10-13 17:53:32,590 | INFO | ANOMALY: ts=1760403211.600457 192.168.12.152 -> 104.29.157.28 proto=17 size=1245 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.009 severity=low
+2025-10-13 17:53:32,609 | WARNING | ANOMALY: ts=1760403211.644562 192.168.12.152 -> 104.29.157.28 proto=17 size=1246 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.075 severity=medium
+2025-10-13 17:53:32,631 | INFO | ANOMALY: ts=1760403211.644629 192.168.12.152 -> 104.29.157.28 proto=17 size=1246 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.014 severity=low
+2025-10-13 17:53:32,648 | INFO | ANOMALY: ts=1760403211.672189 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.037 severity=low
+2025-10-13 17:53:32,666 | INFO | ANOMALY: ts=1760403211.689745 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.000 severity=low
+2025-10-13 17:53:32,707 | WARNING | ANOMALY: ts=1760403211.791022 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.056 severity=medium
+2025-10-13 17:53:32,754 | WARNING | ANOMALY: ts=1760403211.921452 104.29.157.28 -> 192.168.12.152 proto=17 size=90 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.072 severity=medium
+2025-10-13 17:53:32,780 | INFO | ANOMALY: ts=1760403211.959933 192.168.12.152 -> 104.29.157.28 proto=17 size=126 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.002 severity=low
+2025-10-13 17:53:32,799 | INFO | ANOMALY: ts=1760403211.993720 192.168.12.152 -> 104.29.157.28 proto=17 size=174 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.014 severity=low
+2025-10-13 17:53:32,865 | INFO | ANOMALY: ts=1760403212.031317 104.29.157.28 -> 192.168.12.152 proto=17 size=90 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.022 severity=low
+2025-10-13 17:53:33,335 | INFO | Online retraining on current window...
+2025-10-13 17:53:33,445 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:33,494 | ERROR | ANOMALY: ts=1760403212.484912 192.168.12.152 -> 104.29.157.28 proto=17 size=1241 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.141 severity=high
+2025-10-13 17:53:33,523 | WARNING | ANOMALY: ts=1760403212.507331 104.29.152.132 -> 192.168.12.152 proto=17 size=94 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.074 severity=medium
+2025-10-13 17:53:33,543 | INFO | ANOMALY: ts=1760403212.527057 192.168.12.152 -> 104.29.157.28 proto=17 size=1242 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.035 severity=low
+2025-10-13 17:53:33,560 | INFO | ANOMALY: ts=1760403212.527085 192.168.12.152 -> 104.29.157.28 proto=17 size=1242 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.005 severity=low
+2025-10-13 17:53:33,600 | INFO | ANOMALY: ts=1760403212.567706 104.29.152.132 -> 192.168.12.152 proto=17 size=192 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.048 severity=low
+2025-10-13 17:53:33,617 | INFO | ANOMALY: ts=1760403212.572279 192.168.12.152 -> 104.29.157.28 proto=17 size=1242 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.005 severity=low
+2025-10-13 17:53:33,643 | INFO | ANOMALY: ts=1760403212.615856 192.168.12.152 -> 104.29.157.28 proto=17 size=1058 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.022 severity=low
+2025-10-13 17:53:33,675 | INFO | ANOMALY: ts=1760403212.623764 104.29.152.132 -> 192.168.12.152 proto=17 size=193 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.050 severity=low
+2025-10-13 17:53:33,692 | WARNING | ANOMALY: ts=1760403212.639637 104.29.152.132 -> 192.168.12.152 proto=17 size=278 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.061 severity=medium
+2025-10-13 17:53:33,708 | INFO | ANOMALY: ts=1760403212.655496 192.168.12.152 -> 104.29.157.28 proto=17 size=1155 dport=19302 eph_sport=1 unique_dports_15s=2 direction=out score=-0.026 severity=low
+2025-10-13 17:53:33,733 | INFO | ANOMALY: ts=1760403212.694202 104.29.152.132 -> 192.168.12.152 proto=17 size=260 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.031 severity=low
+2025-10-13 17:53:33,778 | INFO | ANOMALY: ts=1760403212.749251 104.29.152.132 -> 192.168.12.152 proto=17 size=258 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.043 severity=low
+2025-10-13 17:53:33,803 | WARNING | ANOMALY: ts=1760403212.771617 104.29.152.132 -> 192.168.12.152 proto=17 size=270 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.069 severity=medium
+2025-10-13 17:53:33,829 | WARNING | ANOMALY: ts=1760403212.795531 104.29.152.132 -> 192.168.12.152 proto=17 size=278 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.077 severity=medium
+2025-10-13 17:53:33,847 | WARNING | ANOMALY: ts=1760403212.811637 104.29.152.132 -> 192.168.12.152 proto=17 size=281 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.064 severity=medium
+2025-10-13 17:53:33,880 | WARNING | ANOMALY: ts=1760403212.835154 104.29.152.132 -> 192.168.12.152 proto=17 size=272 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.071 severity=medium
+2025-10-13 17:53:33,912 | INFO | ANOMALY: ts=1760403212.854654 104.29.152.132 -> 192.168.12.152 proto=17 size=260 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.025 severity=low
+2025-10-13 17:53:33,944 | INFO | ANOMALY: ts=1760403212.875328 104.29.157.28 -> 192.168.12.152 proto=17 size=102 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.037 severity=low
+2025-10-13 17:53:33,961 | INFO | ANOMALY: ts=1760403212.879372 104.29.152.132 -> 192.168.12.152 proto=17 size=258 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.022 severity=low
+2025-10-13 17:53:33,986 | WARNING | ANOMALY: ts=1760403212.891605 104.29.152.132 -> 192.168.12.152 proto=17 size=273 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.052 severity=medium
+2025-10-13 17:53:34,017 | INFO | ANOMALY: ts=1760403212.911200 104.29.152.132 -> 192.168.12.152 proto=17 size=264 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.039 severity=low
+2025-10-13 17:53:34,057 | INFO | ANOMALY: ts=1760403212.935160 104.29.152.132 -> 192.168.12.152 proto=17 size=261 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.047 severity=low
+2025-10-13 17:53:34,084 | INFO | ANOMALY: ts=1760403212.956032 104.29.152.132 -> 192.168.12.152 proto=17 size=269 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.036 severity=low
+2025-10-13 17:53:34,109 | INFO | ANOMALY: ts=1760403212.975166 104.29.152.132 -> 192.168.12.152 proto=17 size=259 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.039 severity=low
+2025-10-13 17:53:34,155 | INFO | ANOMALY: ts=1760403212.994288 104.29.152.132 -> 192.168.12.152 proto=17 size=255 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.022 severity=low
+2025-10-13 17:53:34,173 | WARNING | ANOMALY: ts=1760403213.008022 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=2 direction=out score=-0.061 severity=medium
+2025-10-13 17:53:34,192 | INFO | ANOMALY: ts=1760403213.011067 104.29.152.132 -> 192.168.12.152 proto=17 size=263 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.026 severity=low
+2025-10-13 17:53:34,216 | WARNING | ANOMALY: ts=1760403213.042570 104.29.152.132 -> 192.168.12.152 proto=17 size=263 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.078 severity=medium
+2025-10-13 17:53:34,240 | WARNING | ANOMALY: ts=1760403213.049626 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=2 direction=out score=-0.055 severity=medium
+2025-10-13 17:53:34,258 | WARNING | ANOMALY: ts=1760403213.050623 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=2 direction=out score=-0.056 severity=medium
+2025-10-13 17:53:34,275 | INFO | ANOMALY: ts=1760403213.055751 104.29.152.132 -> 192.168.12.152 proto=17 size=251 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.022 severity=low
+2025-10-13 17:53:34,293 | WARNING | ANOMALY: ts=1760403213.071800 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=2 direction=out score=-0.071 severity=medium
+2025-10-13 17:53:34,317 | INFO | ANOMALY: ts=1760403213.079177 104.29.152.132 -> 192.168.12.152 proto=17 size=247 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.045 severity=low
+2025-10-13 17:53:34,334 | ERROR | ANOMALY: ts=1760403213.084175 162.159.136.234 -> 192.168.12.152 proto=6 size=109 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.123 severity=high
+2025-10-13 17:53:34,352 | WARNING | ANOMALY: ts=1760403213.084194 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.052 severity=medium
+2025-10-13 17:53:34,369 | INFO | ANOMALY: ts=1760403213.095124 104.29.152.132 -> 192.168.12.152 proto=17 size=259 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.045 severity=low
+2025-10-13 17:53:34,388 | WARNING | ANOMALY: ts=1760403213.104504 104.29.157.28 -> 192.168.12.152 proto=17 size=90 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.057 severity=medium
+2025-10-13 17:53:34,413 | WARNING | ANOMALY: ts=1760403213.114055 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.057 severity=medium
+2025-10-13 17:53:34,432 | WARNING | ANOMALY: ts=1760403213.114473 104.29.152.132 -> 192.168.12.152 proto=17 size=276 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.050 severity=medium
+2025-10-13 17:53:34,451 | WARNING | ANOMALY: ts=1760403213.115338 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.056 severity=medium
+2025-10-13 17:53:34,468 | WARNING | ANOMALY: ts=1760403213.132353 104.29.152.132 -> 192.168.12.152 proto=17 size=264 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.060 severity=medium
+2025-10-13 17:53:34,486 | WARNING | ANOMALY: ts=1760403213.135854 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.051 severity=medium
+2025-10-13 17:53:34,511 | INFO | ANOMALY: ts=1760403213.150842 104.29.152.132 -> 192.168.12.152 proto=17 size=269 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.018 severity=low
+2025-10-13 17:53:34,527 | INFO | ANOMALY: ts=1760403213.156627 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.042 severity=low
+2025-10-13 17:53:34,544 | WARNING | ANOMALY: ts=1760403213.158089 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.057 severity=medium
+2025-10-13 17:53:34,582 | INFO | ANOMALY: ts=1760403213.169183 104.29.152.132 -> 192.168.12.152 proto=17 size=267 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.041 severity=low
+2025-10-13 17:53:34,648 | INFO | ANOMALY: ts=1760403213.198620 104.29.152.132 -> 192.168.12.152 proto=17 size=254 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.045 severity=low
+2025-10-13 17:53:34,665 | WARNING | ANOMALY: ts=1760403213.200210 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.057 severity=medium
+2025-10-13 17:53:34,680 | INFO | Online retraining on current window...
+2025-10-13 17:53:34,791 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:34,810 | INFO | ANOMALY: ts=1760403213.212389 104.29.157.28 -> 192.168.12.152 proto=17 size=90 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.018 severity=low
+2025-10-13 17:53:34,956 | WARNING | ANOMALY: ts=1760403213.447093 192.168.12.152 -> 104.29.157.28 proto=17 size=345 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.081 severity=medium
+2025-10-13 17:53:35,043 | INFO | ANOMALY: ts=1760403213.535237 104.29.152.132 -> 192.168.12.152 proto=17 size=271 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.005 severity=low
+2025-10-13 17:53:35,243 | INFO | ANOMALY: ts=1760403213.860798 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.038 severity=low
+2025-10-13 17:53:35,317 | INFO | ANOMALY: ts=1760403213.967952 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.010 severity=low
+2025-10-13 17:53:35,462 | WARNING | ANOMALY: ts=1760403214.269020 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.059 severity=medium
+2025-10-13 17:53:35,500 | INFO | ANOMALY: ts=1760403214.360008 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.044 severity=low
+2025-10-13 17:53:35,524 | INFO | ANOMALY: ts=1760403214.414841 104.29.152.132 -> 192.168.12.152 proto=17 size=276 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.037 severity=low
+2025-10-13 17:53:35,542 | INFO | ANOMALY: ts=1760403214.437526 192.168.12.152 -> 104.29.157.28 proto=17 size=1254 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.010 severity=low
+2025-10-13 17:53:35,565 | INFO | ANOMALY: ts=1760403214.474344 104.29.152.132 -> 192.168.12.152 proto=17 size=255 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.010 severity=low
+2025-10-13 17:53:35,600 | INFO | ANOMALY: ts=1760403214.534867 104.29.152.132 -> 192.168.12.152 proto=17 size=262 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.025 severity=low
+2025-10-13 17:53:35,626 | INFO | Online retraining on current window...
+2025-10-13 17:53:35,739 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:35,772 | INFO | ANOMALY: ts=1760403214.595479 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.020 severity=low
+2025-10-13 17:53:35,871 | WARNING | ANOMALY: ts=1760403214.795268 192.168.12.152 -> 104.29.157.28 proto=17 size=161 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.069 severity=medium
+2025-10-13 17:53:35,916 | INFO | ANOMALY: ts=1760403214.856409 104.29.157.28 -> 192.168.12.152 proto=17 size=50 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.033 severity=low
+2025-10-13 17:53:36,379 | INFO | ANOMALY: ts=1760403215.331725 104.29.152.132 -> 192.168.12.152 proto=17 size=213 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.005 severity=low
+2025-10-13 17:53:36,478 | INFO | ANOMALY: ts=1760403215.414263 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.040 severity=low
+2025-10-13 17:53:36,505 | INFO | Online retraining on current window...
+2025-10-13 17:53:36,618 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:36,673 | INFO | ANOMALY: ts=1760403215.490802 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.019 severity=low
+2025-10-13 17:53:36,695 | INFO | ANOMALY: ts=1760403215.511203 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.037 severity=low
+2025-10-13 17:53:36,732 | INFO | ANOMALY: ts=1760403215.535803 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.039 severity=low
+2025-10-13 17:53:36,765 | INFO | ANOMALY: ts=1760403215.575794 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.030 severity=low
+2025-10-13 17:53:36,818 | ERROR | ANOMALY: ts=1760403215.740932 104.29.157.28 -> 192.168.12.152 proto=17 size=118 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.135 severity=high
+2025-10-13 17:53:36,899 | ERROR | ANOMALY: ts=1760403215.853685 162.159.136.234 -> 192.168.12.152 proto=6 size=104 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.126 severity=high
+2025-10-13 17:53:37,400 | INFO | Online retraining on current window...
+2025-10-13 17:53:37,513 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:37,594 | INFO | ANOMALY: ts=1760403216.506689 104.29.152.132 -> 192.168.12.152 proto=17 size=94 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.006 severity=low
+2025-10-13 17:53:37,622 | INFO | ANOMALY: ts=1760403216.620764 104.29.152.132 -> 192.168.12.152 proto=17 size=270 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.040 severity=low
+2025-10-13 17:53:37,757 | INFO | ANOMALY: ts=1760403216.860261 192.168.12.152 -> 104.29.157.28 proto=17 size=1154 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.001 severity=low
+2025-10-13 17:53:38,187 | ERROR | ANOMALY: ts=1760403217.394427 162.159.136.234 -> 192.168.12.152 proto=6 size=191 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.121 severity=high
+2025-10-13 17:53:38,205 | ERROR | ANOMALY: ts=1760403217.394442 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.139 severity=high
+2025-10-13 17:53:38,270 | INFO | Online retraining on current window...
+2025-10-13 17:53:38,427 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:38,510 | INFO | ANOMALY: ts=1760403217.523748 104.29.152.132 -> 192.168.12.152 proto=17 size=268 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.010 severity=low
+2025-10-13 17:53:38,824 | ERROR | ANOMALY: ts=1760403217.896630 162.159.136.234 -> 192.168.12.152 proto=6 size=108 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.128 severity=high
+2025-10-13 17:53:38,843 | ERROR | ANOMALY: ts=1760403217.896649 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.159 severity=high
+2025-10-13 17:53:39,072 | ERROR | ANOMALY: ts=1760403218.225631 162.159.136.234 -> 192.168.12.152 proto=6 size=108 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.126 severity=high
+2025-10-13 17:53:39,090 | ERROR | ANOMALY: ts=1760403218.225653 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.159 severity=high
+2025-10-13 17:53:39,115 | INFO | ANOMALY: ts=1760403218.251642 104.29.157.28 -> 192.168.12.152 proto=17 size=90 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.006 severity=low
+2025-10-13 17:53:39,214 | INFO | Online retraining on current window...
+2025-10-13 17:53:39,327 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:39,354 | ERROR | ANOMALY: ts=1760403218.436999 104.29.152.132 -> 192.168.12.152 proto=17 size=214 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.105 severity=high
+2025-10-13 17:53:39,488 | INFO | ANOMALY: ts=1760403218.576073 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.016 severity=low
+2025-10-13 17:53:39,506 | INFO | ANOMALY: ts=1760403218.595406 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.003 severity=low
+2025-10-13 17:53:39,558 | INFO | ANOMALY: ts=1760403218.629270 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.007 severity=low
+2025-10-13 17:53:39,596 | INFO | ANOMALY: ts=1760403218.671790 104.29.152.132 -> 192.168.12.152 proto=17 size=89 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.017 severity=low
+2025-10-13 17:53:39,684 | INFO | ANOMALY: ts=1760403218.831931 192.168.12.152 -> 104.29.152.132 proto=17 size=181 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.030 severity=low
+2025-10-13 17:53:39,701 | ERROR | ANOMALY: ts=1760403218.839992 162.159.136.234 -> 192.168.12.152 proto=6 size=206 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.115 severity=high
+2025-10-13 17:53:39,720 | ERROR | ANOMALY: ts=1760403218.840025 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.139 severity=high
+2025-10-13 17:53:39,744 | INFO | ANOMALY: ts=1760403218.873951 192.168.12.152 -> 104.29.152.132 proto=17 size=150 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.034 severity=low
+2025-10-13 17:53:39,816 | INFO | ANOMALY: ts=1760403218.916806 192.168.12.152 -> 104.29.152.132 proto=17 size=145 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.007 severity=low
+2025-10-13 17:53:39,876 | INFO | ANOMALY: ts=1760403218.959994 192.168.12.152 -> 104.29.152.132 proto=17 size=145 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.015 severity=low
+2025-10-13 17:53:39,956 | INFO | ANOMALY: ts=1760403219.067432 192.168.12.152 -> 104.29.152.132 proto=17 size=145 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.010 severity=low
+2025-10-13 17:53:39,980 | INFO | ANOMALY: ts=1760403219.108796 192.168.12.152 -> 104.29.152.132 proto=17 size=145 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.049 severity=low
+2025-10-13 17:53:40,028 | INFO | ANOMALY: ts=1760403219.130739 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.020 severity=low
+2025-10-13 17:53:40,046 | INFO | ANOMALY: ts=1760403219.162445 192.168.12.152 -> 104.29.157.28 proto=17 size=1159 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.046 severity=low
+2025-10-13 17:53:40,099 | INFO | ANOMALY: ts=1760403219.194232 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.023 severity=low
+2025-10-13 17:53:40,116 | INFO | ANOMALY: ts=1760403219.215281 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.020 severity=low
+2025-10-13 17:53:40,155 | ERROR | ANOMALY: ts=1760403219.331919 192.168.12.152 -> 104.29.157.28 proto=17 size=181 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.130 severity=high
+2025-10-13 17:53:40,175 | WARNING | ANOMALY: ts=1760403219.375616 192.168.12.152 -> 104.29.157.28 proto=17 size=1144 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.078 severity=medium
+2025-10-13 17:53:40,198 | WARNING | ANOMALY: ts=1760403219.423151 192.168.12.152 -> 104.29.157.28 proto=17 size=1145 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.081 severity=medium
+2025-10-13 17:53:40,251 | WARNING | ANOMALY: ts=1760403219.466124 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.070 severity=medium
+2025-10-13 17:53:40,265 | INFO | Online retraining on current window...
+2025-10-13 17:53:40,379 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:40,413 | INFO | ANOMALY: ts=1760403219.500767 192.168.12.152 -> 104.29.157.28 proto=17 size=958 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.010 severity=low
+2025-10-13 17:53:40,435 | WARNING | ANOMALY: ts=1760403219.547122 192.168.12.152 -> 104.29.157.28 proto=17 size=1214 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.074 severity=medium
+2025-10-13 17:53:40,484 | INFO | ANOMALY: ts=1760403219.581128 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=50314 eph_sport=0 unique_dports_15s=1 direction=in score=-0.030 severity=low
+2025-10-13 17:53:40,525 | WARNING | ANOMALY: ts=1760403219.647400 192.168.12.152 -> 104.29.157.28 proto=17 size=1071 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.088 severity=medium
+2025-10-13 17:53:40,564 | ERROR | ANOMALY: ts=1760403219.675353 162.159.136.234 -> 192.168.12.152 proto=6 size=108 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.116 severity=high
+2025-10-13 17:53:40,583 | INFO | ANOMALY: ts=1760403219.699915 192.168.12.152 -> 104.29.157.28 proto=17 size=755 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.000 severity=low
+2025-10-13 17:53:40,601 | INFO | ANOMALY: ts=1760403219.739087 192.168.12.152 -> 104.29.157.28 proto=17 size=1102 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.042 severity=low
+2025-10-13 17:53:40,619 | INFO | ANOMALY: ts=1760403219.769016 192.168.12.152 -> 104.29.157.28 proto=17 size=1030 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.006 severity=low
+2025-10-13 17:53:40,685 | WARNING | ANOMALY: ts=1760403219.864551 104.29.157.28 -> 192.168.12.152 proto=17 size=50 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.086 severity=medium
+2025-10-13 17:53:40,776 | WARNING | ANOMALY: ts=1760403220.001488 192.168.12.152 -> 104.29.157.28 proto=17 size=1227 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.053 severity=medium
+2025-10-13 17:53:40,817 | INFO | ANOMALY: ts=1760403220.034328 192.168.12.152 -> 104.29.157.28 proto=17 size=978 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.023 severity=low
+2025-10-13 17:53:40,837 | INFO | ANOMALY: ts=1760403220.065942 192.168.12.152 -> 104.29.157.28 proto=17 size=712 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.027 severity=low
+2025-10-13 17:53:40,863 | INFO | ANOMALY: ts=1760403220.100926 192.168.12.152 -> 104.29.157.28 proto=17 size=942 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.040 severity=low
+2025-10-13 17:53:40,887 | INFO | ANOMALY: ts=1760403220.138599 192.168.12.152 -> 104.29.157.28 proto=17 size=1136 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.034 severity=low
+2025-10-13 17:53:40,950 | INFO | ANOMALY: ts=1760403220.225471 192.168.12.152 -> 104.29.157.28 proto=17 size=1234 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.047 severity=low
+2025-10-13 17:53:40,996 | WARNING | ANOMALY: ts=1760403220.277665 192.168.12.152 -> 104.29.157.28 proto=17 size=1165 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.060 severity=medium
+2025-10-13 17:53:41,039 | ERROR | ANOMALY: ts=1760403220.388700 192.168.12.152 -> 104.29.152.132 proto=17 size=252 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.131 severity=high
+2025-10-13 17:53:41,085 | INFO | ANOMALY: ts=1760403220.430293 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.034 severity=low
+2025-10-13 17:53:41,102 | INFO | ANOMALY: ts=1760403220.452609 192.168.12.152 -> 104.29.152.132 proto=17 size=258 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.024 severity=low
+2025-10-13 17:53:41,147 | INFO | ANOMALY: ts=1760403220.494743 192.168.12.152 -> 104.29.157.28 proto=17 size=1052 dport=19302 eph_sport=1 unique_dports_15s=3 direction=out score=-0.001 severity=low
+2025-10-13 17:53:41,207 | INFO | ANOMALY: ts=1760403220.559162 104.29.152.132 -> 192.168.12.152 proto=17 size=50 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.028 severity=low
+2025-10-13 17:53:41,225 | INFO | ANOMALY: ts=1760403220.559162 104.29.152.132 -> 192.168.12.152 proto=17 size=50 dport=46096 eph_sport=0 unique_dports_15s=1 direction=in score=-0.028 severity=low
+2025-10-13 17:53:41,348 | INFO | Online retraining on current window...
+2025-10-13 17:53:41,464 | INFO | Online retraining complete and model saved.
+2025-10-13 17:53:41,519 | INFO | ANOMALY: ts=1760403220.755275 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.008 severity=low
+2025-10-13 17:53:41,548 | INFO | ANOMALY: ts=1760403220.793983 192.168.12.152 -> 104.29.152.132 proto=17 size=89 dport=19334 eph_sport=0 unique_dports_15s=3 direction=out score=-0.003 severity=low
+2025-10-13 17:53:41,701 | INFO | ANOMALY: ts=1760403220.971616 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.005 severity=low
+2025-10-13 17:53:41,776 | INFO | ANOMALY: ts=1760403221.075613 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.018 severity=low
+2025-10-13 17:53:41,851 | INFO | ANOMALY: ts=1760403221.177190 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.015 severity=low
+2025-10-13 17:53:41,934 | INFO | ANOMALY: ts=1760403221.305506 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.024 severity=low
+2025-10-13 17:53:41,953 | INFO | ANOMALY: ts=1760403221.305506 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.008 severity=low
+2025-10-13 17:53:41,971 | INFO | ANOMALY: ts=1760403221.305506 104.29.157.28 -> 192.168.12.152 proto=17 size=102 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.011 severity=low
+2025-10-13 17:53:42,003 | INFO | ANOMALY: ts=1760403221.387508 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.042 severity=low
+2025-10-13 17:53:42,027 | INFO | ANOMALY: ts=1760403221.387508 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.042 severity=low
+2025-10-13 17:53:42,114 | INFO | ANOMALY: ts=1760403221.495466 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.002 severity=low
+2025-10-13 17:53:42,160 | ERROR | ANOMALY: ts=1760403221.566327 162.159.136.234 -> 192.168.12.152 proto=6 size=243 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.123 severity=high
+2025-10-13 17:53:42,177 | ERROR | ANOMALY: ts=1760403221.566355 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.144 severity=high
+2025-10-13 17:53:42,209 | INFO | ANOMALY: ts=1760403221.595125 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=49691 eph_sport=0 unique_dports_15s=2 direction=in score=-0.021 severity=low
+2025-10-13 17:55:01,767 | INFO | Loaded model: models/iforest.joblib
+2025-10-13 17:55:01,768 | INFO | Model info: version=1.0.0 trained_at=2025-10-14T00:53:41.435699+00:00 features=7 checksum=12a274e21180…
+2025-10-13 17:55:01,768 | INFO | IF params: contamination=0.05 n_estimators=200 random_state=42
+2025-10-13 17:55:01,768 | INFO | Feature order: protocol, packet_size_log, time_diff, dport, is_ephemeral_sport, unique_dports_15s, direction
+2025-10-13 17:55:01,768 | INFO | Alert thresholds: high<=-0.100  medium<=-0.050 | online_retrain_interval=100
+2025-10-13 17:55:01,768 | INFO | Starting live monitoring on 'wlp131s0f0'. Press Ctrl+C to stop.
+2025-10-13 17:55:02,080 | INFO | ANOMALY: ts=1760403301.943424 192.168.12.152 -> 104.29.152.132 proto=17 size=70 dport=19334 eph_sport=0 unique_dports_15s=2 direction=out score=-0.005 severity=low
+2025-10-13 17:55:02,149 | INFO | ANOMALY: ts=1760403302.021216 192.168.12.152 -> 104.29.157.28 proto=17 size=114 dport=19302 eph_sport=0 unique_dports_15s=2 direction=out score=-0.000 severity=low
+2025-10-13 17:55:02,202 | ERROR | ANOMALY: ts=1760403302.086150 162.159.136.234 -> 192.168.12.152 proto=6 size=107 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.101 severity=high
+2025-10-13 17:55:02,219 | ERROR | ANOMALY: ts=1760403302.086178 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.145 severity=high
+2025-10-13 17:55:02,243 | INFO | ANOMALY: ts=1760403302.132149 192.168.12.152 -> 104.29.157.28 proto=17 size=1185 dport=19302 eph_sport=0 unique_dports_15s=3 direction=out score=-0.020 severity=low
+2025-10-13 17:55:02,306 | INFO | ANOMALY: ts=1760403302.175464 192.168.12.152 -> 104.29.157.28 proto=17 size=1186 dport=19302 eph_sport=0 unique_dports_15s=3 direction=out score=-0.016 severity=low
+2025-10-13 17:55:02,414 | INFO | ANOMALY: ts=1760403302.245583 192.168.12.152 -> 104.29.157.28 proto=17 size=1153 dport=19302 eph_sport=0 unique_dports_15s=3 direction=out score=-0.026 severity=low
+2025-10-13 17:55:02,517 | INFO | ANOMALY: ts=1760403302.290443 104.29.157.28 -> 192.168.12.152 proto=17 size=94 dport=38247 eph_sport=0 unique_dports_15s=1 direction=in score=-0.006 severity=low
+2025-10-13 17:55:02,538 | INFO | Online retraining on current window...
+2025-10-13 17:55:02,641 | INFO | Online retraining complete and model saved.
+2025-10-13 17:55:02,890 | INFO | ANOMALY: ts=1760403302.671635 104.29.157.28 -> 192.168.12.152 proto=17 size=98 dport=38247 eph_sport=0 unique_dports_15s=1 direction=in score=-0.015 severity=low
+2025-10-13 17:55:02,947 | INFO | ANOMALY: ts=1760403302.709574 104.29.157.28 -> 192.168.12.152 proto=17 size=102 dport=38247 eph_sport=0 unique_dports_15s=1 direction=in score=-0.011 severity=low
+2025-10-13 17:55:02,995 | ERROR | ANOMALY: ts=1760403302.819226 162.159.136.234 -> 192.168.12.152 proto=6 size=110 dport=48516 eph_sport=0 unique_dports_15s=1 direction=in score=-0.149 severity=high
+2025-10-13 17:55:03,019 | ERROR | ANOMALY: ts=1760403302.819253 192.168.12.152 -> 162.159.136.234 proto=6 size=66 dport=443 eph_sport=0 unique_dports_15s=3 direction=out score=-0.143 severity=high
+2025-10-13 17:55:03,063 | WARNING | ANOMALY: ts=1760403302.919608 104.29.157.28 -> 192.168.12.152 proto=17 size=110 dport=38247 eph_sport=0 unique_dports_15s=1 direction=in score=-0.065 severity=medium
