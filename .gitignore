@@ -53,3 +53,6 @@ sprint_artifacts/
 .__pycache__/
 logs/
 tests/__pycache__/
+tests/ui/playwright-report/
+tests/ui/test-results
+test-results/
