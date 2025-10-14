@@ -174,6 +174,24 @@ function startRealtime () {
       }
     }),
   )
+  realtimeStops.push(
+    subscribeToEvents('scan', (payload) => {
+      const scan = payload?.scan || payload
+      if (!scan) return
+      scanInfo.value = scan
+      const status = scan?.status || 'idle'
+      lastScanStatus = status
+      scanning.value = status === 'running'
+      if (statusTimer && status !== 'running') {
+        clearInterval(statusTimer); statusTimer = null
+      }
+      if (status === 'done' || status === 'error' || status === 'canceled') {
+        if (!loadingGuard.value) {
+          load()
+        }
+      }
+    }),
+  )
 }
 </script>
 
@@ -222,7 +240,7 @@ function startRealtime () {
                 <span class="badge" :class="(d.risk || '').toLowerCase()">{{ d.risk || '—' }}</span>
               </td>
               <td style="text-align:right;">
-                <router-link to="/banlist" class="btn btn--ghost">Contain</router-link>
+               <router-link :to="{ path: '/banlist', query: { ip: d.ip } }" class="btn btn--ghost">Contain</router-link>
               </td>
             </tr>
             <tr v-if="!devices.length">

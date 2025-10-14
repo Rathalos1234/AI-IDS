@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { api } from '../api';
 import { subscribeToEvents } from '../eventStream';
+import { useRoute, useRouter } from 'vue-router';
 const ip = ref(''), reason = ref(''), items = ref([]), err = ref(null), loading = ref(false);
 // PD-28 additions:
 const duration = ref('');  // minutes (blank = permanent)
@@ -9,6 +10,22 @@ const note = ref('');
 const trusted = ref([]);   // [{ip,note,created_ts}]
 const status = ref('');
 const stopFns = [];
+const route = useRoute();
+const router = useRouter();
+
+function applyRouteIp(value){
+  if (typeof value === 'string' && value){
+    ip.value = value;
+  }
+}
+
+function clearRouteIp(){
+  if (route.query.ip){
+    const nextQuery = { ...route.query };
+    delete nextQuery.ip;
+    router.replace({ query: nextQuery });
+  }
+}
 
 async function refresh(){
   try{
@@ -33,6 +50,7 @@ async function block(){
       status.value = describeFirewall(res?.firewall, `Blocked ${target}`);
     }
     ip.value=''; reason.value=''; duration.value='';
+    clearRouteIp();
     await refresh();
   }  catch(e){ err.value = e?.error || e?.message; }
 }
@@ -42,15 +60,32 @@ async function unblock(addr){
 }
 const isTrusted = (xip) => !!trusted.value.find(t => t.ip === xip);
 async function trust(addr){
-  const target = typeof addr === 'string' ? addr : addr?.value || '';
+  const target = (typeof addr === 'string' && addr) ? addr : ip.value;
   if (!target) return;
-  try{ await api.trustIp(target, note.value || ''); status.value = `Marked ${target} as trusted.`; note.value=''; await refresh(); }
+  try{
+    await api.trustIp(target, note.value || '');
+    status.value = `Marked ${target} as trusted.`;
+    if (!(typeof addr === 'string' && addr)) {
+      note.value='';
+      ip.value='';
+      clearRouteIp();
+    }
+    await refresh();
+  }
   catch(e){ err.value = e?.error || e?.message; }
 }
 async function untrust(addr){
-  const target = typeof addr === 'string' ? addr : addr?.value || '';
+  const target = (typeof addr === 'string' && addr) ? addr : ip.value;
   if (!target) return;
-  try{ await api.untrustIp(target); status.value = `Removed ${target} from trusted list.`; await refresh(); }
+  try{
+    await api.untrustIp(target);
+    status.value = `Removed ${target} from trusted list.`;
+    if (!(typeof addr === 'string' && addr)) {
+      ip.value='';
+      clearRouteIp();
+    }
+    await refresh();
+  }
   catch(e){ err.value = e?.error || e?.message; }
 }
 function applyBlockEvent(event) {
@@ -64,8 +99,15 @@ function applyBlockEvent(event) {
 }
 
 onMounted(async () => {
+  applyRouteIp(route.query.ip);
   await refresh();
   stopFns.push(subscribeToEvents('block', applyBlockEvent));
+});
+
+watch(() => route.query.ip, (value) => {
+  if (typeof value === 'string' && value) {
+    applyRouteIp(value);
+  }
 });
 
 onBeforeUnmount(() => {
@@ -117,8 +159,8 @@ function describeFirewall(fw, prefix){
         <input class="input" v-model="ip" placeholder="IP address (trust)" style="min-width:180px;" />
         <input class="input" v-model="note" placeholder="Trust note (optional)" style="min-width:200px;" />
         <div class="actions-row" style="gap:10px;">
-          <button class="btn btn--primary" @click="trust(ip.value)" :disabled="!ip">Trust</button>
-          <button class="btn" @click="untrust(ip.value)" :disabled="!ip">Untrust</button>
+          <button class="btn btn--primary" @click="trust()" :disabled="!ip">Trust</button>
+          <button class="btn" @click="untrust()" :disabled="!ip">Untrust</button>
         </div>
       </div>
       <div v-if="trusted.length" class="trusted-chips small">

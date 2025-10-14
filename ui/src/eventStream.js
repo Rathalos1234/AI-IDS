@@ -46,6 +46,14 @@ function ensureSource() {
       console.error('failed to parse block event', err);
     }
   });
+  source.addEventListener('scan', (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      dispatch('scan', data);
+    } catch (err) {
+      console.error('failed to parse scan event', err);
+    }
+  });
   source.onerror = () => {
     // allow browser to attempt automatic reconnects; if it closes we will rebuild
     console.warn('event stream error, waiting for reconnect');

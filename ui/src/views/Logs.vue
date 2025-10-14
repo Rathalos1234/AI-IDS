@@ -10,6 +10,24 @@ const err = ref(null);
 const loading = ref(false);
 const stopFns = [];
 
+function parseLabel(alert) {
+  const label = alert?.label || '';
+  const match = String(label).match(/^(.*)\s+score=([-+]?\d*\.?\d+(?:e[-+]?\d+)?)/i);
+  if (match) {
+    return {
+      ...alert,
+      label: match[1].trim(),
+      score: Number(match[2]),
+    };
+  }
+  return {
+    ...alert,
+    score: typeof alert?.score === 'number' ? alert.score : null,
+  };
+}
+
+const formatScore = (score) => (typeof score === 'number' && score === score ? score.toFixed(3) : '—');
+
 
 
 async function load(cursor = null) {
@@ -18,11 +36,13 @@ async function load(cursor = null) {
     err.value = null;
     const data = await api.alerts(limit, cursor);
     if (Array.isArray(data)) {
-      items.value = cursor ? items.value.concat(data) : data;
+      const mapped = data.map(parseLabel);
+      items.value = cursor ? items.value.concat(mapped) : mapped;
       nextCursor.value = data.length ? data[data.length - 1].ts : null;
     } else {
       const page = data.items || [];
-      items.value = cursor ? items.value.concat(page) : page;
+      const mapped = page.map(parseLabel);
+      items.value = cursor ? items.value.concat(mapped) : mapped;
       nextCursor.value = data.next_cursor || (items.value[items.value.length - 1]?.ts || null);
     }
   } catch (e) {
@@ -34,11 +54,12 @@ async function load(cursor = null) {
 
 function upsertAlert(alert) {
   if (!alert || !alert.id) return;
+  const normalized = parseLabel(alert);
   const existingIdx = items.value.findIndex((row) => row.id === alert.id);
   if (existingIdx !== -1) {
     items.value.splice(existingIdx, 1);
   }
-    items.value.unshift(alert);
+    items.value.unshift(normalized);
     if (items.value.length > 200) items.value.splice(200);
 }
 
@@ -93,6 +114,7 @@ async function exportHistory(format) {
             <th>Time</th>
             <th>IP</th>
             <th>Description</th>
+            <th>Score</th>
           </tr>
         </thead>
         <tbody>
@@ -101,9 +123,10 @@ async function exportHistory(format) {
             <td>{{ (a.ts||'').split('T')[1]?.slice(0,5) }}</td>
             <td>{{ a.src_ip }}</td>
             <td>{{ a.label }}</td>
+            <td>{{ formatScore(a.score) }}</td>
           </tr>
           <tr v-if="!items.length">
-            <td colspan="4" class="small" style="text-align:center;color:var(--muted);padding:18px;">No events yet.</td>
+           <td colspan="5" class="small" style="text-align:center;color:var(--muted);padding:18px;">No events yet.</td>
           </tr>
         </tbody>
       </table>

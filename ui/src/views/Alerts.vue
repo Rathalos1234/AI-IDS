@@ -14,17 +14,33 @@ const fTo = ref('');
 
 const unsubscribers = [];
 
+function splitLabel(value) {
+  const label = value || '';
+  const match = String(label).match(/^(.*)\s+score=([-+]?\d*\.?\d+(?:e[-+]?\d+)?)/i);
+  if (match) {
+    return {
+      text: match[1].trim(),
+      score: Number(match[2]),
+    };
+  }
+  return { text: label, score: null };
+}
+
+const formatScore = (score) => (typeof score === 'number' && score === score ? score.toFixed(3) : '—');
+
 function normalize(event) {
   if (!event) return null;
   const ts = event.ts || event.timestamp || '';
   if (event.type === 'alert' || event.kind === 'ANOMALY' || event.kind === 'SIGNATURE') {
+    const { text, score } = splitLabel(event.label || event.kind || '');
     return {
       id: event.id,
       ts,
       ip: event.src_ip || event.ip || '',
       type: 'alert',
-      detail: event.label || event.kind || '',
+      detail: text || (event.kind || ''),
       severity: event.severity || '',
+      score,
     };
   }
   if (event.type === 'block' || event.action === 'block' || event.action === 'unblock') {
@@ -36,15 +52,18 @@ function normalize(event) {
       type,
       detail: event.action || '',
       severity: event.severity || '',
+      score: null,
     };
   }
+  const { text, score } = splitLabel(event.label || event.detail || '');
   return {
     id: event.id,
     ts,
     ip: event.ip || event.src_ip || '',
     type: event.type || event.kind || 'event',
-    detail: event.label || event.detail || '',
+    detail: text,
     severity: event.severity || '',
+    score,
   };
 }
 
@@ -200,6 +219,7 @@ onBeforeUnmount(() => {
             <th>Type</th>
             <th>Severity</th>
             <th>Details</th>
+            <th>Score</th>
           </tr>
         </thead>
         <tbody>
@@ -210,9 +230,10 @@ onBeforeUnmount(() => {
             <td style="text-transform:capitalize;">{{ e.type }}</td>
             <td>{{ e.severity || '—' }}</td>
             <td>{{ e.detail }}</td>
+            <td>{{ formatScore(e.score) }}</td>
           </tr>
           <tr v-if="!items.length">
-            <td colspan="6" class="small" style="text-align:center;color:var(--muted);padding:18px;">No events yet.</td>
+            <td colspan="7" class="small" style="text-align:center;color:var(--muted);padding:18px;">No events yet.</td>
           </tr>
         </tbody>
       </table>

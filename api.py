@@ -785,6 +785,7 @@ def sse_events():
     def gen():
         last_alert_id = None
         last_block_id = None
+        last_scan = None
         # immediate keep-alive
         yield ": ok\n\n"
         while True:
@@ -798,6 +799,13 @@ def sse_events():
             if b and b[0]["id"] != last_block_id:
                 last_block_id = b[0]["id"]
                 yield f"event: block\ndata: {json.dumps(b[0])}\n\n"
+            # scan status updates
+            with _SCAN_LOCK:
+                scan_snapshot = dict(_SCAN)
+            if last_scan != scan_snapshot:
+                last_scan = scan_snapshot
+                payload = {"scan": scan_snapshot}
+                yield f"event: scan\ndata: {json.dumps(payload)}\n\n"
             # heartbeat (helps some proxies)
             yield ": ping\n\n"
             time.sleep(1.5)
