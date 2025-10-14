@@ -5,7 +5,7 @@ import { api } from '../api';
 
 const router = useRouter();
 const username = ref('admin');
-const password = ref('admin123');
+const password = ref('admin');
 const msg = ref(null);
 const err = ref(null);
 

@@ -134,7 +134,12 @@ function hhmm (s) {
         <span class="back">{{ scanning ? 'Scanning…' : 'Scan Network' }}</span>
       </span>
     </button>
-    <span v-if="scanInfo" class="small" style="margin-left:8px;color:var(--muted);">
+    <span
+      v-if="scanInfo"
+      class="small"
+      style="margin-left:8px;color:var(--muted);"
+      data-test="scan-status"
+    >
       {{ scanInfo.progress }} / {{ scanInfo.total }} · {{ scanInfo.status }}
     </span>
     <button class="btn" style="margin-left:8px" @click="load" :disabled="loading">Refresh</button>
@@ -151,7 +156,12 @@ function hhmm (s) {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="d in devices" :key="d.ip" style="border-top:1px solid var(--border);">
+            <tr
+              v-for="d in devices"
+              :key="d.ip"
+              style="border-top:1px solid var(--border);"
+              data-test="device-row"
+            >
               <td style="padding:12px;">{{ d.ip }}</td>
               <td style="padding:12px;">{{ d.name || 'Unknown' }}</td>
               <td style="padding:12px;">
@@ -170,12 +180,21 @@ function hhmm (s) {
       <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;">
         <h3 style="margin:0 0 8px;">Quick Overview</h3>
         <div class="small">Total Devices: <b>{{ devices.length }}</b></div>
-        <div class="small">Last Scan: <b>{{ lastScanStr }}</b></div>
+        <div class="small">
+          Last Scan:
+          <b class="mono" data-test="last-update">{{ lastScanStr }}</b>
+        </div>
         <div class="small">Unknown Devices: <b>{{ devices.filter(d => !d.name).length }}</b></div>
 
-        <div style="margin-top:16px;">
+        <div style="margin-top:16px;" data-test="recent-alerts">
           <h4 style="margin:0 0 8px;">Recent Alerts</h4>
-          <div v-for="a in recent" :key="a.id" class="small" style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding:8px 0;">
+          <div
+            v-for="a in recent"
+            :key="a.id"
+            class="small"
+            data-test="alert-row"
+            style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding:8px 0;"
+          >
             <span>IP: {{ a.src_ip }} • {{ a.label }}</span>
             <span class="mono">{{ hhmm(a.ts) }}</span>
           </div>
