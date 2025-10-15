@@ -39,9 +39,8 @@ tests/test_webdb.py::test_schema_init_and_list PASSED                    [100%]
 0.02s call     tests/test_anomaly_detector.py::test_reindex_safety_same_predictions
 0.02s call     tests/test_cli_golden_text.py::test_verify_model_prints_expected_fields
 0.02s call     tests/test_model_bundle.py::test_feature_order_checksum_and_version
+0.01s call     tests/test_ops_endpoints_sprint2.py::test_ops_health_and_retention_and_backup
 0.01s call     tests/test_auth_gating_lockout_sprint2.py::test_auth_gating_and_session_cookie
-0.01s call     tests/test_api_logs_export_filters_sprint2.py::test_logs_export_csv_and_json
 0.01s call     tests/test_auth_gating_lockout_sprint2.py::test_lockout_after_failed_attempts
-
-(1 durations < 0.005s hidden.  Use -vv to show these durations.)
-======================= 25 passed, 4 deselected in 0.73s =======================
+0.01s call     tests/test_api_contract_sprint2.py::test_stats_devices_events_heads
+======================= 25 passed, 4 deselected in 1.09s =======================

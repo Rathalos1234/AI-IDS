@@ -36,14 +36,14 @@ tests/test_packet_processor.py::test_is_ephemeral_sport_flag PASSED      [ 96%]
 tests/test_webdb.py::test_schema_init_and_list PASSED                    [100%]
 
 ============================= slowest 10 durations =============================
-0.09s call     tests/test_api_trusted_temp_bans_sprint2.py::test_trusted_crud_and_temp_ban_contract
 0.07s call     tests/test_anomaly_detector.py::test_train_save_load_round_trip
 0.06s call     tests/test_integration_train_pipeline.py::test_capture_engineer_train_save
 0.04s call     tests/test_anomaly_detector.py::test_determinism_with_fixed_seed
+0.03s call     tests/test_api_trusted_temp_bans_sprint2.py::test_trusted_crud_and_temp_ban_contract
 0.02s call     tests/test_anomaly_detector.py::test_reindex_safety_same_predictions
 0.02s call     tests/test_cli_golden_text.py::test_verify_model_prints_expected_fields
+0.02s call     tests/test_banlist_integration.py::test_block_ip_round_trip
 0.02s call     tests/test_model_bundle.py::test_feature_order_checksum_and_version
-0.01s call     tests/test_banlist_integration.py::test_block_ip_round_trip
 0.01s call     tests/test_auth_gating_lockout_sprint2.py::test_auth_gating_and_session_cookie
 0.01s call     tests/test_api_logs_export_filters_sprint2.py::test_logs_export_csv_and_json
-======================= 28 passed, 1 deselected in 0.86s =======================
+======================= 28 passed, 1 deselected in 0.81s =======================
