@@ -68,7 +68,7 @@ jobs:
       - name: Upgrade pip
         run: python -m pip install --upgrade pip wheel
       - name: Install deps
-        run: pip install -r requirements.txt pytest
+        run: pip install -r requirements.txt pytest flask ruff mypy
       - name: Make scripts executable
         run: chmod +x scripts/test_full.sh
       - name: (debug) list files
