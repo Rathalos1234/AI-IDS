@@ -7,7 +7,8 @@ import uuid
 import hashlib
 import os
 
-DB = Path("ids_web.db")
+# DB = Path("ids_web.db")
+DB = Path(os.environ.get("SQLITE_DB", "ids_web.db"))
 SCHEMA = """
 PRAGMA journal_mode=WAL;
 CREATE TABLE IF NOT EXISTS alerts (
