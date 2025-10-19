@@ -4,13 +4,32 @@ Live network monitor: capture packets, engineer features, and detect anomalies.
 """
 
 from __future__ import annotations
-
 import os
 import logging
-import ipaddress
+import math
+import random
+import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 import webdb
+from typing import Any, Dict, List, Set, cast
+import ipaddress
+from anomaly_detector import AnomalyDetector
+from firewall import capabilities as firewall_capabilities
+from firewall import ensure_block as firewall_ensure_block
+from packet_processor import IP, TCP, UDP, PacketProcessor
+from signature_engine import default_engine
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _iso_utc(dt: datetime) -> str:
+    return (
+        dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    )
+
 
 try:
     import netifaces  # type: ignore
@@ -22,12 +41,69 @@ try:
 except Exception as e:  # pragma: no cover
     raise RuntimeError("Scapy is required for packet capture: pip install scapy") from e
 
-from packet_processor import PacketProcessor
-from anomaly_detector import AnomalyDetector
 
-from typing import Any, Dict, List, cast
+class _FakeLayer:
+    def __init__(self, **attrs: Any) -> None:
+        self.__dict__.update(attrs)
 
-from signature_engine import default_engine
+    def __getattr__(self, item: str) -> Any:
+        return self.__dict__.get(item)
+
+
+class _SyntheticPacket:
+    """Tiny Scapy-like packet used when generating fake traffic."""
+
+    __slots__ = ("time", "_layers", "_len")
+
+    def __init__(
+        self,
+        *,
+        timestamp: float,
+        length: int,
+        src: str,
+        dest: str,
+        proto: int,
+        sport: int,
+        dport: int,
+    ) -> None:
+        self.time = timestamp
+        self._len = length
+        self._layers: dict[Any, _FakeLayer] = {
+            IP: _FakeLayer(src=src, dst=dest, proto=proto),
+        }
+        transport_cls = TCP if proto == 6 else UDP
+        self._layers[transport_cls] = _FakeLayer(sport=sport, dport=dport)
+
+    def haslayer(self, layer: Any) -> bool:
+        return layer in self._layers
+
+    def __getitem__(self, layer: Any) -> _FakeLayer:
+        return self._layers[layer]
+
+    def __len__(self) -> int:
+        return self._len
+    
+
+def _as_int(value: Any, default: int = 0) -> int:
+    try:
+        if isinstance(value, bool):
+            return int(value)
+        if isinstance(value, int):
+            return value
+        if isinstance(value, float):
+            return default if math.isnan(value) else int(value)
+        return int(float(value))
+    except Exception:
+        return default
+
+
+def _as_float(value: Any, default: float = 0.0) -> float:
+    try:
+        if isinstance(value, float):
+            return value
+        return float(value)
+    except Exception:
+        return default
 
 
 class NetworkMonitor:
@@ -85,6 +161,12 @@ class NetworkMonitor:
         self.enable_sigs = self.config.getboolean("Signatures", "Enable", fallback=True)
         self.sig_engine = default_engine() if self.enable_sigs else None
 
+        # Runtime firewall + simulation knobs
+        self.firewall_capabilities = firewall_capabilities()
+        self.firewall_runtime_enabled = False
+        self._runtime_blocked: Set[str] = set()
+        self._simulate_mode = False
+        
         # Ensure the Web UI database exists for alert inserts
         try:
             webdb.init()
@@ -161,11 +243,32 @@ class NetworkMonitor:
         self.detector.save_model(model_path)
         self.logger.info(f"Model trained and saved to: {model_path}")
 
-    def start_monitoring(self, interface: str, model_path: str) -> None:
+    def start_monitoring(
+        self,
+        interface: str,
+        model_path: str,
+        *,
+        firewall_blocking: bool = False,
+        simulate: bool = False,
+    ) -> None:
         """Begin live packet sniffing and anomaly detection."""
-        self._validate_interface(interface)
+        if not simulate:
+            self._validate_interface(interface)
         self.detector.load_model(model_path)
         self.logger.info(f"Loaded model: {model_path}")
+        self.firewall_runtime_enabled = bool(firewall_blocking) and bool(
+            self.firewall_capabilities.get("supported")
+        )
+        self._simulate_mode = bool(simulate)
+        if firewall_blocking and not self.firewall_runtime_enabled:
+            self.logger.warning(
+                "Firewall blocking requested but unavailable (capabilities=%s)",
+                self.firewall_capabilities,
+            )
+        if self.firewall_runtime_enabled:
+            self.logger.info("Runtime firewall auto-blocking enabled")
+        if self._simulate_mode:
+            self.logger.info("Simulated traffic enabled — generating synthetic flows")
         # Startup banner with model + thresholds details
         try:
             info = self.detector.bundle_metadata()
@@ -201,6 +304,15 @@ class NetworkMonitor:
             self._thr_med,
             self.online_retrain_interval,
         )
+        if self._simulate_mode:
+            self.logger.info(
+                "Starting synthetic monitoring loop (interface hint: %s)", interface
+            )
+            try:
+                self._simulate_loop()
+            except KeyboardInterrupt:
+                self.logger.info("Simulation stopped by user.")
+            return
         self.logger.info(
             f"Starting live monitoring on '{interface}'. Press Ctrl+C to stop."
         )
@@ -242,10 +354,27 @@ class NetworkMonitor:
                 last_row_dev = processed_df.tail(1).iloc[0]
                 sip = str(last_row_dev.get("src_ip"))
                 dip = str(last_row_dev.get("dest_ip"))
-                if sip and ipaddress.ip_address(sip).is_private:
-                    webdb.record_device(sip)
-                if dip and ipaddress.ip_address(dip).is_private:
-                    webdb.record_device(dip)
+
+            # --- Works for all valid IPs    
+                seen_ips = []
+                for candidate in (sip, dip):
+                    if not candidate:
+                        continue
+                    try:
+                        ipaddress.ip_address(candidate)
+                    except ValueError:
+                        continue
+                    seen_ips.append(candidate)
+                for candidate in dict.fromkeys(seen_ips):
+                    webdb.record_device(candidate)
+
+            # --- Works for private IPs only
+            #                if sip and ipaddress.ip_address(sip).is_private:
+            #                    webdb.record_device(sip)
+            #                if dip and ipaddress.ip_address(dip).is_private:
+            #                    webdb.record_device(dip)
+
+
             except Exception:
                 self.logger.debug("record_device failed", exc_info=True)
 
@@ -264,13 +393,13 @@ class NetworkMonitor:
 
                 # 2) ephemeral source port flag (>= 49152)
                 try:
-                    eph = int(last_row["sport"]) >= 49152
+                    eph = _as_int(last_row.get("sport")) >= 49152
                 except Exception:
                     eph = False
 
                 # 3) unique destination ports by source in the last 15 seconds
                 try:
-                    cutoff = float(last_row["timestamp"]) - 15.0
+                    cutoff = _as_float(last_row.get("timestamp")) - 15.0
                     recent = window_df[window_df["timestamp"] >= cutoff]
                     uniq_d = int(
                         recent[recent["src_ip"] == last_row["src_ip"]][
@@ -299,25 +428,39 @@ class NetworkMonitor:
 
                 # New, feature-aligned log line (keep overall shape similar)
                 sev = self._severity_from_score(score) if score == score else "unknown"
+                ts_val = _as_float(last_row.get("timestamp"))
+                src_ip = str(last_row.get("src_ip", ""))
+                dest_ip = str(last_row.get("dest_ip", ""))
                 msg = (
-                    f"ANOMALY: ts={last_row['timestamp']:.6f} "
-                    f"{last_row['src_ip']} -> {last_row['dest_ip']} "
-                    f"proto={int(last_row['protocol'])} size={int(last_row['packet_size'])} "
-                    f"dport={int(last_row['dport'])} eph_sport={int(eph)} "
+                    f"ANOMALY: ts={ts_val:.6f} "
+                    f"{src_ip} -> {dest_ip} "
+                    f"proto={_as_int(last_row.get('protocol'))} "
+                    f"size={_as_int(last_row.get('packet_size'))} "
+                    f"dport={_as_int(last_row.get('dport'))} eph_sport={int(eph)} "
                     f"unique_dports_15s={uniq_d} direction={'out' if dir_flag else 'in'} "
                     f"score={score:.3f} severity={sev}"
                 )
 
                 self._emit(msg, sev)  # severity-aware logger
 
+                if self.firewall_runtime_enabled and (sev or "").lower() == "high":
+                    self._maybe_firewall_block(
+                        str(last_row.get("src_ip", "")),
+                        sev,
+                        f"{dest_ip}:{_as_int(last_row.get('dport'))}",
+                    )
+
                 # NEW: sink anomaly to WebDB so the GUI can see it
                 try:
                     webdb.insert_alert(
                         {
                             "id": str(uuid.uuid4()),
-                            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+                            "ts": _iso_utc(_utcnow()),
                             "src_ip": str(last_row["src_ip"]),
-                            "label": f"{last_row['dest_ip']}:{int(last_row['dport'])} score={score:.3f}",
+                            "label": (
+                                f"{dest_ip}:{_as_int(last_row.get('dport'))} "
+                                f"score={score:.3f}"
+                            ),
                             "severity": str(sev).upper(),  # LOW/MEDIUM/HIGH
                             "kind": "ANOMALY",
                         }
@@ -354,7 +497,7 @@ class NetworkMonitor:
                     s_msg = (
                         f"SIGNATURE: {hit.name} severity={hit.severity} | "
                         f"{last_row_dict.get('src_ip')} -> {last_row_dict.get('dest_ip')} "
-                        f'dport={int(last_row_dict.get("dport", 0))} desc="{hit.description}"'
+                        f'dport={_as_int(last_row_dict.get("dport"))} desc="{hit.description}"'
                     )
                     self._emit(s_msg, hit.severity)
 
@@ -363,10 +506,12 @@ class NetworkMonitor:
                         webdb.insert_alert(
                             {
                                 "id": str(uuid.uuid4()),
-                                "ts": datetime.utcnow().isoformat(timespec="seconds")
-                                + "Z",
+                                "ts": _iso_utc(_utcnow()),
                                 "src_ip": str(last_row_dict.get("src_ip")),
-                                "label": f"{hit.name} {last_row_dict.get('dest_ip')}:{int(last_row_dict.get('dport', 0))}",
+                                "label": (
+                                    f"{hit.name} {last_row_dict.get('dest_ip')}:"
+                                    f"{_as_int(last_row_dict.get('dport'))}"
+                                ),
                                 "severity": str(hit.severity or "").upper(),
                                 "kind": "SIGNATURE",
                             }
@@ -398,3 +543,103 @@ class NetworkMonitor:
             self.logger.warning(msg)
         else:
             self.logger.info(msg)
+
+    def _maybe_firewall_block(self, ip: str, severity: str, detail: str) -> None:
+        ip = (ip or "").strip()
+        if not ip or ip in self._runtime_blocked:
+            return
+        try:
+            if ip in getattr(self.processor, "_local_ips", set()):
+                return
+        except Exception:
+            pass
+        try:
+            parsed = ipaddress.ip_address(ip)
+            if parsed.is_loopback:
+                return
+        except Exception:
+            return
+        # Skip trusted hosts when possible
+        if hasattr(webdb, "is_trusted"):
+            try:
+                if webdb.is_trusted(ip):
+                    self.logger.info("Skip auto-block for trusted IP %s", ip)
+                    return
+            except Exception:
+                pass
+        ok, err = firewall_ensure_block(ip, f"auto-{severity}")
+        if ok:
+            self._runtime_blocked.add(ip)
+            self.logger.warning("Auto-blocked %s via firewall (%s)", ip, detail)
+            try:
+                webdb.delete_action_by_ip(ip, "unblock")
+                webdb.delete_action_by_ip(ip, "block")
+                webdb.insert_block(
+                    {
+                        "id": str(uuid.uuid4()),
+                        "ts": _iso_utc(_utcnow()),
+                        "ip": ip,
+                        "action": "block",
+                        "reason": f"auto-{severity}",
+                        "expires_at": "",
+                    }
+                )
+            except Exception:
+                self.logger.debug("auto block persistence failed", exc_info=True)
+        elif err:
+            self.logger.error("Firewall auto-block failed for %s: %s", ip, err)
+
+    def _simulate_loop(self) -> None:
+        local_ips = list(getattr(self.processor, "_local_ips", [])) or ["192.168.1.10"]
+        remote_pool = [
+            "45.83.12.5",
+            "91.210.44.19",
+            "203.0.113.45",
+            "198.51.100.88",
+            "176.31.72.14",
+        ]
+        service_ports = [22, 53, 80, 123, 389, 443, 502, 8080, 8443]
+        rng = random.Random()
+
+        while True:
+            now = time.time()
+            # Occasionally emit a bursty inbound scan to trigger anomalies
+            if rng.random() < 0.18:
+                attacker = rng.choice(remote_pool)
+                victim = rng.choice(local_ips)
+                for dport in rng.sample(range(20, 1050), rng.randint(6, 10)):
+                    pkt = _SyntheticPacket(
+                        timestamp=now + rng.random() * 0.05,
+                        length=rng.randint(60, 900),
+                        src=attacker,
+                        dest=victim,
+                        proto=6,
+                        sport=rng.randint(1024, 65535),
+                        dport=dport,
+                    )
+                    self._analyze_packet(pkt)
+                    time.sleep(rng.uniform(0.03, 0.07))
+                continue
+
+            outbound = rng.random() < 0.55
+            if outbound:
+                src = rng.choice(local_ips)
+                dest = rng.choice(remote_pool)
+            else:
+                src = rng.choice(remote_pool)
+                dest = rng.choice(local_ips)
+
+            proto = 6 if rng.random() < 0.7 else 17
+            dport = rng.choice(service_ports + [rng.randint(1024, 65535)])
+            sport = rng.randint(49152, 65535)
+            pkt = _SyntheticPacket(
+                timestamp=now,
+                length=rng.randint(70, 1400),
+                src=src,
+                dest=dest,
+                proto=proto,
+                sport=sport,
+                dport=dport,
+            )
+            self._analyze_packet(pkt)
+            time.sleep(rng.uniform(0.05, 0.25))

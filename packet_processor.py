@@ -20,6 +20,8 @@ try:
 except Exception:  # pragma: no cover
     IP = TCP = UDP = object
 
+__all__ = ["PacketProcessor", "IP", "TCP", "UDP"]
+
 
 class PacketProcessor:
     """Transforms raw packets into model-ready features."""

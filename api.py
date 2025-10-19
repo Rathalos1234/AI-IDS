@@ -1,29 +1,54 @@
-from flask import Flask, request, jsonify
-from flask import session, abort
-from flask_cors import CORS
-from datetime import datetime, timedelta
-import os
+from datetime import datetime, timedelta, timezone
 import configparser
-import uuid
-import webdb
-from flask import Response, stream_with_context, send_file
-import json
-import time
-import socket
-import ipaddress
-import threading
-from io import StringIO
 import csv
-import tempfile
+import ipaddress
+import json
+import os
+import socket
 import shutil
+import tempfile
+import threading
+import time
+import uuid
+from io import StringIO
+from typing import Optional, TypedDict
+
+from flask import (
+    Flask,
+    Response,
+    abort,
+    g,
+    jsonify,
+    request,
+    session,
+    send_file,
+    stream_with_context,
+)
+
+from flask_cors import CORS
+from firewall import capabilities as firewall_capabilities
+from firewall import ensure_block as firewall_ensure_block
+from firewall import ensure_unblock as firewall_ensure_unblock
+import webdb
 
 app = Flask(__name__)
 # allow cookies when UI is on a different origin during dev
 CORS(app, supports_credentials=True)
 webdb.init()
 
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _iso_utc(dt: datetime) -> str:
+    return (
+        dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    )
+
+
 # --- PD-29: record app start for uptime ---
-_APP_STARTED = datetime.utcnow()
+_APP_STARTED = _utcnow()
 
 
 # =========================
@@ -59,8 +84,8 @@ def _is_trusted(ip: str) -> bool:
     return ip in _TRUSTED_MEM
 
 
-"""def _compute_expiry(body: dict) -> str:
-    '''Return ISO 'expires_at' or empty string for permanent bans.'''
+def _compute_expiry(body: dict) -> str:
+    """Return ISO 'expires_at' or empty string for permanent bans."""
     mins = body.get("duration_minutes")
     if mins is None or str(mins).strip() == "":
         return ""
@@ -69,52 +94,37 @@ def _is_trusted(ip: str) -> bool:
         if mins <= 0:
             return ""
         return (
-            datetime.utcnow().isoformat(timespec="seconds") + "Z"
+            _iso_utc(_utcnow())
             if mins == 0
-            else (datetime.utcnow() + timedelta(minutes=mins)).isoformat(
-                timespec="seconds"
-            )
-            + "Z"
+            else _iso_utc(_utcnow() + timedelta(minutes=mins))
         )
     except Exception:
         return ""
-        """
+    
+
+class FirewallResult(TypedDict):
+    applied: bool
+    error: Optional[str]
 
 
-def _compute_expiry(body: dict) -> tuple[str, int]:
-    """
-    Return (expires_at_iso, ttl_seconds). Supports either:
-      - body["ttl"] (seconds), or
-      - body["duration_minutes"] (minutes)
-    Empty string if permanent ban.
-    """
-    # Prefer explicit ttl seconds if provided
-    if "ttl" in body and str(body["ttl"]).strip() != "":
-        try:
-            ttl = int(body["ttl"])
-            if ttl > 0:
-                exp = (datetime.utcnow() + timedelta(seconds=ttl)).isoformat(
-                    timespec="seconds"
-                ) + "Z"
-                return exp, ttl
-            return "", 0
-        except Exception:
-            return "", 0
-    # Fallback to minutes
-    mins = body.get("duration_minutes")
-    if mins is None or str(mins).strip() == "":
-        return "", 0
+class LockState(TypedDict, total=False):
+    fail_count: int
+    locked_until: Optional[str]
+
+
+def _firewall_apply(action: str, ip: str, reason: str = "") -> FirewallResult:
+    info: FirewallResult = {"applied": False, "error": None}
     try:
-        mins = int(mins)
-        if mins <= 0:
-            return "", 0
-        ttl = mins * 60
-        exp = (datetime.utcnow() + timedelta(minutes=mins)).isoformat(
-            timespec="seconds"
-        ) + "Z"
-        return exp, ttl
-    except Exception:
-        return "", 0
+        if action == "block":
+            ok, err = firewall_ensure_block(ip, reason or "manual")
+        else:
+            ok, err = firewall_ensure_unblock(ip)
+        info["applied"] = bool(ok)
+        if err:
+            info["error"] = err
+    except Exception as exc:
+        info["error"] = str(exc)
+    return info
 
 
 # =========================
@@ -130,32 +140,40 @@ LOCK_MINUTES = int(os.environ.get("LOCK_MINUTES", "15"))
 REQUIRE_AUTH = os.environ.get("REQUIRE_AUTH", "0") == "1"
 # session TTL + cookie hygiene
 SESSION_TTL = int(os.environ.get("SESSION_TTL_SECONDS", "3600"))
+TOKEN_TTL = int(os.environ.get("TOKEN_TTL_SECONDS", str(SESSION_TTL)))
+TOKEN_TTL = int(os.environ.get("TOKEN_TTL_SECONDS", str(SESSION_TTL)))
 app.permanent_session_lifetime = timedelta(seconds=SESSION_TTL)
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=bool(int(os.environ.get("COOKIE_SECURE", "0"))),
 )
-_LOCKS = {}  # {username: {"fail_count": int, "locked_until": iso_str}}
+_LOCKS: dict[
+    str, LockState
+] = {}  # {username: {"fail_count": int, "locked_until": iso_str}}
+_TOKENS: dict[str, dict] = {}
+_TOKENS_LOCK = threading.Lock()
 
-
+# after: REQUIRE_AUTH = os.environ.get("REQUIRE_AUTH", "0") == "1"
 def _auth_required() -> bool:
-    """Read REQUIRE_AUTH fresh each request to avoid test cross-talk."""
-    return os.environ.get("REQUIRE_AUTH", "0") == "1"
+    return REQUIRE_AUTH
 
 
-def _is_locked(username: str):
+def _is_locked(username: str) -> Optional[str]:
     rec = _LOCKS.get(username)
-    if not rec or not rec.get("locked_until"):
+    if not rec:
         return None
-    until = datetime.fromisoformat(rec["locked_until"])
-    if until > datetime.utcnow():
-        return until.isoformat() + "Z"
+    locked_until = rec.get("locked_until")
+    if not locked_until:
+        return None
+    until = datetime.fromisoformat(locked_until)
+    if until > _utcnow():
+        return _iso_utc(until)
     return None
 
 
 def _register_failure(username: str):
-    now = datetime.utcnow()
+    now = _utcnow()
     rec = _LOCKS.get(username, {"fail_count": 0, "locked_until": None})
     count = int(rec.get("fail_count", 0)) + 1
     locked_until = rec.get("locked_until")
@@ -173,10 +191,100 @@ def _verify_login(username: str, password: str) -> bool:
     return username == ADMIN_USER and password == ADMIN_PASSWORD
 
 
+def _cleanup_tokens(now: Optional[datetime] = None) -> None:
+    """Remove expired tokens from the in-memory registry."""
+    now = now or _utcnow()
+    with _TOKENS_LOCK:
+        for token, meta in list(_TOKENS.items()):
+            expires_at = meta.get("expires_at")
+            if isinstance(expires_at, datetime) and expires_at <= now:
+                _TOKENS.pop(token, None)
+
+
+def _issue_token(username: str) -> tuple[str, datetime]:
+    """Create a bearer token tied to the user with an expiration timestamp."""
+    expires_at = _utcnow() + timedelta(seconds=TOKEN_TTL)
+    token = uuid.uuid4().hex
+    with _TOKENS_LOCK:
+        _TOKENS[token] = {"username": username, "expires_at": expires_at}
+    return token, expires_at
+
+
+def _token_from_request() -> Optional[str]:
+    auth = request.headers.get("Authorization", "")
+    if auth.lower().startswith("bearer "):
+        return auth.split(" ", 1)[1].strip()
+    token = request.args.get("token")
+    if token:
+        return token.strip()
+    return request.cookies.get("auth_token")
+
+
+def _resolve_token(
+    token: Optional[str],
+) -> tuple[Optional[str], Optional[datetime], Optional[str]]:
+    if not token:
+        return None, None, None
+    with _TOKENS_LOCK:
+        meta = _TOKENS.get(token)
+        if not meta:
+            return None, None, "invalid"
+        expires_at = meta.get("expires_at")
+        if not isinstance(expires_at, datetime):
+            _TOKENS.pop(token, None)
+            return None, None, "invalid"
+        if expires_at <= _utcnow():
+            _TOKENS.pop(token, None)
+            return None, None, "expired"
+        return str(meta.get("username")), expires_at, None
+
+
+def _forget_token(token: Optional[str]) -> None:
+    if not token:
+        return
+    with _TOKENS_LOCK:
+        _TOKENS.pop(token, None)
+
+
+def _iso_or_none(dt: Optional[datetime]) -> Optional[str]:
+    if not dt:
+        return None
+    return dt.isoformat(timespec="seconds") + "Z"
+
+
+def _current_user() -> Optional[str]:
+    if hasattr(g, "_auth_user"):
+        return g._auth_user
+
+    _cleanup_tokens()
+    token = _token_from_request()
+    username, expires_at, reason = _resolve_token(token)
+    if username:
+        g._auth_user = username
+        g._auth_token = token
+        g._auth_expires = expires_at
+        g._auth_error = None
+        return username
+
+    username = session.get("username")
+    if username:
+        g._auth_user = username
+        g._auth_token = None
+        g._auth_expires = _utcnow() + timedelta(seconds=SESSION_TTL)
+        g._auth_error = None
+        return username
+
+    g._auth_user = None
+    g._auth_token = token
+    g._auth_expires = None
+    g._auth_error = reason or ("unauthenticated" if token else None)
+    return None
+
+
 def require_auth():
     if not _auth_required():
         return
-    if not session.get("username"):
+    if not _current_user():
         abort(401)
 
 
@@ -203,8 +311,11 @@ def _gate_api_when_auth_on():
     if p in public:
         return
     if p.startswith("/api/") and not p.startswith("/api/auth/"):
-        if not session.get("username"):
-            return jsonify({"ok": False, "error": "unauthorized"}), 401
+        if _current_user():
+            return
+        reason = getattr(g, "_auth_error", None) or "unauthorized"
+        status = 401 if reason != "invalid" else 401
+        return jsonify({"ok": False, "error": reason}), status
     # (UI static is served by Vite/Flask separately; nothing else to allow here)
 
 
@@ -225,42 +336,37 @@ def login():
     session.clear()
     session.permanent = True
     session["username"] = username
-    return jsonify({"ok": True, "user": username})
-
-
-@app.post("/api/login")
-def login_alias_api():
-    # Alias for tests that probe /api/login
-    return login()
-
-
-@app.post("/login")
-def login_alias_root():
-    # Alias for tests that probe /login
-    return login()
+    token, expires_at = _issue_token(username)
+    resp = {
+        "ok": True,
+        "user": username,
+        "token": token,
+        "expires_at": expires_at.isoformat(timespec="seconds") + "Z",
+        "ttl_seconds": TOKEN_TTL,
+    }
+    return jsonify(resp)
 
 
 @app.post("/api/auth/logout")
 def logout():
+    _forget_token(_token_from_request())
     session.clear()
     return jsonify({"ok": True})
 
 
-@app.post("/api/logout")
-def logout_alias_api():
-    return logout()
-
-
-@app.post("/logout")
-def logout_alias_root():
-    return logout()
-
-
 @app.get("/api/auth/me")
 def whoami():
-    if REQUIRE_AUTH and not session.get("username"):
-        return jsonify({"ok": False, "user": None}), 401
-    return jsonify({"ok": True, "user": session.get("username")})
+    user = _current_user()
+    if REQUIRE_AUTH and not user:
+        reason = getattr(g, "_auth_error", "unauthorized")
+        return jsonify({"ok": False, "user": None, "error": reason}), 401
+    return jsonify(
+        {
+            "ok": True,
+            "user": user,
+            "expires_at": _iso_or_none(getattr(g, "_auth_expires", None)),
+        }
+    )
 
 
 @app.get("/api/alerts")
@@ -271,7 +377,7 @@ def alerts():
 @app.get("/api/blocks")
 def blocks():
     # Auto-expire temporary bans before listing
-    now_iso = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    now_iso = _iso_utc(_utcnow())
     if _supports_expire_bans():
         try:
             webdb.expire_bans(now_iso)
@@ -310,6 +416,7 @@ def post_block():
     # PD-28: don't allow blocking trusted IPs
     if _is_trusted(ip):
         return jsonify({"ok": False, "error": "trusted_ip"}), 400
+    reason = (body.get("reason") or "").strip()
     expires_at = _compute_expiry(body)
 
     webdb.delete_action_by_ip(ip, "unblock")
@@ -317,7 +424,7 @@ def post_block():
     webdb.insert_block(
         {
             "id": str(uuid.uuid4()),
-            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "ts": _iso_utc(_utcnow()),
             "ip": ip,
             "action": "block",
             "reason": (body.get("reason") or "").strip(),
@@ -325,9 +432,22 @@ def post_block():
             "expires_at": expires_at,
         }
     )
+#    webdb.insert_block(
+#        {
+#            "id": str(uuid.uuid4()),
+#            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+#            "ip": ip,
+#            "action": "block",
+#            "reason": (body.get("reason") or "").strip(),
+#            # If webdb has no 'expires_at' column, this extra key is ignored.
+#            "expires_at": expires_at,
+#        }
+#    )
     if expires_at and not _supports_expire_bans():
         _TEMP_BANS[ip] = expires_at
-    return {"ok": True}
+    fw = _firewall_apply("block", ip, reason)
+    fw["capabilities"] = firewall_capabilities()
+    return {"ok": True, "firewall": fw}
 
 
 @app.post("/api/blocks")
@@ -341,14 +461,15 @@ def post_block_with_reason():
     # PD-28: block guard for trusted IPs + duration support
     if _is_trusted(ip):
         return jsonify({"ok": False, "error": "trusted_ip"}), 400
-    expires_at, ttl_sec = _compute_expiry(body)
+#    expires_at, ttl_sec = _compute_expiry(body)
+    expires_at = _compute_expiry(body)
 
     webdb.delete_action_by_ip(ip, "unblock")
     webdb.delete_action_by_ip(ip, "block")
     webdb.insert_block(
         {
             "id": str(uuid.uuid4()),
-            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "ts": _iso_utc(_utcnow()),
             "ip": ip,
             "action": "block",
             "reason": reason,
@@ -357,18 +478,9 @@ def post_block_with_reason():
     )
     if expires_at and not _supports_expire_bans():
         _TEMP_BANS[ip] = expires_at
-    return (
-        jsonify(
-            {
-                "ok": True,
-                "ip": ip,
-                "reason": reason,
-                "ttl": ttl_sec if ttl_sec > 0 else None,
-                "expires_at": expires_at or None,
-            }
-        ),
-        201,
-    )
+    fw = _firewall_apply("block", ip, reason)
+    fw["capabilities"] = firewall_capabilities()
+    return {"ok": True, "firewall": fw}
 
 
 @app.post("/api/unblock")
@@ -377,6 +489,7 @@ def post_unblock():
     ip = (body.get("ip") or "").strip()
     if not ip:
         return {"error": "ip required"}, 400
+    reason = (body.get("reason") or "manual").strip() or "manual"
 
     webdb.delete_action_by_ip(ip, "block")
     webdb.delete_action_by_ip(ip, "unblock")
@@ -384,15 +497,17 @@ def post_unblock():
         {
             "id": str(uuid.uuid4()),
             # use UTC for consistent ordering across endpoints
-            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "ts": _iso_utc(_utcnow()),
             "ip": ip,
             "action": "unblock",
-            "reason": (body.get("reason") or "").strip(),
+            "reason": reason,
             "expires_at": "",
         }
     )
     _TEMP_BANS.pop(ip, None)  # clear any in-memory duration
-    return {"ok": True}
+    fw = _firewall_apply("unblock", ip)
+    fw["capabilities"] = firewall_capabilities()
+    return {"ok": True, "firewall": fw}
 
 
 # @app.get("/api/devices")
@@ -428,7 +543,7 @@ def stats():
         {
             "ok": True,
             "counts": {"alerts_200": len(a), "blocks_200": len(b)},
-            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "ts": _iso_utc(_utcnow()),
         }
     )
 
@@ -507,7 +622,7 @@ def devices():
         #        items = []
         #    return jsonify({"ok": True, "items": items})
         items = []
-    return jsonify(items)
+    return jsonify({"ok": True, "items": items})
 
 
 # =========================
@@ -525,8 +640,8 @@ def healthz():
     return jsonify(
         {
             "ok": db_ok,
-            "uptime_sec": int((datetime.utcnow() - _APP_STARTED).total_seconds()),
-            "time": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "uptime_sec": int((_utcnow() - _APP_STARTED).total_seconds()),
+            "time": _iso_utc(_utcnow()),
         }
     ), (200 if db_ok else 500)
 
@@ -553,13 +668,11 @@ def retention_run():
         # graceful fallback if webdb lacks helper
         return jsonify(
             {
-                # Return 200 for test contract even if unsupported
                 "ok": False,
                 "error": "retention_unsupported",
                 "settings": {"alerts_days": alerts_days, "blocks_days": blocks_days},
             }
-            #        ), 501
-        ), 200
+        ), 501
 
 
 @app.get("/api/backup/db")
@@ -571,7 +684,7 @@ def backup_db():
     """
     db_path = str(webdb.DB)
     tmpdir = tempfile.mkdtemp(prefix="idsdb_")
-    fname = f"ids_web_{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.sqlite"
+    fname = f"ids_web_{_utcnow().strftime('%Y%m%dT%H%M%SZ')}.sqlite"
     tmpfile = os.path.join(tmpdir, fname)
     shutil.copyfile(db_path, tmpfile)
     # stream the temp copy; OS/tempdir cleanup is fine for dev
@@ -581,6 +694,18 @@ def backup_db():
         download_name=fname,
         mimetype="application/octet-stream",
     )
+
+
+@app.post("/api/ops/reset")
+def ops_reset():
+    """Clear runtime state from the web database (alerts, blocks, devices, trusted)."""
+    require_auth()
+    if not hasattr(webdb, "wipe_all"):
+        return jsonify({"ok": False, "error": "reset_unsupported"}), 501
+    cleared = webdb.wipe_all()
+    if not _supports_trusted_db():
+        _TRUSTED_MEM.clear()
+    return jsonify({"ok": True, "cleared": cleared})
 
 
 # =========================
@@ -612,6 +737,12 @@ def add_trusted():
         ipaddress.ip_address(ip)
     except Exception:
         return jsonify({"ok": False, "error": "bad_ip"}), 400
+    if _is_currently_blocked(ip):
+        return jsonify({
+            "ok": False,
+            "error": "ip_blocked",
+            "message": "Unblock this IP before adding it to Trusted."
+        }), 409
     if _supports_trusted_db():
         webdb.upsert_trusted_ip(ip, note)
     else:
@@ -638,10 +769,12 @@ _SCAN = {
     "finished": None,
     "progress": 0,  # percent 0..100
     "done": 0,  # count done (aux)
-    "total": 0,
+    "total": 100,
     "message": "",
 }
 _SCAN_LOCK = threading.Lock()
+
+_LAST_SCAN_TS: Optional[str] = None
 
 TOP_PORTS = [22, 23, 53, 80, 110, 139, 143, 443, 445, 3306, 3389, 5900]
 
@@ -658,6 +791,7 @@ def _tcp_scan(ip: str, ports: list[int], timeout_ms: int) -> list[int]:
     openp = []
     to = max(50, min(timeout_ms, 1000)) / 1000.0
     for p in ports:
+        s = None
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(to)
@@ -666,47 +800,64 @@ def _tcp_scan(ip: str, ports: list[int], timeout_ms: int) -> list[int]:
         except Exception:
             pass
         finally:
-            try:
-                s.close()
-            except Exception:
-                pass
+            if s is not None:
+                try:
+                    s.close()
+                except Exception:
+                    pass
     return openp
 
 
 def _scan_job(target_ips: list[str], ports: list[int], timeout_ms: int):
+    global _LAST_SCAN_TS
+    target_count = max(1, len(target_ips))  # avoid div-by-zero
     with _SCAN_LOCK:
-        _SCAN.update(
-            {
-                "status": "running",
-                "started": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-                "finished": None,
-                "progress": 0,  # percent 0..100
-                "done": 0,  # count done (aux)
-                "total": len(target_ips),
-                "message": "",
-            }
-        )
+        _SCAN.update({
+            "status": "running",
+            "started": _iso_utc(_utcnow()),
+            "finished": None,
+            "progress": 0,        # percent (0..100)
+            "total": 100,         # fixed denominator for UI
+            "done": 0,            # how many IPs completed
+            "targets": target_count,
+            "message": "",
+        })
+
     try:
         done = 0
         for ip in target_ips:
             openp = _tcp_scan(ip, ports, timeout_ms)
-            webdb.set_device_scan(
-                ip, ",".join(map(str, openp)), _risk_from_ports(openp)
-            )
+            webdb.set_device_scan(ip, ",".join(map(str, openp)), _risk_from_ports(openp))
             done += 1
+            percent = min(100, int(done * 100 / target_count))
             with _SCAN_LOCK:
                 _SCAN["done"] = done
-                _SCAN["progress"] = int(done * 100 / max(1, _SCAN["total"]))
+                _SCAN["progress"] = percent
+
+        finished = _iso_utc(_utcnow())
         with _SCAN_LOCK:
             _SCAN["status"] = "done"
-            _SCAN["finished"] = datetime.utcnow().isoformat(timespec="seconds") + "Z"
-            _SCAN["progress"] = 100
+            _SCAN["finished"] = _iso_utc(_utcnow())
+            _SCAN["progress"] = 100  # ensure 100/100 at completion
+        # remember last finished scan time for future status calls
+        _LAST_SCAN_TS = finished
     except Exception as e:
         with _SCAN_LOCK:
             _SCAN["status"] = "error"
             _SCAN["message"] = str(e)
-            _SCAN["finished"] = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+            _SCAN["finished"] = _iso_utc(_utcnow())
+        # even failed runs count as the last attempt time
+        _LAST_SCAN_TS = finished
 
+def _is_currently_blocked(ip: str) -> bool:
+    try:
+        # list_blocks returns newest first; first match is the latest action for this IP
+        for b in webdb.list_blocks(limit=1000):
+            if b.get("ip") == ip:
+                return b.get("action") == "block"
+        return False
+    except Exception:
+        return False
 
 @app.post("/api/scan")
 def start_scan():
@@ -756,18 +907,6 @@ def start_scan():
     with _SCAN_LOCK:
         if _SCAN["status"] == "running":
             return jsonify({"ok": False, "error": "scan_in_progress"}), 409
-        # Seed coherent initial state before starting the thread
-        _SCAN.update(
-            {
-                "status": "running",
-                "started": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-                "finished": None,
-                "progress": 0,
-                "done": 0,
-                "total": len(target_ips),
-                "message": "",
-            }
-        )
         threading.Thread(
             target=_scan_job, args=(target_ips, ports, timeout_ms), daemon=True
         ).start()
@@ -851,6 +990,7 @@ def sse_events():
     def gen():
         last_alert_id = None
         last_block_id = None
+        last_scan = None
         # immediate keep-alive
         yield ": ok\n\n"
         while True:
@@ -864,6 +1004,13 @@ def sse_events():
             if b and b[0]["id"] != last_block_id:
                 last_block_id = b[0]["id"]
                 yield f"event: block\ndata: {json.dumps(b[0])}\n\n"
+            # scan status updates
+            with _SCAN_LOCK:
+                scan_snapshot = dict(_SCAN)
+            if last_scan != scan_snapshot:
+                last_scan = scan_snapshot
+                payload = {"scan": scan_snapshot}
+                yield f"event: scan\ndata: {json.dumps(payload)}\n\n"
             # heartbeat (helps some proxies)
             yield ": ping\n\n"
             time.sleep(1.5)

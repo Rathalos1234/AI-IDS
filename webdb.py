@@ -1,11 +1,22 @@
-import sqlite3
-from contextlib import closing
-from pathlib import Path
-from typing import Optional, Any
-from datetime import datetime, timedelta
-import uuid
 import hashlib
 import os
+import sqlite3
+import uuid
+from contextlib import closing
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _iso_utc(dt: datetime) -> str:
+    return (
+        dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    )
+
 
 # DB = Path("ids_web.db")
 DB = Path(os.environ.get("SQLITE_DB", "ids_web.db"))
@@ -115,19 +126,33 @@ def delete_action_by_ip(ip: str, action: str):
 def insert_alert(a):
     with closing(_con()) as con:
         con.execute(
-            "INSERT OR REPLACE INTO alerts VALUES (?,?,?,?,?,?)",
-            (a["id"], a["ts"], a["src_ip"], a["label"], a["severity"], a["kind"]),
+            "INSERT OR REPLACE INTO alerts (id, ts, src_ip, label, severity, kind) VALUES (?,?,?,?,?,?)",
+            (
+                a["id"],
+                a["ts"],
+                a["src_ip"],
+                a["label"],
+                a["severity"],
+                a["kind"],
+            ),
         )
         con.commit()
 
 
-# def insert_block(b):
-#    with closing(_con()) as con:
-#        con.execute(
-#            "INSERT OR REPLACE INTO blocks (id, ts, ip, action, reason) VALUES (?,?,?,?,?)",
-#            (b["id"], b["ts"], b["ip"], b["action"], b.get("reason", "")),
-#        )
-#        con.commit()
+def insert_block(b):
+    with closing(_con()) as con:
+        con.execute(
+            "INSERT OR REPLACE INTO blocks (id, ts, ip, action, reason, expires_at) VALUES (?,?,?,?,?,?)",
+            (
+                b["id"],
+                b["ts"],
+                b["ip"],
+                b["action"],
+                b.get("reason", ""),
+                b.get("expires_at", ""),
+            ),
+        )
+        con.commit()
 
 
 # -----------------------
@@ -150,7 +175,7 @@ def add_alert(
     Rich signature compatible with the API sink, but stores only the 6 columns your table has.
     """
     rid = uuid.uuid4().hex
-    ts = ts or datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    ts = ts or _iso_utc(_utcnow())
     insert_alert(
         {
             "id": rid,
@@ -189,13 +214,11 @@ def list_log_events_filtered(
     *,
     limit: int = 200,
     ip: str | None = None,
-    severity: str | None = None,  # e.g., low|medium|high|critical (case-insensitive)
-    kind: str | None = None,  # 'alert' or 'block'
-    ts_from: str | None = None,  # ISO 8601 (inclusive)
-    ts_to: str | None = None,  # ISO 8601 (inclusive)
+    severity: str | None = None,   # e.g., low|medium|high|critical (case-insensitive)
+    kind: str | None = None,       # 'alert' or 'block'
+    ts_from: str | None = None,    # ISO 8601 (inclusive)
+    ts_to: str | None = None,       # ISO 8601 (inclusive)
 ):
-    # clauses = []
-    # params = []
     params: list[Any] = []
 
     # We UNION alerts + blocks into a normalized view with a few columns
@@ -252,11 +275,7 @@ def ensure_admin(username: str = "admin", password: Optional[str] = None) -> Non
         if r is None:
             con.execute(
                 "INSERT INTO auth_users (username, password_hash, created_at) VALUES (?, ?, ?)",
-                (
-                    username,
-                    _hash_password(pw),
-                    datetime.utcnow().isoformat(timespec="seconds") + "Z",
-                ),
+                (username, _hash_password(pw), _iso_utc(_utcnow())),
             )
             con.commit()
 
@@ -270,11 +289,10 @@ def verify_login(username: str, password: str) -> bool:
             return False
         return _hash_password(password) == row["password_hash"]
 
-
 def register_failure(
     username: str, lock_after: int = 5, lock_minutes: int = 15
 ) -> None:
-    now = datetime.utcnow()
+    now_str = _iso_utc(now)
     with closing(_con()) as con:
         r = con.execute(
             "SELECT * FROM auth_lockout WHERE username=?", (username,)
@@ -282,24 +300,17 @@ def register_failure(
         if r is None:
             con.execute(
                 "INSERT INTO auth_lockout (username, fail_count, last_fail_at) VALUES (?, ?, ?)",
-                (username, 1, now.isoformat(timespec="seconds") + "Z"),
+                (username, 1, now_str),
             )
         else:
             count = int(r["fail_count"]) + 1
             locked_until = None
             if count >= lock_after:
-                locked_until = (now + timedelta(minutes=lock_minutes)).isoformat(
-                    timespec="seconds"
-                ) + "Z"
+                locked_until = _iso_utc(now + timedelta(minutes=lock_minutes))
                 count = 0
             con.execute(
                 "UPDATE auth_lockout SET fail_count=?, last_fail_at=?, locked_until=? WHERE username=?",
-                (
-                    count,
-                    now.isoformat(timespec="seconds") + "Z",
-                    locked_until,
-                    username,
-                ),
+                (count, now_str, locked_until, username),
             )
         con.commit()
 
@@ -327,7 +338,7 @@ def is_locked(username: str) -> Optional[str]:
 
 
 def _now():
-    return datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    return _iso_utc(_utcnow())
 
 
 def upsert_device(ip: str, name: str = ""):
@@ -439,20 +450,14 @@ def expire_bans(now_iso: str):
 
 
 # (tweak) widen insert_block to support expires_at
-def insert_block(b):
-    with closing(_con()) as con:
-        con.execute(
-            "INSERT OR REPLACE INTO blocks (id, ts, ip, action, reason, expires_at) VALUES (?,?,?,?,?,?)",
-            (
-                b["id"],
-                b["ts"],
-                b["ip"],
-                b["action"],
-                b.get("reason", ""),
-                b.get("expires_at", ""),
-            ),
-        )
-        con.commit()
+# def insert_block(b):
+#     with closing(_con()) as con:
+#         con.execute(
+#             "INSERT OR REPLACE INTO blocks (id, ts, ip, action, reason, expires_at) VALUES (?,?,?,?,?,?)",
+#             (b["id"], b["ts"], b["ip"], b["action"], b.get("reason", ""), b.get("expires_at", "")),
+#         )
+#         con.commit()
+
 
 
 # optional retention helper (used by PD-29)
@@ -473,3 +478,20 @@ def prune_old(days_alerts: int | None = None, days_blocks: int | None = None) ->
             out["blocks"] = cur.rowcount
         con.commit()
     return out
+
+
+def wipe_all() -> Dict[str, int]:
+    """Clear alerts, blocks, devices, and trusted IPs in one transaction."""
+    tables = (
+        ("alerts", "alerts"),
+        ("blocks", "blocks"),
+        ("devices", "devices"),
+        ("trusted_ips", "trusted"),
+    )
+    cleared: Dict[str, int] = {}
+    with closing(_con()) as con:
+        for table, key in tables:
+            cur = con.execute(f"DELETE FROM {table}")
+            cleared[key] = cur.rowcount
+        con.commit()
+    return cleared

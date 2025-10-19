@@ -22,18 +22,18 @@ async function login() {
 </script>
 
 <template>
-  <div style="display:grid;place-items:center;min-height:100vh;">
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:24px;width:min(460px,92vw);">
-      <h2 style="margin:0 0 6px;text-align:center;">Login</h2>
-      <p style="color:var(--muted);text-align:center;margin:0 0 14px;">Sign In To Your Account</p>
-      <div class="stack" style="display:flex;flex-direction:column;gap:10px;">
+  <div class="hero">
+    <div class="form-card">
+      <h2>Login</h2>
+      <p class="small">Sign in to continue to the dashboard.</p>
+      <div class="stack">
         <input class="input" v-model="username" placeholder="Username" />
         <input class="input" v-model="password" type="password" placeholder="Password" />
-        <button class="btn-toggle" @click="login"><span class="swap"><span class="front">Login</span><span class="back">Go</span></span></button>
+        <button class="btn btn--primary" @click="login">{{ msg ? 'Redirecting…' : 'Login' }}</button>
       </div>
       <p class="small" style="color:var(--muted);margin-top:10px;">Forgot Password? <a>Click to reset</a></p>
-      <p v-if="msg" class="small" style="color:#27c383;">{{ msg }}</p>
-      <p v-if="err" class="small" style="color:#ff7070;">{{ err }}</p>
+      <div v-if="msg" class="alert-banner success" style="margin-top:12px;">{{ msg }}</div>
+      <div v-if="err" class="alert-banner" style="margin-top:12px;">{{ err }}</div>
     </div>
   </div>
 </template>

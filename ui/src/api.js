@@ -1,159 +1,196 @@
 // Normalize JSON responses; throw on HTTP errors
-const j = (res) => {
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+const TOKEN_KEY = 'ids.auth.token';
+const TOKEN_EXP_KEY = 'ids.auth.expiry';
+
+function clearStoredToken() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(TOKEN_EXP_KEY);
+}
+
+function getStoredToken() {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) return null;
+  const expiryRaw = localStorage.getItem(TOKEN_EXP_KEY);
+  if (expiryRaw) {
+    const expiry = Number(expiryRaw);
+    if (!Number.isFinite(expiry) || expiry <= Date.now()) {
+      clearStoredToken();
+      return null;
+    }
+  }
+  return token;
+}
+
+function storeToken(token, expiresAt, ttlSeconds) {
+  if (!token) {
+    clearStoredToken();
+    return;
+  }
+  localStorage.setItem(TOKEN_KEY, token);
+  let expiry = null;
+  if (expiresAt) {
+    const parsed = Date.parse(expiresAt);
+    if (!Number.isNaN(parsed)) expiry = parsed;
+  }
+  if (!expiry && ttlSeconds) {
+    expiry = Date.now() + Number(ttlSeconds) * 1000;
+  }
+  if (expiry) {
+    localStorage.setItem(TOKEN_EXP_KEY, String(expiry));
+  } else {
+    localStorage.removeItem(TOKEN_EXP_KEY);
+  }
+}
+
+const parseJson = async (res) => {
+  let body = null;
+  try {
+    body = await res.json();
+  } catch (err) {
+    body = null;
+  }
+  if (res.status === 401) {
+    clearStoredToken();
+  }
+  if (!res.ok) {
+    const error = new Error(body?.error || `HTTP ${res.status}`);
+    if (body && typeof body === 'object') Object.assign(error, body);
+    error.status = res.status;
+    throw error;
+  }
+  return body ?? {};
 };
 
-// Optional base URL + credentials (works for same-origin or cross-origin dev)
 const prefix = (path) => (window.API_BASE || localStorage.getItem('API_BASE') || '') + path;
-const CRED = { credentials: 'include' };
+
+const authFetch = (path, options = {}) => {
+  const token = getStoredToken();
+  const headers = { ...(options.headers || {}) };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const finalOptions = {
+    credentials: 'include',
+    ...options,
+    headers,
+  };
+  return fetch(prefix(path), finalOptions);
+};
+
+const authJson = (path, options = {}) => authFetch(path, options).then(parseJson);
+
+export const trustedList = () => authJson('/api/trusted');
 
 
 
-// ---- PD-28: Trusted IPs + temp bans ----
-export const trustedList = () =>
-  fetch(prefix('/api/trusted'), { ...CRED }).then(j);
 export const trustIp = (ip, note = '') =>
-  fetch(prefix('/api/trusted'), {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ip, note }), ...CRED,
-  }).then(j);
+  authJson('/api/trusted', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ip, note }),
+    });
+    
 export const untrustIp = (ip) =>
-  fetch(prefix(`/api/trusted/${encodeURIComponent(ip)}`), {
-    method: 'DELETE', ...CRED,
-  }).then(j);
+  authJson(`/api/trusted/${encodeURIComponent(ip)}`, {
+    method: 'DELETE',
+  });
+
 export const blockIpWithDuration = (ip, { reason = '', duration_minutes = null } = {}) => {
   const payload = { ip, reason };
   if (duration_minutes != null) payload.duration_minutes = duration_minutes;
-  return fetch(prefix('/api/blocks'), {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload), ...CRED,
-  }).then(j);
+  return authJson('/api/blocks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
 };
 
 
 // ------- Existing functions (kept) -------
 export const fetchAlerts = (limit = 100) =>
-  fetch(prefix(`/api/alerts?limit=${encodeURIComponent(limit)}`), { ...CRED }).then(j);
+  authJson(`/api/alerts?limit=${encodeURIComponent(limit)}`);
 
 export const fetchBlocks = (limit = 100) =>
-  fetch(prefix(`/api/blocks?limit=${encodeURIComponent(limit)}`), { ...CRED }).then(j);
+  authJson(`/api/blocks?limit=${encodeURIComponent(limit)}`);
 
 export const blockIp = (ip) =>
-  fetch(prefix(`/api/block`), {
+  authJson('/api/block', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ip }),
-    ...CRED,
-  }).then(j);
+  });
 
 export const unblockIp = (ip) =>
-  fetch(prefix(`/api/unblock`), {
+  authJson('/api/unblock', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ip }),
-    ...CRED,
-  }).then(j);
+  });
 
 // ------- Additions (non-breaking) -------
 
-// Auth
-export const login = (username, password) =>
-  fetch(prefix('/api/auth/login'), {
+export const login = async (username, password) => {
+  const res = await fetch(prefix('/api/auth/login'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
-    ...CRED,
-  }).then(j);
+    }).then(parseJson);
+  if (res?.token) {
+    storeToken(res.token, res.expires_at, res.ttl_seconds);
+  }
+  return res;
+};
 
-export const logout = () =>
-  fetch(prefix('/api/auth/logout'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    ...CRED,
-  }).then(j);
+export const logout = async () => {
+  try {
+    await authJson('/api/auth/logout', { method: 'POST' });
+  } finally {
+    clearStoredToken();
+  }
+  return { ok: true };
+};
 
 // Stats
-export const fetchStats = () =>
-  fetch(prefix('/api/stats'), { ...CRED }).then(j);
+export const fetchStats = () => authJson('/api/stats');
 
 // Alerts w/ pagination
 export const fetchAlertsPaged = (limit = 50, cursor = null) => {
   const q = new URLSearchParams({ limit: String(limit) });
   if (cursor) q.set('cursor', cursor);
-  return fetch(prefix(`/api/alerts?${q.toString()}`), { ...CRED }).then(j);
+  return authJson(`/api/alerts?${q.toString()}`);
 };
 
 // Devices
-export const fetchDevices = () =>
-  fetch((window.API_BASE || localStorage.getItem('API_BASE') || '') + '/api/devices', {
-    credentials: 'include'
-  }).then(res => { if(!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); });
+export const fetchDevices = () => authJson('/api/devices');
 
 // Settings
-export const getSettings = () =>
-  fetch(prefix('/api/settings'), { ...CRED }).then(j);
+export const getSettings = () => authJson('/api/settings');
 
 export const putSettings = (updates) =>
-  fetch(prefix('/api/settings'), {
+  authJson('/api/settings', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updates),
-    ...CRED,
-  }).then(j);
+  });
 
 // Block with reason (keeps your original blockIp(ip) unchanged)
 export const blockIpWithReason = (ip, reason) =>
-  fetch(prefix('/api/blocks'), {
+  authJson('/api/blocks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ip, reason }),
-    ...CRED,
-  }).then(j);
-
-  // --- add this at the very end of ui/src/api.js ---
-
-export const api = {
-  // Alerts (prefers paged if present)
-  alerts: (limit = 50, cursor = null) =>
-    typeof fetchAlertsPaged === 'function'
-      ? fetchAlertsPaged(limit, cursor)
-      : fetchAlerts(limit),
-
-  // Blocks
-  blocks: fetchBlocks,
-  block: (ip, reason) =>
-    reason && typeof blockIpWithReason === 'function'
-      ? blockIpWithReason(ip, reason)
-      : blockIp(ip),
-  unblock: unblockIp,
-
-  // Stats / Devices / Settings (only used if you added them earlier)
-  stats: typeof fetchStats === 'function' ? fetchStats : undefined,
-  devices: typeof fetchDevices === 'function' ? fetchDevices : undefined,
-  getSettings: typeof getSettings === 'function' ? getSettings : undefined,
-  putSettings: typeof putSettings === 'function' ? putSettings : undefined,
-
-  // Auth (optional)
-  login: typeof login === 'function' ? login : undefined,
-  logout: typeof logout === 'function' ? logout : undefined,
-};
-
+  });
 
 export const fetchLogs = (limit = 200) =>
-  fetch(prefix(`/api/logs?limit=${encodeURIComponent(limit)}`), { ...CRED }).then(j);
+  authJson(`/api/logs?limit=${encodeURIComponent(limit)}`);
 
 
 export const startScan = (payload = {}) =>
-  fetch('/api/scan', {
+  authJson('/api/scan', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify(payload),
-  }).then(j);
+  });
 
-export const scanStatus = () =>
-  fetch('/api/scan/status', { credentials: 'include' }).then(j);
+export const scanStatus = () => authJson('/api/scan/status');
 
 // ---- PD-27 canonical helpers ----
 // filters: { ip, severity, type, from, to, limit }
@@ -162,39 +199,88 @@ export const getLogs = (filters = {}) => {
   Object.entries(filters).forEach(([k, v]) => {
     if (v != null && v !== '') q.set(k, String(v));
   });
-  return fetch(prefix(`/api/logs?${q.toString()}`), { ...CRED }).then(j);
+  return authJson(`/api/logs?${q.toString()}`);
 };
 // Trigger a download directly (no blob handling needed in the caller)
-export const exportLogs = (filters = {}, format = 'csv') => {
+export const exportLogs = async (filters = {}, format = 'csv') => {
   const q = new URLSearchParams();
   Object.entries(filters).forEach(([k, v]) => {
     if (v != null && v !== '') q.set(k, String(v));
   });
   q.set('format', format);
-  window.location.href = prefix(`/api/logs/export?${q.toString()}`);
+  const res = await authFetch(`/api/logs/export?${q.toString()}`);
+  if (res.status === 401) clearStoredToken();
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const err = new Error(data?.error || `HTTP ${res.status}`);
+    throw Object.assign(err, data);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ids_logs.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
 
 // --- PD-29: Ops helpers ---
-export const health = () =>
-  fetch(prefix('/api/healthz'), { ...CRED }).then(j);
+export const health = () => authJson('/api/healthz');
 
-export const runRetention = () =>
-  fetch(prefix('/api/retention/run'), { method: 'POST', ...CRED }).then(j);
+export const runRetention = () => authJson('/api/retention/run', { method: 'POST' });
 
 export const downloadDbBackup = async () => {
-  const res = await fetch(prefix('/api/backup/db'), { ...CRED });
+  const res = await authFetch('/api/backup/db');
+  if (res.status === 401) clearStoredToken();
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.blob(); // caller can save-as
 };
 
-if (typeof api !== 'undefined') {
-  api.health = health;
-  api.runRetention = runRetention;
-  api.downloadDbBackup = downloadDbBackup;
-  api.logs = getLogs;
-  api.exportLogs = exportLogs;
-  api.trustedList = trustedList;
-  api.trustIp = trustIp;
-  api.untrustIp = untrustIp;
-  api.blockIpWithDuration = blockIpWithDuration;  
-}
+export const resetAllData = () => authJson('/api/ops/reset', { method: 'POST' });
+
+export const api = {
+  // Alerts (prefers paged if present)
+  alerts: (limit = 50, cursor = null) =>
+    (typeof fetchAlertsPaged === 'function' ? fetchAlertsPaged : fetchAlerts)(limit, cursor),
+  blocks: fetchBlocks,
+  block: (ip, reason) =>
+    reason && typeof blockIpWithReason === 'function' ? blockIpWithReason(ip, reason) : blockIp(ip),
+  unblock: unblockIp,
+
+  // Trusted IP management
+  trustedList: typeof trustedList === 'function' ? trustedList : undefined,
+  trustIp: typeof trustIp === 'function' ? trustIp : undefined,
+  untrustIp: typeof untrustIp === 'function' ? untrustIp : undefined,
+  blockIpWithDuration: typeof blockIpWithDuration === 'function' ? blockIpWithDuration : undefined,
+
+  // Logs
+  logs: typeof getLogs === 'function' ? getLogs : (filters) => fetchLogs(filters?.limit || 200),
+  exportLogs: typeof exportLogs === 'function' ? exportLogs : undefined,
+
+  // Stats / Devices / Settings (only used if you added them earlier)
+  stats: typeof fetchStats === 'function' ? fetchStats : undefined,
+  devices: typeof fetchDevices === 'function' ? fetchDevices : undefined,
+  getSettings: typeof getSettings === 'function' ? getSettings : undefined,
+  putSettings: typeof putSettings === 'function' ? putSettings : undefined,
+
+  // Network scanning helpers
+  startScan: typeof startScan === 'function' ? startScan : undefined,
+  scanStatus: typeof scanStatus === 'function' ? scanStatus : undefined,
+
+  // Auth (optional)
+  login: typeof login === 'function' ? login : undefined,
+  logout: typeof logout === 'function' ? logout : undefined,
+
+  // Ops helpers
+  health: typeof health === 'function' ? health : undefined,
+  runRetention: typeof runRetention === 'function' ? runRetention : undefined,
+  downloadDbBackup: typeof downloadDbBackup === 'function' ? downloadDbBackup : undefined,
+  resetAllData: typeof resetAllData === 'function' ? resetAllData : undefined,
+};
+
+export const authToken = {
+  get: getStoredToken,
+  clear: clearStoredToken,
+};

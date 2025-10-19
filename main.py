@@ -5,11 +5,50 @@ from __future__ import annotations
 
 import argparse
 import configparser
+import os
+import socket
 import sys
+import threading
 from network_monitor import NetworkMonitor
 from anomaly_detector import AnomalyDetector
 from config_validation import validate_config
 from typing import Any, Dict, List, cast
+
+_API_THREAD: threading.Thread | None = None
+
+
+def _is_port_listening(host: str, port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(0.5)
+        try:
+            sock.connect((host, port))
+            return True
+        except OSError:
+            return False
+
+
+def _start_api_server_in_background() -> None:
+    global _API_THREAD
+    if os.environ.get("DISABLE_EMBEDDED_API", "0") == "1":
+        return
+    host = os.environ.get("API_HOST", "127.0.0.1")
+    port = int(os.environ.get("API_PORT", "5000"))
+    if _API_THREAD and _API_THREAD.is_alive():
+        return
+    if _is_port_listening(host, port):
+        return
+    try:
+        from api import app as flask_app  # noqa: WPS433 (import within function)
+    except Exception as exc:  # pragma: no cover - best-effort startup helper
+        print(f"[WARN] Unable to start API server automatically: {exc}")
+        return
+
+    def _run() -> None:
+        flask_app.run(host, port, debug=False, use_reloader=False)
+
+    _API_THREAD = threading.Thread(target=_run, daemon=True, name="api-server")
+    _API_THREAD.start()
+    print(f"[INFO] Embedded API server listening on http://{host}:{port}")
 
 
 def _load_config(config_path: str) -> configparser.ConfigParser:
@@ -59,6 +98,35 @@ def build_arg_parser(cfg: configparser.ConfigParser) -> argparse.ArgumentParser:
         default=default_model,
         help="Path to the trained model (joblib).",
     )
+    fw_default = cfg.getboolean("Monitoring", "FirewallBlocking", fallback=False)
+    pm.add_argument(
+        "--firewall-blocking",
+        dest="firewall_blocking",
+        action="store_true",
+        help="Enable runtime firewall blocking for high-severity anomalies.",
+    )
+    pm.add_argument(
+        "--no-firewall-blocking",
+        dest="firewall_blocking",
+        action="store_false",
+        help="Disable runtime firewall blocking (default).",
+    )
+    pm.set_defaults(firewall_blocking=fw_default)
+
+    sim_default = cfg.getboolean("Monitoring", "SimulateTraffic", fallback=False)
+    pm.add_argument(
+        "--simulate-traffic",
+        dest="simulate_traffic",
+        action="store_true",
+        help="Generate synthetic packets instead of sniffing a real interface.",
+    )
+    pm.add_argument(
+        "--no-simulate-traffic",
+        dest="simulate_traffic",
+        action="store_false",
+        help="Capture live packets from the selected interface.",
+    )
+    pm.set_defaults(simulate_traffic=sim_default)
     pv = sub.add_parser("verify-model", help="Inspect a trained model bundle.")
     pv.add_argument(
         "--model",
@@ -83,7 +151,13 @@ def main(argv=None) -> int:
                 interface=args.interface, packet_count=args.count, model_path=args.model
             )
         elif args.mode == "monitor":
-            monitor.start_monitoring(interface=args.interface, model_path=args.model)
+            _start_api_server_in_background()
+            monitor.start_monitoring(
+                interface=args.interface,
+                model_path=args.model,
+                firewall_blocking=getattr(args, "firewall_blocking", False),
+                simulate=getattr(args, "simulate_traffic", False),
+            )
         elif args.mode == "verify-model":
             # Create a detector aligned with config, load bundle, and print details
             det = AnomalyDetector(
