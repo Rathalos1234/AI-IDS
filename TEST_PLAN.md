@@ -32,6 +32,9 @@ Covers packet feature extraction, anomaly scoring, and alert formatting for runn
 | Ephemeral port predicate correctness       | Property/unit    | PP-U-03                          |
 | Deterministic scoring w/ fixed seed        | Unit             | AD-U-01                          |
 | Severity mapping boundaries                 | Unit             | AD-U-02                          |
+| Network monitor config thresholds & toggles | Unit             | NM-U-01, NM-U-02                 |
+| Numeric coercion helpers guard edge cases  | Unit             | NM-U-03                          |
+| Signature engine rule triggering/resilience | Unit             | SIG-U-01, SIG-U-02               |
 | End-to-end packet→alert                     | Integration      | INT-01                           |
 | Corrupt/partial packet handling             | Fault-injection  | FE-01                             |
 | 10k perf snapshot                           | Perf smoke       | PERF-10K-01                      |
