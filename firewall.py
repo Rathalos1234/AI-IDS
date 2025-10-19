@@ -1,6 +1,6 @@
 """Linux firewall helpers for runtime blocking."""
-from __future__ import annotations
 
+from __future__ import annotations
 import logging
 import os
 import platform
@@ -75,7 +75,9 @@ def ensure_block(ip: str, reason: str | None = None) -> Tuple[bool, str | None]:
             _LOG.info("Firewall block installed for %s", ip)
             return True, None
 
-        error = (added.stderr or "iptables_failed").strip() if added else "iptables_failed"
+        error = (
+            (added.stderr or "iptables_failed").strip() if added else "iptables_failed"
+        )
         _LOG.error("Firewall block failed for %s: %s", ip, error)
         return False, error or "iptables_failed"
 

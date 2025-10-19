@@ -1,4 +1,5 @@
 """Unit tests for the Linux firewall helper."""
+
 from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
@@ -83,3 +84,4 @@ def test_ensure_unblock_retries_until_missing(monkeypatch):
     assert ok is True
     assert err is None
     assert calls[0][1] == "-D"
+    

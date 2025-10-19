@@ -50,6 +50,7 @@ def _start_api_server_in_background() -> None:
     _API_THREAD.start()
     print(f"[INFO] Embedded API server listening on http://{host}:{port}")
 
+
 def _load_config(config_path: str) -> configparser.ConfigParser:
     cfg = configparser.ConfigParser()
     read = cfg.read(config_path)

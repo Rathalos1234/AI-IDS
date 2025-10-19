@@ -1,11 +1,9 @@
 """Backend coverage for Alerts UI manual scenarios."""
-from __future__ import annotations
 
+from __future__ import annotations
 import json
 from collections import deque
-
 import pytest
-
 import api
 
 pytestmark = pytest.mark.integration
@@ -53,7 +51,9 @@ def test_ui_alerts_01_filter_form_applies_rest_query_params(client, monkeypatch)
         )
         return rows
 
-    monkeypatch.setattr(api.webdb, "list_log_events_filtered", fake_list_log_events_filtered)
+    monkeypatch.setattr(
+        api.webdb, "list_log_events_filtered", fake_list_log_events_filtered
+    )
 
     resp = client.get(
         "/api/logs",
@@ -90,7 +90,9 @@ def test_ui_alerts_01_filter_form_applies_rest_query_params(client, monkeypatch)
         ("json", "application/json"),
     ],
 )
-def test_ui_alerts_02_export_buttons_honor_filters(client, monkeypatch, fmt, expected_mimetype):
+def test_ui_alerts_02_export_buttons_honor_filters(
+    client, monkeypatch, fmt, expected_mimetype
+):
     """UI-ALERTS-02 — export endpoints reuse the active filter set."""
 
     captured = {}
@@ -128,7 +130,9 @@ def test_ui_alerts_02_export_buttons_honor_filters(client, monkeypatch, fmt, exp
         )
         return rows
 
-    monkeypatch.setattr(api.webdb, "list_log_events_filtered", fake_list_log_events_filtered)
+    monkeypatch.setattr(
+        api.webdb, "list_log_events_filtered", fake_list_log_events_filtered
+    )
 
     resp = client.get(
         "/api/logs/export",
@@ -156,7 +160,15 @@ def test_ui_alerts_02_export_buttons_honor_filters(client, monkeypatch, fmt, exp
 
     if fmt == "csv":
         body = resp.data.decode("utf-8").strip().splitlines()
-        assert body[0].split(",") == ["id", "ts", "ip", "type", "label", "severity", "kind"]
+        assert body[0].split(",") == [
+            "id",
+            "ts",
+            "ip",
+            "type",
+            "label",
+            "severity",
+            "kind",
+        ]
         assert len(body) == 3
     else:
         exported = json.loads(resp.data.decode("utf-8"))

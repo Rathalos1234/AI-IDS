@@ -20,12 +20,16 @@ from firewall import ensure_block as firewall_ensure_block
 from packet_processor import IP, TCP, UDP, PacketProcessor
 from signature_engine import default_engine
 
+
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
 def _iso_utc(dt: datetime) -> str:
-    return dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return (
+        dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    )
+
 
 try:
     import netifaces  # type: ignore
@@ -92,6 +96,7 @@ def _as_int(value: Any, default: int = 0) -> int:
     except Exception:
         return default
 
+
 def _as_float(value: Any, default: float = 0.0) -> float:
     try:
         if isinstance(value, float):
@@ -99,6 +104,7 @@ def _as_float(value: Any, default: float = 0.0) -> float:
         return float(value)
     except Exception:
         return default
+
 
 class NetworkMonitor:
     """Glue code that wires up capture, processing, and the detector."""
@@ -237,7 +243,14 @@ class NetworkMonitor:
         self.detector.save_model(model_path)
         self.logger.info(f"Model trained and saved to: {model_path}")
 
-    def start_monitoring(self, interface: str, model_path: str, *, firewall_blocking: bool = False, simulate: bool = False,) -> None:
+    def start_monitoring(
+        self,
+        interface: str,
+        model_path: str,
+        *,
+        firewall_blocking: bool = False,
+        simulate: bool = False,
+    ) -> None:
         """Begin live packet sniffing and anomaly detection."""
         if not simulate:
             self._validate_interface(interface)
@@ -292,7 +305,9 @@ class NetworkMonitor:
             self.online_retrain_interval,
         )
         if self._simulate_mode:
-            self.logger.info("Starting synthetic monitoring loop (interface hint: %s)", interface)
+            self.logger.info(
+                "Starting synthetic monitoring loop (interface hint: %s)", interface
+            )
             try:
                 self._simulate_loop()
             except KeyboardInterrupt:
@@ -353,11 +368,11 @@ class NetworkMonitor:
                 for candidate in dict.fromkeys(seen_ips):
                     webdb.record_device(candidate)
 
-            # --- Works for private IPs only  
-#                if sip and ipaddress.ip_address(sip).is_private:
-#                    webdb.record_device(sip)
-#                if dip and ipaddress.ip_address(dip).is_private:
-#                    webdb.record_device(dip)
+            # --- Works for private IPs only
+            #                if sip and ipaddress.ip_address(sip).is_private:
+            #                    webdb.record_device(sip)
+            #                if dip and ipaddress.ip_address(dip).is_private:
+            #                    webdb.record_device(dip)
 
 
             except Exception:
@@ -426,7 +441,6 @@ class NetworkMonitor:
                     f"score={score:.3f} severity={sev}"
                 )
 
-                
                 self._emit(msg, sev)  # severity-aware logger
 
                 if self.firewall_runtime_enabled and (sev or "").lower() == "high":
@@ -438,19 +452,23 @@ class NetworkMonitor:
 
                 # NEW: sink anomaly to WebDB so the GUI can see it
                 try:
-                    webdb.insert_alert({
-                        "id": str(uuid.uuid4()),
-                        "ts": _iso_utc(_utcnow()),
-                        "src_ip": str(last_row["src_ip"]),
-                        "label": (
-                            f"{dest_ip}:{_as_int(last_row.get('dport'))} "
-                            f"score={score:.3f}"
-                        ),
-                        "severity": str(sev).upper(),   # LOW/MEDIUM/HIGH
-                        "kind": "ANOMALY",
-                    })
+                    webdb.insert_alert(
+                        {
+                            "id": str(uuid.uuid4()),
+                            "ts": _iso_utc(_utcnow()),
+                            "src_ip": str(last_row["src_ip"]),
+                            "label": (
+                                f"{dest_ip}:{_as_int(last_row.get('dport'))} "
+                                f"score={score:.3f}"
+                            ),
+                            "severity": str(sev).upper(),  # LOW/MEDIUM/HIGH
+                            "kind": "ANOMALY",
+                        }
+                    )
                 except Exception:
-                    self.logger.debug("webdb.insert_alert failed (anomaly)", exc_info=True)
+                    self.logger.debug(
+                        "webdb.insert_alert failed (anomaly)", exc_info=True
+                    )
 
                 print(
                     "\n--- ANOMALY DETECTED ---\n"
@@ -485,19 +503,23 @@ class NetworkMonitor:
 
                     # NEW: sink signature hit to WebDB (also visible in Log History)
                     try:
-                        webdb.insert_alert({
-                            "id": str(uuid.uuid4()),
-                            "ts": _iso_utc(_utcnow()),
-                            "src_ip": str(last_row_dict.get("src_ip")),
-                            "label": (
-                                f"{hit.name} {last_row_dict.get('dest_ip')}:"
-                                f"{_as_int(last_row_dict.get('dport'))}"
-                            ),
-                            "severity": str(hit.severity or "").upper(),
-                            "kind": "SIGNATURE",
-                        })
+                        webdb.insert_alert(
+                            {
+                                "id": str(uuid.uuid4()),
+                                "ts": _iso_utc(_utcnow()),
+                                "src_ip": str(last_row_dict.get("src_ip")),
+                                "label": (
+                                    f"{hit.name} {last_row_dict.get('dest_ip')}:"
+                                    f"{_as_int(last_row_dict.get('dport'))}"
+                                ),
+                                "severity": str(hit.severity or "").upper(),
+                                "kind": "SIGNATURE",
+                            }
+                        )
                     except Exception:
-                        self.logger.debug("webdb.insert_alert failed (signature)", exc_info=True)
+                        self.logger.debug(
+                            "webdb.insert_alert failed (signature)", exc_info=True
+                        )
 
         except Exception as e:
             self.logger.error(f"Error during packet analysis: {e}", exc_info=False)

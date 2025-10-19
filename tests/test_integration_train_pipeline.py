@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
 import os
-
 from packet_processor import PacketProcessor
 from anomaly_detector import AnomalyDetector
 

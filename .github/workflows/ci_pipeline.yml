@@ -27,13 +27,15 @@ jobs:
         with:
           python-version: "3.10"
           cache: "pip"
-          cache-dependency-path: requirements.txt
-      - name: Install deps (runtime + test/linters)
-        run: pip install -r requirements.txt pytest ruff mypy
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
       - name: Make scripts executable
         run: chmod +x scripts/test_fast.sh scripts/test_full.sh
-      - name: (debug) list files
-        run: ls -la && echo "--- tests dir ---" && ls -la tests
       - name: Run fast gate
         run: bash scripts/test_fast.sh
         env:
@@ -49,13 +51,15 @@ jobs:
         with:
           python-version: "3.10"
           cache: "pip"
-          cache-dependency-path: requirements.txt
-      - name: Install deps
-        run: pip install -r requirements.txt pytest
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
       - name: Make scripts executable
         run: chmod +x scripts/test_full.sh
-      - name: (debug) list files
-        run: ls -la && echo "--- tests dir ---" && ls -la tests
       - name: Run full suite
         run: bash scripts/test_full.sh
       - name: Append perf snapshot to job summary
