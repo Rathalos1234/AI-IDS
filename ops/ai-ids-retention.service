@@ -1,0 +1,7 @@
+[Unit]
+Description=AI-IDS retention job
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/AI-IDS/AI-IDS
+ExecStart=/usr/bin/bash scripts/retention_now.sh 30 30

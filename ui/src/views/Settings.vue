@@ -5,7 +5,15 @@ const settings = ref({}); const err = ref(null); const msg = ref(null);
 // PD-29 ops state
 const opsBusy = ref(false);
 const opsMsg = ref('');
+const themeKey = 'ids.theme';
+const theme = ref(localStorage.getItem(themeKey) || document.documentElement.dataset.theme || 'dark');
 
+function applyTheme(mode) {
+  const next = mode === 'light' ? 'light' : 'dark';
+  theme.value = next;
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem(themeKey, next);
+}
 
 async function load(){
   try{ err.value=null; msg.value=null;
@@ -19,7 +27,10 @@ async function save(){
     msg.value = res.ok !== false ? 'Saved' : (res.message || 'Save failed');
   }catch(e){ err.value = e?.error || e?.message; }
 }
-onMounted(load);
+onMounted(() => {
+  load();
+  applyTheme(theme.value);
+});
 
 // ---- PD-29: Operations actions ----
 async function onRunRetention () {
@@ -54,39 +65,75 @@ async function onHealth () {
   } catch { opsMsg.value = 'Health check failed'; }
   finally { opsBusy.value = false; }
 }
+
+async function onResetAll () {
+  if (!window.confirm('This will remove alerts, blocks, trusted IPs, and devices. Continue?')) return;
+  try {
+    opsBusy.value = true; opsMsg.value = '';
+    const res = await (api.resetAllData
+      ? api.resetAllData()
+      : fetch('/api/ops/reset', { method: 'POST', credentials: 'include' }).then(r => r.json()));
+    if (res?.ok) {
+      const cleared = res.cleared || {};
+      const parts = Object.entries(cleared).map(([k, v]) => `${k}: ${v}`);
+      opsMsg.value = parts.length ? `Reset complete (${parts.join(', ')})` : 'Reset complete.';
+    } else {
+      opsMsg.value = res?.error ? `Reset failed: ${res.error}` : 'Reset failed';
+    }
+  } catch (e) {
+    opsMsg.value = `Reset failed: ${e?.message || 'error'}`;
+  } finally { opsBusy.value = false; }
+}
+
 </script>
 
 <template>
-  <div>
-    <h1 style="margin:0 0 16px;">Settings</h1>
-    <div v-if="err" style="color:#ff8080;margin-bottom:12px;">{{ err }}</div>
-    <div v-if="msg" style="color:#27c383;margin-bottom:12px;">{{ msg }}</div>
-
-    <div class="stack" style="display:flex;flex-direction:column;gap:10px;">
-      <label>Signatures.Enable <input class="input" v-model="settings['Signatures.Enable']"/></label>
-      <label>Logging.LogLevel <input class="input" v-model="settings['Logging.LogLevel']"/></label>
-      <label>Logging.EnableFileLogging <input class="input" v-model="settings['Logging.EnableFileLogging']"/></label>
-      <label>Monitoring.AlertThresholds <input class="input" v-model="settings['Monitoring.AlertThresholds']"/></label>
-      <!-- PD-29: optional retention keys if you set them via /api/settings -->
-      <label>Retention.AlertsDays <input class="input" v-model="settings['Retention.AlertsDays']" placeholder="e.g. 7"/></label>
-      <label>Retention.BlocksDays <input class="input" v-model="settings['Retention.BlocksDays']" placeholder="e.g. 14"/></label>
+  <div class="fade-in">
+    <div class="view-header">
+      <div>
+        <h1>Settings</h1>
+        <p>Adjust monitoring thresholds, logging, and maintenance operations.</p>
+      </div>
+      <div class="actions-row">
+        <button class="btn btn--primary" @click="save">Save</button>
+        <button class="btn btn--ghost" @click="load">Reset</button>
+      </div>
     </div>
 
-    <div style="margin-top:12px;">
-      <button class="btn" @click="save">Save</button>
-      <button class="btn" style="margin-left:8px;" @click="load">Reset</button>
-    </div>
+    <section class="surface surface--soft" style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div>
+        <h3 style="margin:0 0 4px;">Appearance</h3>
+        <p class="small" style="margin:0;">Toggle between dark and light mode.</p>
+      </div>
+      <div class="actions-row">
+        <button class="btn" :class="{ active: theme==='dark' }" @click="applyTheme('dark')">Dark</button>
+        <button class="btn" :class="{ active: theme==='light' }" @click="applyTheme('light')">Light</button>
+      </div>
+    </section>
 
+    <div v-if="err" class="alert-banner" style="margin-bottom:16px;">{{ err }}</div>
+    <div v-if="msg" class="alert-banner success" style="margin-bottom:16px;">{{ msg }}</div>
 
-    <!-- PD-29: Operations -->
-    <section class="card" style="margin-top:16px;">
-      <div class="card-header"><h3>Operations</h3></div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn" @click="onRunRetention" :disabled="opsBusy">{{ opsBusy ? 'Running…' : 'Run retention now' }}</button>
+    <section class="surface surface--soft" style="margin-bottom:20px;">
+      <div class="stack">
+        <label>Signatures.Enable <input class="input" v-model="settings['Signatures.Enable']"/></label>
+        <label>Logging.LogLevel <input class="input" v-model="settings['Logging.LogLevel']"/></label>
+        <label>Logging.EnableFileLogging <input class="input" v-model="settings['Logging.EnableFileLogging']"/></label>
+        <label>Monitoring.AlertThresholds <input class="input" v-model="settings['Monitoring.AlertThresholds']"/></label>
+        <label>Retention.AlertsDays <input class="input" v-model="settings['Retention.AlertsDays']" placeholder="e.g. 7"/></label>
+        <label>Retention.BlocksDays <input class="input" v-model="settings['Retention.BlocksDays']" placeholder="e.g. 14"/></label>
+      </div>
+    </section>
+
+    <section class="surface surface--soft">
+      <h3 style="margin:0 0 12px;">Operations</h3>
+      <div class="actions-row" style="flex-wrap:wrap; gap:12px;">
+        <button class="btn btn--primary" @click="onRunRetention" :disabled="opsBusy">{{ opsBusy ? 'Running…' : 'Run retention now' }}</button>
         <button class="btn" @click="onBackup" :disabled="opsBusy">Download DB backup</button>
+        <button class="btn btn--danger" @click="onResetAll" :disabled="opsBusy">Reset data</button>
         <button class="btn" @click="onHealth" :disabled="opsBusy">Health check</button>
       </div>
-      <div class="small" style="margin-top:8px; color: var(--muted);" v-if="opsMsg">{{ opsMsg }}</div>
+      <div class="small" style="margin-top:12px; color: var(--muted);" v-if="opsMsg">{{ opsMsg }}</div>
     </section>
   </div>
 </template>

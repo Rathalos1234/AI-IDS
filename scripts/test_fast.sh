@@ -10,11 +10,11 @@ python -V
 echo "=== Ruff (lint) ==="
 if command -v ruff >/dev/null 2>&1; then
   if [[ "$LINT_STRICT" == "1" ]]; then
-    ruff check --fix .
-    ruff format
+    ruff check .
+    ruff format --check .
   else
-    ruff check --fix . || true
-    ruff format || true
+    ruff check . || true
+    ruff format --check . || true
   fi
 else
   echo "ruff not found, skipping."

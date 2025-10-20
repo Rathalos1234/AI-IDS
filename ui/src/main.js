@@ -2,7 +2,10 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 
-// import your existing global CSS (root-level file): ../styles.css
-import './styles.css';   // adjusts to the dark theme you already have
+import './styles.css';
+
+const THEME_KEY = 'ids.theme';
+const initialTheme = localStorage.getItem(THEME_KEY) || 'dark';
+document.documentElement.dataset.theme = initialTheme;
 
 createApp(App).use(router).mount('#app');

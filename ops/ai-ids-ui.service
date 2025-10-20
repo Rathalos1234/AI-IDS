@@ -1,0 +1,17 @@
+[Unit]
+Description=AI-IDS UI (NGINX single origin)
+After=network.target ai-ids-api.service
+
+[Service]
+WorkingDirectory=%h/AI-IDS/AI-IDS
+ExecStart=/usr/sbin/nginx -c %h/AI-IDS/AI-IDS/ops/nginx.conf -g 'daemon off;'
+Restart=on-failure
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=default.target

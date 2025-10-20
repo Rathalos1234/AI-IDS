@@ -1,124 +1,140 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { api } from '../api'
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { api } from '../api';
+import { subscribeToEvents } from '../eventStream';
 
-const items = ref([]); const err = ref(null); const loading = ref(false);
-// PD-27 filters
-const fIp = ref(''); const fSeverity = ref(''); const fType = ref(''); // alert|block
-const fFrom = ref(''); const fTo = ref('');
-let es
+const items = ref([]);
+const nextCursor = ref(null);
+const limit = 50;
+const err = ref(null);
+const loading = ref(false);
+const stopFns = [];
 
-
-
-function normalize(e) {
-  // unify table shape
-  if (e.type === 'alert' || e.kind === 'ANOMALY' || e.kind === 'SIGNATURE') {
-    return { id: e.id, ts: e.ts, ip: e.src_ip || e.ip, type: 'alert', detail: e.label || e.kind }
+function parseLabel(alert) {
+  const label = alert?.label || '';
+  const match = String(label).match(/^(.*)\s+score=([-+]?\d*\.?\d+(?:e[-+]?\d+)?)/i);
+  if (match) {
+    return {
+      ...alert,
+      label: match[1].trim(),
+      score: Number(match[2]),
+    };
   }
-  if (e.type === 'block' || e.action === 'block' || e.action === 'unblock') {
-    return { id: e.id, ts: e.ts, ip: e.ip, type: e.action === 'block' ? 'block' : 'unblock', detail: e.action }
-  }
-  return { id: e.id, ts: e.ts, ip: e.ip || e.src_ip, type: e.type || e.kind || 'event', detail: e.label || '' }
+  return {
+    ...alert,
+    score: typeof alert?.score === 'number' ? alert.score : null,
+  };
 }
 
-async function initialLoad() {
+const formatScore = (score) => (typeof score === 'number' && score === score ? score.toFixed(3) : '—');
+
+
+
+async function load(cursor = null) {
   try {
-    err.value = null
-    const res = await api.logs?.({
-      limit: 200,
-      ip: fIp.value || undefined,
-      severity: fSeverity.value || undefined,
-      type: fType.value || undefined,
-      from: fFrom.value || undefined,
-      to: fTo.value || undefined,
-    }) || { items: [] }
-    const page = Array.isArray(res) ? res : (res.items || [])
-    items.value = page.map(normalize)
+    loading.value = true;
+    err.value = null;
+    const data = await api.alerts(limit, cursor);
+    if (Array.isArray(data)) {
+      const mapped = data.map(parseLabel);
+      items.value = cursor ? items.value.concat(mapped) : mapped;
+      nextCursor.value = data.length ? data[data.length - 1].ts : null;
+    } else {
+      const page = data.items || [];
+      const mapped = page.map(parseLabel);
+      items.value = cursor ? items.value.concat(mapped) : mapped;
+      nextCursor.value = data.next_cursor || (items.value[items.value.length - 1]?.ts || null);
+    }
   } catch (e) {
-    err.value = e?.error || e?.message || 'Failed to load logs'
+    err.value = e?.error || e?.message || 'Failed to load log history';
+  } finally {
+    loading.value = false;
   }
 }
 
-function exportCsv(){
-  api.exportLogs?.({
-    ip: fIp.value || undefined,
-    severity: fSeverity.value || undefined,
-    type: fType.value || undefined,
-    from: fFrom.value || undefined,
-    to: fTo.value || undefined,
-  }, 'csv');
-}
-function exportJson(){
-  api.exportLogs?.({
-    ip: fIp.value || undefined,
-    severity: fSeverity.value || undefined,
-    type: fType.value || undefined,
-    from: fFrom.value || undefined,
-    to: fTo.value || undefined,
-  }, 'json');
+function upsertAlert(alert) {
+  if (!alert || !alert.id) return;
+  const normalized = parseLabel(alert);
+  const existingIdx = items.value.findIndex((row) => row.id === alert.id);
+  if (existingIdx !== -1) {
+    items.value.splice(existingIdx, 1);
+  }
+    items.value.unshift(normalized);
+    if (items.value.length > 200) items.value.splice(200);
 }
 
-function startSSE() {
-  const base = localStorage.getItem('API_BASE') || ''
-  es = new EventSource(base + '/api/events', { withCredentials: true })
-  es.addEventListener('alert', (ev) => {
-    const d = JSON.parse(ev.data); items.value.unshift(normalize({ ...d, type: 'alert' }))
-  })
-  es.addEventListener('block', (ev) => {
-    const d = JSON.parse(ev.data); items.value.unshift(normalize({ ...d, type: 'block' }))
-  })
-  es.onerror = () => { /* network hiccup: keep connection open; browser will retry */ }
+function startRealtime() {
+  stopFns.push(
+    subscribeToEvents('alert', (payload) => {
+      upsertAlert(payload);
+    }),
+  );
 }
 
-onMounted(async () => { await initialLoad(); startSSE() })
-onBeforeUnmount(() => { if (es) es.close() })
+onMounted(async () => {
+  await load();
+  startRealtime();
+});
+onBeforeUnmount(() => {
+  while (stopFns.length) {
+    const off = stopFns.pop();
+    try { if (typeof off === 'function') off(); } catch (e) { console.error(e); }
+  }
+});
+
+async function exportHistory(format) {
+  try {
+    await api.exportLogs?.({ type: 'alert' }, format);
+  } catch (e) {
+    err.value = e?.error || e?.message || 'Export failed';
+  }
+}
+
 </script>
 
 <template>
-  <div>
-    <h1 style="margin:0 0 16px;">Log History</h1>
-    <!-- PD-27: Filters + Export -->
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0;">
-      <input class="input" v-model="fIp" placeholder="IP (e.g., 192.168.1.10)"/>
-      <select class="input" v-model="fSeverity">
-        <option value="">Severity (any)</option>
-        <option>low</option><option>medium</option><option>high</option><option>critical</option>
-      </select>
-      <select class="input" v-model="fType">
-        <option value="">Type (any)</option>
-        <option value="alert">alert</option>
-        <option value="block">block</option>
-      </select>
-      <input class="input" v-model="fFrom" placeholder="From (ISO) 2025-10-01T00:00:00Z" style="min-width:260px;"/>
-      <input class="input" v-model="fTo" placeholder="To (ISO) 2025-10-31T23:59:59Z" style="min-width:260px;"/>
-      <button class="btn" @click="initialLoad">Apply</button>
-      <button class="btn" @click="exportCsv">Export CSV</button>
-      <button class="btn" @click="exportJson">Export JSON</button>
+  <div class="fade-in">
+    <div class="view-header">
+      <div>
+        <h1>Log History</h1>
+        <p>Chronological list of recent alert events.</p>
+      </div>
+      <div class="actions-row">
+        <button class="btn" @click="exportHistory('csv')">Export CSV</button>
+        <button class="btn" @click="exportHistory('json')">Export JSON</button>
+      </div>
     </div>
-    <div v-if="err" style="color:#ff8080;margin-bottom:12px;">{{ err }}</div>
+    <div v-if="err" class="alert-banner" style="margin-bottom:16px;">{{ err }}</div>
 
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+    <section class="surface table-card">
+      <table>
         <thead>
-          <tr style="background:#0f141b;">
-            <th style="text-align:left;padding:12px;">Date</th>
-            <th style="text-align:left;padding:12px;">Time</th>
-            <th style="text-align:left;padding:12px;">IP Address</th>
-            <th style="text-align:left;padding:12px;">Type</th>
-            <th style="text-align:left;padding:12px;">Details</th>
+          <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>IP</th>
+            <th>Description</th>
+            <th>Score</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="e in items" :key="e.id + e.type" style="border-top:1px solid var(--border);">
-            <td style="padding:12px;">{{ (e.ts||'').split('T')[0] }}</td>
-            <td style="padding:12px;">{{ (e.ts||'').split('T')[1]?.slice(0,5) }}</td>
-            <td style="padding:12px;">{{ e.ip }}</td>
-            <td style="padding:12px; text-transform:capitalize;">{{ e.type }}</td>
-            <td style="padding:12px;">{{ e.detail }}</td>
+          <tr v-for="a in items" :key="a.id">
+            <td>{{ (a.ts||'').split('T')[0] }}</td>
+            <td>{{ (a.ts||'').split('T')[1]?.slice(0,5) }}</td>
+            <td>{{ a.src_ip }}</td>
+            <td>{{ a.label }}</td>
+            <td>{{ formatScore(a.score) }}</td>
           </tr>
-          <tr v-if="!items.length"><td colspan="5" style="padding:12px;color:var(--muted);">No events yet.</td></tr>
+          <tr v-if="!items.length">
+           <td colspan="5" class="small" style="text-align:center;color:var(--muted);padding:18px;">No events yet.</td>
+          </tr>
         </tbody>
       </table>
+    </section>
+    <div class="actions-row" style="justify-content:flex-end;margin-top:16px;">
+      <button class="btn" :disabled="!nextCursor || loading" @click="load(nextCursor)">
+        {{ loading ? 'Loading…' : 'Load more' }}
+      </button>
     </div>
   </div>
 </template>
