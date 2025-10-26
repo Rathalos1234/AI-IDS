@@ -56,3 +56,4 @@ tests/__pycache__/
 tests/ui/playwright-report/
 tests/ui/test-results
 test-results/
+TEST_PLAN.md
