@@ -1,18 +1,25 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
+  testDir: './',                       // this folder
   timeout: 60_000,
+  retries: 0,
+  fullyParallel: true,
+  reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:5173',
-    actionTimeout: 15_000,
+    // Your UI is a hash router → we’ll navigate with '/#/<route>'
+    baseURL: 'http://localhost:5173',
+    headless: true,
     trace: 'on-first-retry',
-    video: 'retain-on-failure',
-    screenshot: 'only-on-failure',
-    acceptDownloads: true,
+    // Use the logged-in storage state produced by global setup:
+    storageState: 'tests/ui/.auth/admin.json',
   },
-  reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]],
   projects: [
-    { name: 'chromium', use: { browserName: 'chromium' } },
-    { name: 'firefox', use: { browserName: 'firefox' } },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
+  // Optionally start the dev server for you; comment out if you prefer `make dev`
+  // webServer: [
+  //   { command: 'make dev', url: 'http://localhost:5173', reuseExistingServer: true, timeout: 120000 }
+  // ],
+  globalSetup: './global-setup.ts',
 });
