@@ -622,7 +622,7 @@ def devices():
         #        items = []
         #    return jsonify({"ok": True, "items": items})
         items = []
-    return jsonify({"ok": True, "items": items})
+    return jsonify(items)
 
 
 # =========================
