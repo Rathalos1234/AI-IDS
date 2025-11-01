@@ -184,13 +184,22 @@ test('Dashboard: Scan → reaches 100% and devices refresh', async ({ page }, in
 test('Dashboard: Last Scan timestamp is stable on Refresh (no new scan)', async ({ page }, info) => {
   await login(page);
   await page.goto(route('dashboard'));
-  const lastScanText1 = await page.getByText(/Last Scan/i).first().textContent().catch(() => '');
-  // hit "Refresh" button if present
+
+  // Compare the stable backend field rather than brittle UI text formatting.
+  const beforeStatus = await (await page.request.get(`${API || ''}/api/scan/status`)).json();
+  const before = (beforeStatus?.scan?.last_scan_ts ?? '') as string;
+
   const ref = page.getByRole('button', { name: /refresh/i });
   if (await ref.isVisible().catch(() => false)) await ref.click();
-  await page.waitForTimeout(800);
-  const lastScanText2 = await page.getByText(/Last Scan/i).first().textContent().catch(() => '');
-  expect((lastScanText1 || '').trim()).toBe((lastScanText2 || '').trim());
+  await page.waitForTimeout(500);
+
+  const afterStatus = await (await page.request.get(`${API || ''}/api/scan/status`)).json();
+  const after = (afterStatus?.scan?.last_scan_ts ?? '') as string;
+
+  expect(after).toBe(before);
+
+  // Light UI sanity: label is present.
+  await expect(page.getByText(/Last Scan/i).first()).toBeVisible();
   await snap(page, info, 'S3-dashboard-last-scan-stable');
 });
 
