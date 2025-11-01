@@ -46,6 +46,27 @@ def _iso_utc(dt: datetime) -> str:
         dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     )
 
+# --- Persisted last-scan helpers ---
+def _read_last_scan_ts(path: str = "config.ini") -> Optional[str]:
+    """Read the last finished scan timestamp from config.ini (if present)."""
+    cfg = configparser.ConfigParser()
+    cfg.read(path)
+    # Keep section/key names stable and human-readable.
+    if cfg.has_section("Scan"):
+        val = cfg.get("Scan", "LastScanTs", fallback="").strip()
+        return val or None
+    return None
+
+def _write_last_scan_ts(ts: str, path: str = "config.ini") -> None:
+    """Persist the last finished scan timestamp to config.ini."""
+    cfg = configparser.ConfigParser()
+    cfg.read(path)
+    if not cfg.has_section("Scan"):
+        cfg.add_section("Scan")
+    cfg.set("Scan", "LastScanTs", ts)
+    with open(path, "w") as fh:
+        cfg.write(fh)
+
 
 # --- PD-29: record app start for uptime ---
 _APP_STARTED = _utcnow()
@@ -565,13 +586,28 @@ def stats():
     require_auth()
     a = webdb.list_alerts(limit=200)
     b = webdb.list_blocks(limit=200)
-    return jsonify(
-        {
-            "ok": True,
-            "counts": {"alerts_200": len(a), "blocks_200": len(b)},
-            "ts": _iso_utc(_utcnow()),
-        }
+    # Take a stable snapshot of the current scan state.
+    with _SCAN_LOCK:
+        scan_snapshot = dict(_SCAN)
+    # Derive the same "last scan" timestamp logic used by /api/scan/status
+    last_ts = (
+        scan_snapshot.get("finished")
+        or scan_snapshot.get("started")
+        or _LAST_SCAN_TS
+        or _read_last_scan_ts()
     )
+    ts_out = last_ts or _iso_utc(_utcnow())
+    payload = {
+        "ok": True,
+        "counts": {"alerts_200": len(a), "blocks_200": len(b)},
+        # Keep this stable across refreshes when we know a last scan time.
+        "ts": ts_out,
+        "last_scan_ts": last_ts,
+        # Provide the scan fields so the UI can keep showing "100/100 · done"
+        # instead of falling back to a clock-only display.
+        "scan": scan_snapshot,
+    }
+    return jsonify(payload)
 
 
 # =========================
@@ -592,6 +628,8 @@ SAFE_KEYS.update(
     }
 )
 
+# Optional: expose persisted last-scan time via /api/settings GET
+SAFE_KEYS.update({("Scan", "LastScanTs")})
 
 def _load_settings(path: str = "config.ini") -> dict:
     cfg = configparser.ConfigParser()
@@ -802,7 +840,8 @@ _SCAN = {
 }
 _SCAN_LOCK = threading.Lock()
 
-_LAST_SCAN_TS: Optional[str] = None
+# Initialize from disk so a reboot shows the last known scan time
+_LAST_SCAN_TS: Optional[str] = _read_last_scan_ts()
 
 TOP_PORTS = [22, 23, 53, 80, 110, 139, 143, 443, 445, 3306, 3389, 5900]
 
@@ -869,17 +908,26 @@ def _scan_job(target_ips: list[str], ports: list[int], timeout_ms: int):
         finished = _iso_utc(_utcnow())
         with _SCAN_LOCK:
             _SCAN["status"] = "done"
-            _SCAN["finished"] = _iso_utc(_utcnow())
+            _SCAN["finished"] = finished
             _SCAN["progress"] = 100  # ensure 100/100 at completion
         # remember last finished scan time for future status calls
         _LAST_SCAN_TS = finished
+        try:
+            _write_last_scan_ts(finished)
+        except Exception:
+            pass
     except Exception as e:
+        finished = _iso_utc(_utcnow())
         with _SCAN_LOCK:
             _SCAN["status"] = "error"
             _SCAN["message"] = str(e)
-            _SCAN["finished"] = _iso_utc(_utcnow())
-        # even failed runs count as the last attempt time
+            _SCAN["finished"] = finished
+        # even failed/aborted runs count as the last attempt time
         _LAST_SCAN_TS = finished
+        try:
+            _write_last_scan_ts(finished)
+        except Exception:
+            pass
 
 
 def _is_currently_blocked(ip: str) -> bool:
@@ -954,11 +1002,23 @@ def scan_status():
         data = dict(_SCAN)
     # add soft timestamps the test accepts
     now_iso = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    # Resolve a stable last-scan timestamp first.
+    last_ts = None
     if data.get("finished"):
-        data.setdefault("last_scan_ts", data["finished"])
+        last_ts = data.get("finished")
     elif data.get("started"):
-        data.setdefault("last_scan_ts", data["started"])
-    data.setdefault("ts", now_iso)
+        last_ts = data.get("started")
+    else:
+        # No in-memory record (fresh boot, idle): use persisted value if present.
+        last_ts = _LAST_SCAN_TS or _read_last_scan_ts()
+    if last_ts:
+        # Ensure both 'last_scan_ts' and 'ts' reflect the last known scan time
+        # so the UI does not jump to the current clock time on refresh.
+        data["last_scan_ts"] = last_ts
+        data["ts"] = last_ts
+    else:
+        # Very first boot with no history
+        data.setdefault("ts", now_iso)
     return jsonify({"ok": True, "scan": data})
 
 
