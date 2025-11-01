@@ -214,10 +214,10 @@ def list_log_events_filtered(
     *,
     limit: int = 200,
     ip: str | None = None,
-    severity: str | None = None,   # e.g., low|medium|high|critical (case-insensitive)
-    kind: str | None = None,       # 'alert' or 'block'
-    ts_from: str | None = None,    # ISO 8601 (inclusive)
-    ts_to: str | None = None,       # ISO 8601 (inclusive)
+    severity: str | None = None,  # e.g., low|medium|high|critical (case-insensitive)
+    kind: str | None = None,  # 'alert' or 'block'
+    ts_from: str | None = None,  # ISO 8601 (inclusive)
+    ts_to: str | None = None,  # ISO 8601 (inclusive)
 ):
     params: list[Any] = []
 
@@ -289,10 +289,11 @@ def verify_login(username: str, password: str) -> bool:
             return False
         return _hash_password(password) == row["password_hash"]
 
+
 def register_failure(
     username: str, lock_after: int = 5, lock_minutes: int = 15
 ) -> None:
-    now_str = _iso_utc(now)
+    now_str = _iso_utc(_utcnow())
     with closing(_con()) as con:
         r = con.execute(
             "SELECT * FROM auth_lockout WHERE username=?", (username,)
@@ -306,7 +307,7 @@ def register_failure(
             count = int(r["fail_count"]) + 1
             locked_until = None
             if count >= lock_after:
-                locked_until = _iso_utc(now + timedelta(minutes=lock_minutes))
+                locked_until = _iso_utc(_utcnow() + timedelta(minutes=lock_minutes))
                 count = 0
             con.execute(
                 "UPDATE auth_lockout SET fail_count=?, last_fail_at=?, locked_until=? WHERE username=?",
@@ -457,7 +458,6 @@ def expire_bans(now_iso: str):
 #             (b["id"], b["ts"], b["ip"], b["action"], b.get("reason", ""), b.get("expires_at", "")),
 #         )
 #         con.commit()
-
 
 
 # optional retention helper (used by PD-29)

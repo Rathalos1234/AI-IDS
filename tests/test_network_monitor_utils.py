@@ -20,7 +20,9 @@ def network_monitor_module(monkeypatch, tmp_path):
     return module
 
 
-def _build_config(enable_signatures: bool, thresholds: str | None = None) -> configparser.ConfigParser:
+def _build_config(
+    enable_signatures: bool, thresholds: str | None = None
+) -> configparser.ConfigParser:
     cfg = configparser.ConfigParser()
     monitoring = {"OnlineRetrainInterval": "1"}
     if thresholds is not None:

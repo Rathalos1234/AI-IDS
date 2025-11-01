@@ -84,23 +84,45 @@ def _is_trusted(ip: str) -> bool:
     return ip in _TRUSTED_MEM
 
 
-def _compute_expiry(body: dict) -> str:
-    """Return ISO 'expires_at' or empty string for permanent bans."""
-    mins = body.get("duration_minutes")
-    if mins is None or str(mins).strip() == "":
-        return ""
+#def _compute_expiry(body: dict) -> str:
+#    """Return ISO 'expires_at' or empty string for permanent bans."""
+#    mins = body.get("duration_minutes")
+#    if mins is None or str(mins).strip() == "":
+#        return ""
+#    try:
+#        mins = int(mins)
+#        if mins <= 0:
+#            return ""
+#        return (
+#            _iso_utc(_utcnow())
+#            if mins == 0
+#            else _iso_utc(_utcnow() + timedelta(minutes=mins))
+#        )
+#    except Exception:
+#        return ""
+
+def _compute_expiry(body: dict) -> tuple[str, int]:
+    """
+    Compute temporary-ban expiry.
+    Accepts aliases: duration_minutes | ttl | minutes | duration  (units: minutes)
+    Returns (expires_at_iso, ttl_seconds). Empty string / 0 means 'no expiry' (permanent).
+    """
+    mins_val = None
+    for key in ("duration_minutes", "ttl", "minutes", "duration"):
+        v = body.get(key, None)
+        if v is not None and str(v).strip() != "":
+            mins_val = v
+            break
+    if mins_val is None:
+        return "", 0
     try:
-        mins = int(mins)
-        if mins <= 0:
-            return ""
-        return (
-            _iso_utc(_utcnow())
-            if mins == 0
-            else _iso_utc(_utcnow() + timedelta(minutes=mins))
-        )
+        mins = int(mins_val)
     except Exception:
-        return ""
-    
+        return "", 0
+    if mins <= 0:
+        return "", 0
+    expires = _utcnow() + timedelta(minutes=mins)
+    return _iso_utc(expires), mins * 60
 
 class FirewallResult(TypedDict):
     applied: bool
@@ -153,6 +175,7 @@ _LOCKS: dict[
 ] = {}  # {username: {"fail_count": int, "locked_until": iso_str}}
 _TOKENS: dict[str, dict] = {}
 _TOKENS_LOCK = threading.Lock()
+
 
 # after: REQUIRE_AUTH = os.environ.get("REQUIRE_AUTH", "0") == "1"
 def _auth_required() -> bool:
@@ -417,7 +440,8 @@ def post_block():
     if _is_trusted(ip):
         return jsonify({"ok": False, "error": "trusted_ip"}), 400
     reason = (body.get("reason") or "").strip()
-    expires_at = _compute_expiry(body)
+#    expires_at = _compute_expiry(body)
+    expires_at, ttl_sec = _compute_expiry(body)
 
     webdb.delete_action_by_ip(ip, "unblock")
     webdb.delete_action_by_ip(ip, "block")
@@ -432,17 +456,17 @@ def post_block():
             "expires_at": expires_at,
         }
     )
-#    webdb.insert_block(
-#        {
-#            "id": str(uuid.uuid4()),
-#            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-#            "ip": ip,
-#            "action": "block",
-#            "reason": (body.get("reason") or "").strip(),
-#            # If webdb has no 'expires_at' column, this extra key is ignored.
-#            "expires_at": expires_at,
-#        }
-#    )
+    #    webdb.insert_block(
+    #        {
+    #            "id": str(uuid.uuid4()),
+    #            "ts": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+    #            "ip": ip,
+    #            "action": "block",
+    #            "reason": (body.get("reason") or "").strip(),
+    #            # If webdb has no 'expires_at' column, this extra key is ignored.
+    #            "expires_at": expires_at,
+    #        }
+    #    )
     if expires_at and not _supports_expire_bans():
         _TEMP_BANS[ip] = expires_at
     fw = _firewall_apply("block", ip, reason)
@@ -461,8 +485,9 @@ def post_block_with_reason():
     # PD-28: block guard for trusted IPs + duration support
     if _is_trusted(ip):
         return jsonify({"ok": False, "error": "trusted_ip"}), 400
-#    expires_at, ttl_sec = _compute_expiry(body)
-    expires_at = _compute_expiry(body)
+    #    expires_at, ttl_sec = _compute_expiry(body)
+#    expires_at = _compute_expiry(body)
+    expires_at, ttl_sec = _compute_expiry(body)
 
     webdb.delete_action_by_ip(ip, "unblock")
     webdb.delete_action_by_ip(ip, "block")
@@ -480,7 +505,8 @@ def post_block_with_reason():
         _TEMP_BANS[ip] = expires_at
     fw = _firewall_apply("block", ip, reason)
     fw["capabilities"] = firewall_capabilities()
-    return {"ok": True, "firewall": fw}
+#    return {"ok": True, "firewall": fw}
+    return {"ok": True, "expires_at": expires_at, "ttl_seconds": ttl_sec, "firewall": fw}
 
 
 @app.post("/api/unblock")
@@ -738,11 +764,13 @@ def add_trusted():
     except Exception:
         return jsonify({"ok": False, "error": "bad_ip"}), 400
     if _is_currently_blocked(ip):
-        return jsonify({
-            "ok": False,
-            "error": "ip_blocked",
-            "message": "Unblock this IP before adding it to Trusted."
-        }), 409
+        return jsonify(
+            {
+                "ok": False,
+                "error": "ip_blocked",
+                "message": "Unblock this IP before adding it to Trusted.",
+            }
+        ), 409
     if _supports_trusted_db():
         webdb.upsert_trusted_ip(ip, note)
     else:
@@ -812,22 +840,26 @@ def _scan_job(target_ips: list[str], ports: list[int], timeout_ms: int):
     global _LAST_SCAN_TS
     target_count = max(1, len(target_ips))  # avoid div-by-zero
     with _SCAN_LOCK:
-        _SCAN.update({
-            "status": "running",
-            "started": _iso_utc(_utcnow()),
-            "finished": None,
-            "progress": 0,        # percent (0..100)
-            "total": 100,         # fixed denominator for UI
-            "done": 0,            # how many IPs completed
-            "targets": target_count,
-            "message": "",
-        })
+        _SCAN.update(
+            {
+                "status": "running",
+                "started": _iso_utc(_utcnow()),
+                "finished": None,
+                "progress": 0,  # percent (0..100)
+                "total": 100,  # fixed denominator for UI
+                "done": 0,  # how many IPs completed
+                "targets": target_count,
+                "message": "",
+            }
+        )
 
     try:
         done = 0
         for ip in target_ips:
             openp = _tcp_scan(ip, ports, timeout_ms)
-            webdb.set_device_scan(ip, ",".join(map(str, openp)), _risk_from_ports(openp))
+            webdb.set_device_scan(
+                ip, ",".join(map(str, openp)), _risk_from_ports(openp)
+            )
             done += 1
             percent = min(100, int(done * 100 / target_count))
             with _SCAN_LOCK:
@@ -849,6 +881,7 @@ def _scan_job(target_ips: list[str], ports: list[int], timeout_ms: int):
         # even failed runs count as the last attempt time
         _LAST_SCAN_TS = finished
 
+
 def _is_currently_blocked(ip: str) -> bool:
     try:
         # list_blocks returns newest first; first match is the latest action for this IP
@@ -858,6 +891,7 @@ def _is_currently_blocked(ip: str) -> bool:
         return False
     except Exception:
         return False
+
 
 @app.post("/api/scan")
 def start_scan():

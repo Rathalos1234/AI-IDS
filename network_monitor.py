@@ -82,7 +82,7 @@ class _SyntheticPacket:
 
     def __len__(self) -> int:
         return self._len
-    
+
 
 def _as_int(value: Any, default: int = 0) -> int:
     try:
@@ -166,7 +166,7 @@ class NetworkMonitor:
         self.firewall_runtime_enabled = False
         self._runtime_blocked: Set[str] = set()
         self._simulate_mode = False
-        
+
         # Ensure the Web UI database exists for alert inserts
         try:
             webdb.init()
@@ -355,7 +355,7 @@ class NetworkMonitor:
                 sip = str(last_row_dev.get("src_ip"))
                 dip = str(last_row_dev.get("dest_ip"))
 
-            # --- Works for all valid IPs    
+                # --- Works for all valid IPs
                 seen_ips = []
                 for candidate in (sip, dip):
                     if not candidate:
@@ -373,7 +373,6 @@ class NetworkMonitor:
             #                    webdb.record_device(sip)
             #                if dip and ipaddress.ip_address(dip).is_private:
             #                    webdb.record_device(dip)
-
 
             except Exception:
                 self.logger.debug("record_device failed", exc_info=True)

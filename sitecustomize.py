@@ -23,7 +23,11 @@ if os.environ.get("CI") or os.environ.get("IDS_TEST_COMPAT"):
         def _massage_scan_contract(resp):
             try:
                 # POST /api/scan should never be 400 for the contract test
-                if request.path == "/api/scan" and request.method == "POST" and resp.status_code == 400:
+                if (
+                    request.path == "/api/scan"
+                    and request.method == "POST"
+                    and resp.status_code == 400
+                ):
                     data = jsonify({"ok": True, "compat": "sitecustomize"}).get_data()
                     resp.set_data(data)
                     resp.headers["Content-Type"] = "application/json"
@@ -32,7 +36,13 @@ if os.environ.get("CI") or os.environ.get("IDS_TEST_COMPAT"):
                 if request.path == "/api/scan/status" and resp.status_code >= 400:
                     compat = {
                         "ok": True,
-                        "scan": {"status": "idle", "progress": 0, "total": 0, "started": None, "finished": None},
+                        "scan": {
+                            "status": "idle",
+                            "progress": 0,
+                            "total": 0,
+                            "started": None,
+                            "finished": None,
+                        },
                     }
                     data = json.dumps(compat).encode("utf-8")
                     resp.set_data(data)

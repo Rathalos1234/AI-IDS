@@ -5,6 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import sys
 import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import firewall
 
@@ -84,4 +85,3 @@ def test_ensure_unblock_retries_until_missing(monkeypatch):
     assert ok is True
     assert err is None
     assert calls[0][1] == "-D"
-    
