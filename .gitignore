@@ -58,3 +58,4 @@ tests/ui/test-results
 test-results/
 TEST_PLAN.md
 models/
+data/
