@@ -55,6 +55,7 @@ logs/
 tests/__pycache__/
 tests/ui/playwright-report/
 tests/ui/test-results
+tests/ui/.auth/
 test-results/
 TEST_PLAN.md
 models/
