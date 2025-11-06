@@ -8,6 +8,8 @@ pytestmark = pytest.mark.unit
 
 def test_scan_start_and_status_contract():
     c = api.app.test_client()
+    # Other tests toggle auth-on; disable to exercise happy path without login.
+    api.REQUIRE_AUTH = False
     r = c.post("/api/scan")
     assert r.status_code in (200, 202, 204)
     s = c.get("/api/scan/status")
