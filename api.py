@@ -46,6 +46,7 @@ def _iso_utc(dt: datetime) -> str:
         dt.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     )
 
+
 # --- Persisted last-scan helpers ---
 def _read_last_scan_ts(path: str = "config.ini") -> Optional[str]:
     """Read the last finished scan timestamp from config.ini (if present)."""
@@ -56,6 +57,7 @@ def _read_last_scan_ts(path: str = "config.ini") -> Optional[str]:
         val = cfg.get("Scan", "LastScanTs", fallback="").strip()
         return val or None
     return None
+
 
 def _write_last_scan_ts(ts: str, path: str = "config.ini") -> None:
     """Persist the last finished scan timestamp to config.ini."""
@@ -105,7 +107,7 @@ def _is_trusted(ip: str) -> bool:
     return ip in _TRUSTED_MEM
 
 
-#def _compute_expiry(body: dict) -> str:
+# def _compute_expiry(body: dict) -> str:
 #    """Return ISO 'expires_at' or empty string for permanent bans."""
 #    mins = body.get("duration_minutes")
 #    if mins is None or str(mins).strip() == "":
@@ -121,6 +123,7 @@ def _is_trusted(ip: str) -> bool:
 #        )
 #    except Exception:
 #        return ""
+
 
 def _compute_expiry(body: dict) -> tuple[str, int]:
     """
@@ -144,6 +147,7 @@ def _compute_expiry(body: dict) -> tuple[str, int]:
         return "", 0
     expires = _utcnow() + timedelta(minutes=mins)
     return _iso_utc(expires), mins * 60
+
 
 class FirewallResult(TypedDict):
     applied: bool
@@ -461,7 +465,7 @@ def post_block():
     if _is_trusted(ip):
         return jsonify({"ok": False, "error": "trusted_ip"}), 400
     reason = (body.get("reason") or "").strip()
-#    expires_at = _compute_expiry(body)
+    #    expires_at = _compute_expiry(body)
     expires_at, ttl_sec = _compute_expiry(body)
 
     webdb.delete_action_by_ip(ip, "unblock")
@@ -507,7 +511,7 @@ def post_block_with_reason():
     if _is_trusted(ip):
         return jsonify({"ok": False, "error": "trusted_ip"}), 400
     #    expires_at, ttl_sec = _compute_expiry(body)
-#    expires_at = _compute_expiry(body)
+    #    expires_at = _compute_expiry(body)
     expires_at, ttl_sec = _compute_expiry(body)
 
     webdb.delete_action_by_ip(ip, "unblock")
@@ -526,8 +530,13 @@ def post_block_with_reason():
         _TEMP_BANS[ip] = expires_at
     fw = _firewall_apply("block", ip, reason)
     fw["capabilities"] = firewall_capabilities()
-#    return {"ok": True, "firewall": fw}
-    return {"ok": True, "expires_at": expires_at, "ttl_seconds": ttl_sec, "firewall": fw}
+    #    return {"ok": True, "firewall": fw}
+    return {
+        "ok": True,
+        "expires_at": expires_at,
+        "ttl_seconds": ttl_sec,
+        "firewall": fw,
+    }
 
 
 @app.post("/api/unblock")
@@ -630,6 +639,7 @@ SAFE_KEYS.update(
 
 # Optional: expose persisted last-scan time via /api/settings GET
 SAFE_KEYS.update({("Scan", "LastScanTs")})
+
 
 def _load_settings(path: str = "config.ini") -> dict:
     cfg = configparser.ConfigParser()

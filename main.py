@@ -83,6 +83,19 @@ def build_arg_parser(cfg: configparser.ConfigParser) -> argparse.ArgumentParser:
         help="Number of packets to capture for training.",
     )
     pt.add_argument(
+        "--until-ctrl-c",
+        "--until",
+        dest="until_ctrl_c",
+        action="store_true",
+        help="Capture indefinitely; stop with Ctrl+C, then train on collected traffic.",
+    )
+    pt.add_argument(
+        "--min-packets",
+        type=int,
+        default=100,
+        help="Soft minimum packets before training (only used with --until-ctrl-c).",
+    )
+    pt.add_argument(
         "--model",
         "-m",
         default=default_model,
@@ -147,9 +160,18 @@ def main(argv=None) -> int:
     monitor = NetworkMonitor(cfg)
     try:
         if args.mode == "train":
-            monitor.capture_and_train(
-                interface=args.interface, packet_count=args.count, model_path=args.model
-            )
+            if getattr(args, "until_ctrl_c", False):
+                monitor.capture_and_train_until_interrupt(
+                    interface=args.interface,
+                    model_path=args.model,
+                    min_packets=getattr(args, "min_packets", 100),
+                )
+            else:
+                monitor.capture_and_train(
+                    interface=args.interface,
+                    packet_count=args.count,
+                    model_path=args.model,
+                )
         elif args.mode == "monitor":
             _start_api_server_in_background()
             monitor.start_monitoring(

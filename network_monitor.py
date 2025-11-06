@@ -243,6 +243,55 @@ class NetworkMonitor:
         self.detector.save_model(model_path)
         self.logger.info(f"Model trained and saved to: {model_path}")
 
+    def capture_and_train_until_interrupt(
+        self, interface: str, model_path: str, *, min_packets: int = 100
+    ) -> None:
+        """
+        Capture packets indefinitely and, on Ctrl+C, train the model on what was captured.
+        A larger window is used so the processor retains more rows before training.
+        """
+        self._validate_interface(interface)
+        # Allow configuring a larger rolling window just for this mode (default: 100k)
+        until_window = self.config.getint(
+            "Training", "UntilCtrlCWindow", fallback=100_000
+        )
+        try:
+            self.processor.set_window_size(
+                max(self.processor._window_size, int(until_window))
+            )
+        except Exception:
+            # Best-effort; continue with existing window if resizing fails
+            pass
+
+        self.logger.info(
+            f"Capturing on '{interface}' for training until Ctrl+C... "
+            "(will train on collected traffic at interrupt)"
+        )
+        try:
+            sniff(iface=interface, prn=self.processor.process_packet, store=0)
+        except KeyboardInterrupt:
+            self.logger.info("Stopping capture and training the model...")
+
+        df = self.processor.get_dataframe()
+        n_rows = int(getattr(df, "__len__", lambda: 0)())
+        if n_rows == 0 or df.empty:
+            raise RuntimeError("No packets captured for training.")
+        if n_rows < max(1, int(min_packets)):
+            self.logger.warning(
+                "Only %d packets captured (< min %d). Training anyway.",
+                n_rows,
+                int(min_packets),
+            )
+
+        features, _ = self.processor.engineer_features(df)
+        if features.empty:
+            raise RuntimeError("Failed to engineer features from captured packets.")
+
+        self.logger.info("Training Isolation Forest on %d packets...", n_rows)
+        self.detector.train(features)
+        self.detector.save_model(model_path)
+        self.logger.info("Model trained and saved to: %s", model_path)
+
     def start_monitoring(
         self,
         interface: str,
