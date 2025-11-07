@@ -160,27 +160,6 @@ test('Login: happy path → dashboard + /api/auth/me ok', async ({ page }, info)
 // =====================================================
 // Dashboard (/#/dashboard)
 // =====================================================
-test('Dashboard: overview + devices table visible', async ({ page }, info) => {
-  await login(page);
-  await page.goto(route('dashboard'));
-  await expect(page.getByText(/Quick Overview/i)).toBeVisible();
-  await expect(page.locator('table')).toBeVisible();
-  await snap(page, info, 'S3-dashboard-overview');
-});
-
-test('Dashboard: Scan → reaches 100% and devices refresh', async ({ page }, info) => {
-  await login(page);
-  await page.goto(route('dashboard'));
-  const btn = page.getByRole('button', { name: /scan network/i });
-  if (await btn.isVisible().catch(() => false)) await btn.click();
-  else await page.request.post(`${API || ''}/api/scan`, { data: {} });
-  const s = await waitScanDone(page);
-  expect(s.progress).toBe(100);
-  await page.reload();
-  await expect(page.locator('table tbody tr').first()).toBeVisible();
-  await snap(page, info, 'S3-dashboard-scan-100');
-});
-
 test('Dashboard: Last Scan timestamp is stable on Refresh (no new scan)', async ({ page }, info) => {
   await login(page);
   await page.goto(route('dashboard'));
@@ -202,6 +181,31 @@ test('Dashboard: Last Scan timestamp is stable on Refresh (no new scan)', async 
   await expect(page.getByText(/Last Scan/i).first()).toBeVisible();
   await snap(page, info, 'S3-dashboard-last-scan-stable');
 });
+
+test('Dashboard: overview + devices table visible', async ({ page }, info) => {
+  await login(page);
+  await page.goto(route('dashboard'));
+  await expect(page.getByText(/Quick Overview/i)).toBeVisible();
+  await expect(page.locator('table')).toBeVisible();
+  await snap(page, info, 'S3-dashboard-overview');
+});
+
+
+
+test('Dashboard: Scan → reaches 100% and devices refresh', async ({ page }, info) => {
+  await login(page);
+  await page.goto(route('dashboard'));
+  const btn = page.getByRole('button', { name: /scan network/i });
+  if (await btn.isVisible().catch(() => false)) await btn.click();
+  else await page.request.post(`${API || ''}/api/scan`, { data: {} });
+  const s = await waitScanDone(page);
+  expect(s.progress).toBe(100);
+  await page.reload();
+  await expect(page.locator('table tbody tr').first()).toBeVisible();
+  await snap(page, info, 'S3-dashboard-scan-100');
+});
+
+
 
 // =====================================================
 // Alerts (/#/alerts)

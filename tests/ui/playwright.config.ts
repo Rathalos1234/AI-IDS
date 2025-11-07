@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './',                       // this folder
   timeout: 60_000,
   retries: 0,
-  fullyParallel: true,
+  fullyParallel: false,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     // Your UI is a hash router → we’ll navigate with '/#/<route>'
