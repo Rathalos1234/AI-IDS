@@ -75,3 +75,21 @@ def _seed_everything():
     if np is not None:
         np.random.seed(1337)
     yield
+
+
+# NEW: ensure API/webdb state is clean so tests don't leak into each other
+@pytest.fixture(autouse=True, scope="function")
+def _reset_api_state():
+    """
+    Clear trusted IPs, blocks, alerts, and devices before each test.
+    Fixes the case where /api/blocks returns 400 (trusted_ip) due to prior state.
+    """
+    try:
+        import api  # local Flask app
+
+        c = api.app.test_client()
+        # Best-effort; returns 200 when supported (dev), or 501 on minimal webdb.
+        c.post("/api/ops/reset")
+    except Exception:
+        pass
+    yield

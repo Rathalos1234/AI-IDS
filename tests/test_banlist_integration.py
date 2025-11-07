@@ -8,7 +8,7 @@ pytestmark = pytest.mark.integration
 
 def test_block_ip_round_trip():
     c = api.app.test_client()
-    # PT-17 leaves the module-level flag enabled after reload. 
+    # PT-17 leaves the module-level flag enabled after reload.
     # Make sure integration tests can exercise the endpoint without an auth token.
     api.REQUIRE_AUTH = False
     ip = "203.0.113.42"
