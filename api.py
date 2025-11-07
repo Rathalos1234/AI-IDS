@@ -419,7 +419,38 @@ def whoami():
 
 @app.get("/api/alerts")
 def alerts():
-    return jsonify(webdb.list_alerts(limit=int(request.args.get("limit", 100))))
+    """Newest-first alerts with optional cursor pagination.
+    Query:
+      - limit:   page size (default 100)
+      - cursor:  ISO timestamp; return rows strictly OLDER than this
+                 (alias: 'before')
+    Response: { ok, items: [...], next_cursor: <ts|null> }
+    """
+    require_auth()
+    q = request.args
+    limit = int(q.get("limit", 100))
+    cursor = (q.get("cursor") or q.get("before") or "").strip()
+
+    # Fetch a generous slice, then filter/slice deterministically.
+    # (If your webdb has native "before" support, swap this to that.)
+    try:
+        items = webdb.list_alerts(limit=max(limit * 5, 200))
+    except Exception:
+        items = []
+
+    # Ensure newest-first order by ISO 'ts'
+    try:
+        items = sorted(items, key=lambda r: str(r.get("ts", "")), reverse=True)
+    except Exception:
+        pass
+
+    if cursor:
+        # ISO 8601 with 'Z' sorts lexicographically, so string compare is fine.
+        items = [r for r in items if str(r.get("ts", "")) < cursor]
+
+    page = items[:limit]
+    next_cursor = page[-1]["ts"] if len(page) == limit else None
+    return jsonify({"ok": True, "items": page, "next_cursor": next_cursor})
 
 
 @app.get("/api/blocks")
