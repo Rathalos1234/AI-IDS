@@ -16,5 +16,9 @@ def test_block_ip_round_trip():
     assert r.status_code in (200, 201)
     r2 = c.get("/api/blocks")
     assert r2.status_code == 200
-    rows = r2.get_json() or []
+    body = r2.get_json() or {}
+    if isinstance(body, dict):
+        rows = body.get("active") or body.get("items") or []
+    else:
+        rows = body
     assert any(row.get("ip") == ip for row in rows)

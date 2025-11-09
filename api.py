@@ -107,6 +107,14 @@ def _is_trusted(ip: str) -> bool:
     return ip in _TRUSTED_MEM
 
 
+def _is_valid_ip(ip: str) -> bool:
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except Exception:
+        return False
+
+
 # def _compute_expiry(body: dict) -> str:
 #    """Return ISO 'expires_at' or empty string for permanent bans."""
 #    mins = body.get("duration_minutes")
@@ -180,7 +188,7 @@ def _firewall_apply(action: str, ip: str, reason: str = "") -> FirewallResult:
 # These defaults preserve current behavior (no auth required).
 app.secret_key = os.environ.get("APP_SECRET", "dev-secret")
 ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
-# ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+# ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
 LOCK_AFTER = int(os.environ.get("LOCK_AFTER", "5"))
 LOCK_MINUTES = int(os.environ.get("LOCK_MINUTES", "15"))
@@ -236,6 +244,13 @@ def _clear_failures(username: str):
 
 
 def _verify_login(username: str, password: str) -> bool:
+    if not username or not password:
+        return False
+    try:
+        if webdb.verify_login(username, password):
+            return True
+    except Exception:
+        pass
     return username == ADMIN_USER and password == ADMIN_PASSWORD
 
 
@@ -347,6 +362,8 @@ def _gate_api_when_auth_on():
     public = {
         "/api/auth/login",
         "/api/auth/logout",
+        "/api/auth/register",
+        "/api/auth/reset-password",
         "/api/login",
         "/login",
         "/api/logout",
@@ -393,6 +410,63 @@ def login():
         "ttl_seconds": TOKEN_TTL,
     }
     return jsonify(resp)
+
+
+@app.post("/api/auth/register")
+def register():
+    data = request.get_json(force=True, silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    password = str(data.get("password", "")).strip()
+    if not username or not password:
+        return jsonify({"ok": False, "error": "missing credentials"}), 400
+    if len(username) < 3:
+        return jsonify({"ok": False, "error": "username_short"}), 400
+    if len(password) < 6:
+        return jsonify({"ok": False, "error": "password_short"}), 400
+    try:
+        created = webdb.create_user(username, password)
+    except ValueError as exc:  # pragma: no cover - defensive guard
+        return jsonify({"ok": False, "error": "invalid", "detail": str(exc)}), 400
+    if not created:
+        return jsonify({"ok": False, "error": "user_exists"}), 409
+
+    _clear_failures(username)
+    session.clear()
+    session.permanent = True
+    session["username"] = username
+    token, expires_at = _issue_token(username)
+    resp = {
+        "ok": True,
+        "user": username,
+        "token": token,
+        "expires_at": expires_at.isoformat(timespec="seconds") + "Z",
+        "ttl_seconds": TOKEN_TTL,
+    }
+    return jsonify(resp), 201
+
+
+@app.post("/api/auth/reset-password")
+def reset_password():
+    data = request.get_json(force=True, silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    password = str(
+        data.get("password")
+        or data.get("new_password")
+        or data.get("reset_password")
+        or ""
+    ).strip()
+    if not username or not password:
+        return jsonify({"ok": False, "error": "missing credentials"}), 400
+    if len(password) < 6:
+        return jsonify({"ok": False, "error": "password_short"}), 400
+    try:
+        updated = webdb.set_password(username, password)
+    except ValueError as exc:  # pragma: no cover - defensive guard
+        return jsonify({"ok": False, "error": "invalid", "detail": str(exc)}), 400
+    if not updated:
+        return jsonify({"ok": False, "error": "unknown_user"}), 404
+    _clear_failures(username)
+    return jsonify({"ok": True})
 
 
 @app.post("/api/auth/logout")
@@ -483,7 +557,24 @@ def blocks():
                     _TEMP_BANS.pop(ip, None)
         except Exception:
             pass
-    return jsonify(webdb.list_blocks(limit=int(request.args.get("limit", 100))))
+    
+    history_limit = int(request.args.get("limit", 100))
+    # Fetch a generous slice so we can compute the latest action per IP without
+    # missing older unblock rows. The client can still page the history via
+    # ?limit, but "active" always reflects the newest state.
+    raw_rows = webdb.list_blocks(limit=max(history_limit, 1000))
+    seen = set()
+    active = []
+    for row in raw_rows:
+        ip = row.get("ip")
+        if not ip or ip in seen:
+            continue
+        seen.add(ip)
+        if row.get("action") == "block":
+            active.append(row)
+
+    history = raw_rows[:history_limit]
+    return jsonify({"ok": True, "items": history, "active": active})
 
 
 @app.post("/api/block")
@@ -492,6 +583,8 @@ def post_block():
     ip = (body.get("ip") or "").strip()
     if not ip:
         return {"error": "ip required"}, 400
+    if not _is_valid_ip(ip):
+        return jsonify({"ok": False, "error": "bad_ip"}), 400
     # PD-28: don't allow blocking trusted IPs
     if _is_trusted(ip):
         return jsonify({"ok": False, "error": "trusted_ip"}), 400
@@ -537,6 +630,8 @@ def post_block_with_reason():
     ip = (body.get("ip") or "").strip()
     if not ip:
         return {"error": "ip required"}, 400
+    if not _is_valid_ip(ip):
+        return jsonify({"ok": False, "error": "bad_ip"}), 400
     reason = (body.get("reason") or "").strip()
     # PD-28: block guard for trusted IPs + duration support
     if _is_trusted(ip):
@@ -576,6 +671,8 @@ def post_unblock():
     ip = (body.get("ip") or "").strip()
     if not ip:
         return {"error": "ip required"}, 400
+    if not _is_valid_ip(ip):
+        return jsonify({"ok": False, "error": "bad_ip"}), 400
     reason = (body.get("reason") or "manual").strip() or "manual"
 
     webdb.delete_action_by_ip(ip, "block")
@@ -630,12 +727,9 @@ def stats():
     with _SCAN_LOCK:
         scan_snapshot = dict(_SCAN)
     # Derive the same "last scan" timestamp logic used by /api/scan/status
-    last_ts = (
-        scan_snapshot.get("finished")
-        or scan_snapshot.get("started")
-        or _LAST_SCAN_TS
-        or _read_last_scan_ts()
-    )
+    last_ts = scan_snapshot.get("finished") or _cached_last_scan_ts()
+    if not last_ts:
+        last_ts = scan_snapshot.get("started")
     ts_out = last_ts or _iso_utc(_utcnow())
     payload = {
         "ok": True,
@@ -838,9 +932,7 @@ def add_trusted():
     if not ip:
         return jsonify({"ok": False, "error": "ip_required"}), 400
     # validate IP format
-    try:
-        ipaddress.ip_address(ip)
-    except Exception:
+    if not _is_valid_ip(ip):
         return jsonify({"ok": False, "error": "bad_ip"}), 400
     if _is_currently_blocked(ip):
         return jsonify(
@@ -860,6 +952,9 @@ def add_trusted():
 @app.delete("/api/trusted/<ip>")
 def del_trusted(ip):
     require_auth()
+    ip = (ip or "").strip()
+    if not _is_valid_ip(ip):
+        return jsonify({"ok": False, "error": "bad_ip"}), 400
     if _supports_trusted_db():
         webdb.remove_trusted_ip(ip)
     else:
@@ -883,6 +978,17 @@ _SCAN_LOCK = threading.Lock()
 
 # Initialize from disk so a reboot shows the last known scan time
 _LAST_SCAN_TS: Optional[str] = _read_last_scan_ts()
+
+def _cached_last_scan_ts() -> Optional[str]:
+    """Return the best-known last scan timestamp without mutating runtime state."""
+
+    global _LAST_SCAN_TS
+    if _LAST_SCAN_TS:
+        return _LAST_SCAN_TS
+    cached = _read_last_scan_ts()
+    if cached:
+        _LAST_SCAN_TS = cached
+    return cached
 
 TOP_PORTS = [22, 23, 53, 80, 110, 139, 143, 443, 445, 3306, 3389, 5900]
 
@@ -1046,14 +1152,9 @@ def scan_status():
     # add soft timestamps the test accepts
     now_iso = _iso_utc(_utcnow())
     # Resolve a stable last-scan timestamp first.
-    last_ts = None
-    if data.get("finished"):
-        last_ts = data.get("finished")
-    elif data.get("started"):
+    last_ts = data.get("finished") or _cached_last_scan_ts()
+    if not last_ts:
         last_ts = data.get("started")
-    else:
-        # No in-memory record (fresh boot, idle): use persisted value if present.
-        last_ts = _LAST_SCAN_TS or _read_last_scan_ts()
     if last_ts:
         # Ensure both 'last_scan_ts' and 'ts' reflect the last known scan time
         # so the UI does not jump to the current clock time on refresh.

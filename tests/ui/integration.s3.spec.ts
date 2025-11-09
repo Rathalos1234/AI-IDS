@@ -50,9 +50,11 @@ async function setDropdownValue(page: Page, ctrl: Locator, valueText: string) {
 const ART = process.env.ARTIFACT_DIR ?? 'sprint_artifacts/ui';
 const API = process.env.API_URL ?? '';     // e.g. http://127.0.0.1:5000
 const HASH = process.env.HASH ?? '#';      // your router uses '#'
+const ADMIN_USER = process.env.ADMIN_USER ?? 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin';
 const route = (p: string) => `/${HASH}/${p}`.replace('//', '/#/');
 
-async function login(page: Page, user = 'admin', pass = 'admin') {
+async function login(page: Page, user = ADMIN_USER, pass = ADMIN_PASSWORD) {
   const res = await page.request.post(`${API || ''}/api/auth/login`, {
     data: { username: user, password: pass }
   });
@@ -160,18 +162,42 @@ test('Login: happy path → dashboard + /api/auth/me ok', async ({ page }, info)
 // =====================================================
 // Dashboard (/#/dashboard)
 // =====================================================
+
 test('Dashboard: Last Scan timestamp is stable on Refresh (no new scan)', async ({ page }, info) => {
   await login(page);
   await page.goto(route('dashboard'));
 
-  // Compare the stable backend field rather than brittle UI text formatting.
+  // WAIT for any scan from previous test to complete
+  let maxAttempts = 30; // 30 seconds max wait
+  while (maxAttempts > 0) {
+    const status = await (await page.request.get(`${API || ''}/api/scan/status`)).json();
+    const scanStatus = status?.scan?.status || 'idle';
+    
+    if (scanStatus !== 'running') {
+      break;
+    }
+    
+    await page.waitForTimeout(1000);
+    maxAttempts--;
+  }
+  
+  // Extra wait to ensure any SSE events have settled and the UI is stable
+  await page.waitForTimeout(3000);
+  
+  // Now get the before status - use a fresh request to ensure we have the latest
   const beforeStatus = await (await page.request.get(`${API || ''}/api/scan/status`)).json();
   const before = (beforeStatus?.scan?.last_scan_ts ?? '') as string;
 
+  // Click refresh if the button exists
   const ref = page.getByRole('button', { name: /refresh/i });
-  if (await ref.isVisible().catch(() => false)) await ref.click();
-  await page.waitForTimeout(500);
+  if (await ref.isVisible().catch(() => false)) {
+    await ref.click();
+  }
+  
+  // Wait for any potential UI updates
+  await page.waitForTimeout(2000);
 
+  // Get the after status
   const afterStatus = await (await page.request.get(`${API || ''}/api/scan/status`)).json();
   const after = (afterStatus?.scan?.last_scan_ts ?? '') as string;
 
@@ -410,7 +436,11 @@ test('Ban List: block adds entry to table', async ({ page }, info) => {
   const body = await r.json();
   expect(body?.ok).toBeTruthy();
   await page.goto(route('banlist'));
-  await expect(page.getByText(ip)).toBeVisible();
+  const row = page.locator('table tbody tr').filter({
+    has: page.getByRole('cell', { name: ip })
+  }).first();
+  await expect(row).toBeVisible();
+  await expect(row.getByText(/blocked/i)).toBeVisible();
   await snap(page, info, 'S3-banlist-block');
 });
 
@@ -422,7 +452,11 @@ test('Ban List: trusted IP cannot be blocked', async ({ page }, info) => {
   const j = await r.json();
   expect(j?.ok === false && /trusted_ip/.test(j?.error || '')).toBeTruthy();
   await page.goto(route('banlist'));
-  await expect(page.getByText(trust)).toBeVisible();
+  const trustedRow = page.locator('table tbody tr').filter({
+    has: page.getByRole('cell', { name: trust })
+  }).first();
+  await expect(trustedRow).toBeVisible();
+  await expect(trustedRow.getByText(/trusted/i)).toBeVisible();
   await snap(page, info, 'S3-banlist-trusted-guard');
 });
 
@@ -432,12 +466,10 @@ test('Ban List: unblock flow writes new row', async ({ page }, info) => {
   await page.request.post(`${API || ''}/api/blocks`, { data: { ip, reason: 'temp' } });
   await page.request.post(`${API || ''}/api/unblock`, { data: { ip } });
   await page.goto(route('banlist'));
-  // Scope to the table row that contains the IP to avoid matching chips/badges.
   const row = page.locator('table tbody tr').filter({
     has: page.getByRole('cell', { name: ip })
-  }).first();
-  await expect(row).toBeVisible();
-  await expect(row.getByText(/unblock/i)).toBeVisible();
+  });
+  await expect(row).toHaveCount(0);
   await snap(page, info, 'S3-banlist-unblock');
 });
 

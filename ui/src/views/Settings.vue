@@ -2,6 +2,40 @@
 import { ref, onMounted } from 'vue';
 import { api } from '../api';
 const settings = ref({}); const err = ref(null); const msg = ref(null);
+const settingFields = [
+  {
+    key: 'Signatures.Enable',
+    label: 'Signatures.Enable',
+    tooltip: 'True: turn rule-based detector on\nFalse: turn rule-based detector off'
+  },
+  {
+    key: 'Logging.LogLevel',
+    label: 'Logging.LogLevel',
+    tooltip: 'DEBUG: everything - detailed developer messages, useful while diagnosing issues.\nINFO: normal operational messages\nWARNING: unusual conditions that aren’t failures\nERROR: actual failures that prevented something from working\nChooses how chatty the backend logging is. Use INFO for normal use, DEBUG when troubleshooting'
+  },
+  {
+    key: 'Logging.EnableFileLogging',
+    label: 'Logging.EnableFileLogging',
+    tooltip: 'True: backend also writes logs to a file'
+  },
+  {
+    key: 'Monitoring.AlertThresholds',
+    label: 'Monitoring.AlertThresholds',
+    tooltip: 'E.g., -0.10, -0.05\nAlerts whose scores are more negative than -0.10 are labeled “High”, between -0.10 and -0.05 are labeled “Medium” and above -0.05 are “Low”'
+  },
+  {
+    key: 'Retention.AlertsDays',
+    label: 'Retention.AlertsDays',
+    placeholder: 'e.g. 7',
+    tooltip: 'How long to keep alerts in the web database.'
+  },
+  {
+    key: 'Retention.BlocksDays',
+    label: 'Retention.BlocksDays',
+    placeholder: 'e.g. 14',
+    tooltip: 'How long to keep blocked or trusted IP records in the web database.'
+  }
+];
 // PD-29 ops state
 const opsBusy = ref(false);
 const opsMsg = ref('');
@@ -116,12 +150,28 @@ async function onResetAll () {
 
     <section class="surface surface--soft" style="margin-bottom:20px;">
       <div class="stack">
-        <label>Signatures.Enable <input class="input" v-model="settings['Signatures.Enable']"/></label>
-        <label>Logging.LogLevel <input class="input" v-model="settings['Logging.LogLevel']"/></label>
-        <label>Logging.EnableFileLogging <input class="input" v-model="settings['Logging.EnableFileLogging']"/></label>
-        <label>Monitoring.AlertThresholds <input class="input" v-model="settings['Monitoring.AlertThresholds']"/></label>
-        <label>Retention.AlertsDays <input class="input" v-model="settings['Retention.AlertsDays']" placeholder="e.g. 7"/></label>
-        <label>Retention.BlocksDays <input class="input" v-model="settings['Retention.BlocksDays']" placeholder="e.g. 14"/></label>
+        <label
+          v-for="field in settingFields"
+          :key="field.key"
+          class="setting-field"
+        >
+          <span class="setting-label">
+            {{ field.label }}
+            <span
+              class="info-tooltip"
+              tabindex="0"
+              role="img"
+              aria-label="More information"
+              :data-tooltip="field.tooltip"
+            >?
+            </span>
+          </span>
+          <input
+            class="input"
+            :placeholder="field.placeholder"
+            v-model="settings[field.key]"
+          />
+        </label>
       </div>
     </section>
 

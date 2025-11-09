@@ -6,9 +6,12 @@ export default async function globalSetup(_config: FullConfig) {
     baseURL: process.env.API_URL || 'http://127.0.0.1:5000',
   });
 
+  const username = process.env.ADMIN_USER || 'admin';
+  const password = process.env.ADMIN_PASSWORD || 'admin';
+
   // Adjust creds if you changed them in ENV:
   const res = await api.post('/api/auth/login', {
-    data: { username: 'admin', password: 'admin' },
+    data: { username, password },
   });
   if (!res.ok()) throw new Error(`Login failed: ${res.status()} ${await res.text()}`);
 

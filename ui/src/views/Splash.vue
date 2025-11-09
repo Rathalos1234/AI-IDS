@@ -1,5 +1,5 @@
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter, RouterLink } from 'vue-router';
 const router = useRouter();
 </script>
 
@@ -13,7 +13,7 @@ const router = useRouter();
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;">
           <button class="btn btn--primary" @click="router.push('/auth')">Login</button>
-          <button class="btn btn--ghost" @click="router.push('/auth')">Create Account</button>
+          <RouterLink class="btn btn--ghost" to="/signup">Create Account</RouterLink>
         </div>
       </div>
     </div>
