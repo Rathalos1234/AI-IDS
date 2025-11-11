@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
 import { api } from '../api';
 import { subscribeToEvents } from '../eventStream';
 import { useRoute, useRouter } from 'vue-router';
@@ -12,6 +12,61 @@ const status = ref('');
 const stopFns = [];
 const route = useRoute();
 const router = useRouter();
+let statusTimer = null;
+let errorTimer = null;
+
+function clearStatusMessage(){
+  if (statusTimer){
+    clearTimeout(statusTimer);
+    statusTimer = null;
+  }
+  status.value = '';
+}
+
+function clearErrorMessage(){
+  if (errorTimer){
+    clearTimeout(errorTimer);
+    errorTimer = null;
+  }
+  err.value = null;
+}
+
+function setStatusMessage(message, timeout = 4000){
+  clearStatusMessage();
+  clearErrorMessage();
+  if (message){
+    status.value = message;
+    statusTimer = setTimeout(() => {
+      status.value = '';
+      statusTimer = null;
+    }, timeout);
+  }
+}
+
+function setErrorMessage(message, timeout = 4000){
+  clearErrorMessage();
+  clearStatusMessage();
+  if (message){
+    err.value = message;
+    errorTimer = setTimeout(() => {
+      err.value = null;
+      errorTimer = null;
+    }, timeout);
+  }
+}
+
+function friendlyError(error, fallback){
+  const map = {
+    bad_ip: 'IP address is not valid.',
+    trusted_ip: 'That IP is already marked as trusted.',
+    'ip required': 'IP address is required.',
+    missing: 'Request is missing required fields.',
+  };
+  if (error && map[error]) return map[error];
+  if (fallback && map[fallback]) return map[fallback];
+  if (typeof fallback === 'string' && fallback) return fallback;
+  return 'Something went wrong. Please try again.';
+}
 
 function applyRouteIp(value){
   if (typeof value === 'string' && value){
@@ -27,15 +82,36 @@ function clearRouteIp(){
   }
 }
 
+function deriveActiveBlocks(list){
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  const active = [];
+  for (const row of list){
+    if (!row || !row.ip || seen.has(row.ip)) continue;
+    seen.add(row.ip);
+    if ((row.action || '').toLowerCase() === 'block'){
+      active.push(row);
+    }
+  }
+  return active;
+}
+
 async function refresh(){
   try{
-    loading.value = true; err.value=null; status.value='';
+    loading.value = true;
+    clearErrorMessage();
+    clearStatusMessage();
     const data = await api.blocks();
-    items.value = Array.isArray(data) ? data : (data.items || []);
+    const rawBlocks = Array.isArray(data) ? data : (data.items || []);
+    if (data && Array.isArray(data.active)){
+      items.value = data.active;
+    } else {
+      items.value = deriveActiveBlocks(rawBlocks);
+    }
     const t = await (api.trustedList ? api.trustedList() : { items: [] });
     const list = Array.isArray(t) ? t : t.items || [];
     trusted.value = list;
-  }catch(e){ err.value = e?.error || e?.message; } finally { loading.value=false; }
+  }catch(e){ setErrorMessage(friendlyError(e?.error, e?.message)); } finally { loading.value=false; }
 }
 async function block(){
   if(!ip.value) return;
@@ -44,27 +120,30 @@ async function block(){
     const target = ip.value;
     if (api.blockIpWithDuration) {
       const res = await api.blockIpWithDuration(ip.value, { reason: reason.value || '', duration_minutes: dm });
-      status.value = describeFirewall(res?.firewall, `Blocked ${target}`);
+      setStatusMessage(describeFirewall(res?.firewall, `Blocked ${target}`));
     } else {
       const res = await api.block(ip.value, reason.value || '');
-      status.value = describeFirewall(res?.firewall, `Blocked ${target}`);
+      setStatusMessage(describeFirewall(res?.firewall, `Blocked ${target}`));
     }
     ip.value=''; reason.value=''; duration.value='';
     clearRouteIp();
     await refresh();
-  }  catch(e){ err.value = e?.error || e?.message; }
+  }  catch(e){ setErrorMessage(friendlyError(e?.error, e?.message)); }
 }
 async function unblock(addr){
-  try{ const res = await api.unblock(addr); status.value = describeFirewall(res?.firewall, `Unblocked ${addr}`); await refresh(); }
-  catch(e){ err.value = e?.error || e?.message; }
+  try{
+    const res = await api.unblock(addr);
+    setStatusMessage(describeFirewall(res?.firewall, `Unblocked ${addr}`));
+    await refresh();
+  }
+  catch(e){ setErrorMessage(friendlyError(e?.error, e?.message)); }
 }
-const isTrusted = (xip) => !!trusted.value.find(t => t.ip === xip);
 async function trust(addr){
   const target = (typeof addr === 'string' && addr) ? addr : ip.value;
   if (!target) return;
   try{
     await api.trustIp(target, note.value || '');
-    status.value = `Marked ${target} as trusted.`;
+    setStatusMessage(`Marked ${target} as trusted.`);
     if (!(typeof addr === 'string' && addr)) {
       note.value='';
       ip.value='';
@@ -72,30 +151,36 @@ async function trust(addr){
     }
     await refresh();
   }
-  catch(e){ err.value = e?.error || e?.message; }
+  catch(e){ setErrorMessage(friendlyError(e?.error, e?.message)); }
 }
 async function untrust(addr){
   const target = (typeof addr === 'string' && addr) ? addr : ip.value;
   if (!target) return;
   try{
     await api.untrustIp(target);
-    status.value = `Removed ${target} from trusted list.`;
+    setStatusMessage(`Removed ${target} from trusted list.`);
     if (!(typeof addr === 'string' && addr)) {
       ip.value='';
       clearRouteIp();
     }
     await refresh();
   }
-  catch(e){ err.value = e?.error || e?.message; }
+  catch(e){ setErrorMessage(friendlyError(e?.error, e?.message)); }
 }
 function applyBlockEvent(event) {
   if (!event || !event.id) return;
-  const existingIdx = items.value.findIndex((row) => row.id === event.id);
-  if (existingIdx !== -1) {
-    items.value.splice(existingIdx, 1);
+  if (event.action && event.action !== 'block') {
+    const idx = items.value.findIndex((row) => row.ip === event.ip);
+    if (idx !== -1) items.value.splice(idx, 1);
+    return;
   }
-  items.value.unshift(event);
-  if (items.value.length > 200) items.value.splice(200);
+  const idx = items.value.findIndex((row) => row.ip === event.ip);
+  if (idx !== -1) {
+    items.value.splice(idx, 1, event);
+  } else {
+    items.value.unshift(event);
+    if (items.value.length > 200) items.value.splice(200);
+  }
 }
 
 onMounted(async () => {
@@ -115,6 +200,8 @@ onBeforeUnmount(() => {
     const off = stopFns.pop();
     try { if (typeof off === 'function') off(); } catch (e) { console.error(e); }
   }
+  clearStatusMessage();
+  clearErrorMessage();
 });
 
 function describeFirewall(fw, prefix){
@@ -129,6 +216,50 @@ function describeFirewall(fw, prefix){
     return `${prefix} — recorded (firewall unsupported).`;
   }
   return `${prefix}.`;
+}
+
+const tableEntries = computed(() => {
+  const rows = [];
+  for (const block of items.value){
+    rows.push({
+      kind: 'blocked',
+      ip: block.ip,
+      ts: block.ts || '',
+      detail: block.reason || '',
+    });
+  }
+  for (const t of trusted.value){
+    rows.push({
+      kind: 'trusted',
+      ip: t.ip,
+      ts: t.created_ts || '',
+      detail: t.note || '',
+    });
+  }
+  const order = { trusted: 0, blocked: 1 };
+  return rows.sort((a, b) => {
+    if (order[a.kind] !== order[b.kind]){
+      return order[a.kind] - order[b.kind];
+    }
+    const aTs = a.ts || '';
+    const bTs = b.ts || '';
+    if (aTs && bTs) return bTs.localeCompare(aTs);
+    if (aTs) return -1;
+    if (bTs) return 1;
+    return a.ip.localeCompare(b.ip);
+  });
+});
+
+function entryDate(ts){
+  if (!ts) return '—';
+  if (typeof ts === 'string' && ts.includes('T')){
+    return ts.split('T')[0];
+  }
+  return ts;
+}
+
+function entryDetail(text){
+  return text && String(text).trim() ? text : '—';
 }
 
 </script>
@@ -160,13 +291,7 @@ function describeFirewall(fw, prefix){
         <input class="input" v-model="note" placeholder="Trust note (optional)" style="min-width:200px;" />
         <div class="actions-row" style="gap:10px;">
           <button class="btn btn--primary" @click="trust()" :disabled="!ip">Trust</button>
-          <button class="btn" @click="untrust()" :disabled="!ip">Untrust</button>
-        </div>
-      </div>
-      <div v-if="trusted.length" class="trusted-chips small">
-        <div class="chip chip--action" v-for="t in trusted" :key="t.ip">
-          <span>{{ t.ip }} • {{ t.note || 'trusted' }}</span>
-          <button class="chip__close" type="button" @click.stop="untrust(t.ip)" :aria-label="`Remove trust for ${t.ip}`">×</button>
+          <!-- <button class="btn" @click="untrust()" :disabled="!ip">Untrust</button> -->
         </div>
       </div>
     </section>
@@ -176,27 +301,36 @@ function describeFirewall(fw, prefix){
           <tr>
             <th>Date</th>
             <th>IP Address</th>
-            <th>Reason</th>
+            <th>Details</th>
+            <th>Status</th>
             <th>Action</th>
-            <th>Ops</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="b in items" :key="b.id">
-            <td>{{ (b.ts||'').split('T')[0] }}</td>
-            <td>{{ b.ip }}</td>
-            <td>{{ b.reason || '—' }}</td>
+          <tr v-for="entry in tableEntries" :key="`${entry.kind}-${entry.ip}`">
+            <td>{{ entryDate(entry.ts) }}</td>
+            <td>{{ entry.ip }}</td>
+            <td>{{ entryDetail(entry.detail) }}</td>
             <td>
-              <button v-if="b.action==='block'" class="btn btn--ghost" @click="unblock(b.ip)">Unblock</button>
-              <span v-else class="small" style="color:var(--muted); text-transform:capitalize;">{{ b.action }}</span>
+              <span class="badge" :class="entry.kind === 'trusted' ? 'badge--trusted' : 'badge--blocked'">
+                {{ entry.kind === 'trusted' ? 'TRUSTED' : 'BLOCKED' }}
+              </span>
             </td>
             <td>
-              <span v-if="isTrusted(b.ip)" class="badge">Trusted</span>
-              <button v-else class="btn btn--ghost" @click="trust(b.ip)">Trust</button>
+              <button
+                v-if="entry.kind === 'blocked'"
+                class="btn btn--ghost"
+                @click="unblock(entry.ip)"
+              >Unblock</button>
+              <button
+                v-else
+                class="btn btn--ghost"
+                @click="untrust(entry.ip)"
+              >Untrust</button>
             </td>
           </tr>
-          <tr v-if="!items.length">
-            <td colspan="5" class="small" style="text-align:center;color:var(--muted);padding:18px;">No blocks yet.</td>
+          <tr v-if="!tableEntries.length">
+            <td colspan="5" class="small" style="text-align:center;color:var(--muted);padding:18px;">No entries yet.</td>
           </tr>
         </tbody>
       </table>

@@ -20,6 +20,15 @@ def _iso_utc(dt: datetime) -> str:
 
 # DB = Path("ids_web.db")
 DB = Path(os.environ.get("SQLITE_DB", "ids_web.db"))
+
+def _should_seed_defaults() -> bool:
+    """Return True when the configured DB path is the default production path."""
+    configured = Path(os.environ.get("SQLITE_DB", "ids_web.db"))
+    try:
+        return DB.resolve() == configured.resolve()
+    except FileNotFoundError:
+        # resolve(strict=False) on some Python versions may still raise; fall back.
+        return os.path.abspath(DB) == os.path.abspath(configured)
 SCHEMA = """
 PRAGMA journal_mode=WAL;
 CREATE TABLE IF NOT EXISTS alerts (
@@ -66,6 +75,7 @@ def _con():
 
 def init():
     DB.parent.mkdir(parents=True, exist_ok=True)
+    seed_defaults = _should_seed_defaults()
     with closing(_con()) as con:
         con.executescript(SCHEMA)
         # --- migration: add 'reason' column if the table already exists without it ---
@@ -81,6 +91,49 @@ def init():
         bcols = [r[1] for r in con.execute("PRAGMA table_info(blocks)")]
         if "expires_at" not in bcols:
             con.execute("ALTER TABLE blocks ADD COLUMN expires_at TEXT DEFAULT ''")
+        if seed_defaults:
+            # Seed representative data when starting from an empty database so the
+            # UI (and Playwright suites) can exercise filtering interactions.
+            now = _utcnow()
+
+            alert_count = con.execute("SELECT COUNT(1) FROM alerts").fetchone()[0]
+            if int(alert_count) == 0:
+                samples = [
+                    ("10.0.0.5", "Brute-force login detected", "high"),
+                    ("10.0.0.42", "Suspicious port sweep", "medium"),
+                ]
+                for idx, (ip, label, severity) in enumerate(samples):
+                    ts = _iso_utc(now - timedelta(minutes=idx + 1))
+                    con.execute(
+                        "INSERT INTO alerts (id, ts, src_ip, label, severity, kind) VALUES (?,?,?,?,?,?)",
+                        (uuid.uuid4().hex, ts, ip, label, severity, "alert"),
+                    )
+
+            block_count = con.execute("SELECT COUNT(1) FROM blocks").fetchone()[0]
+            if int(block_count) == 0:
+                con.execute(
+                    "INSERT INTO blocks (id, ts, ip, action, reason, expires_at) VALUES (?,?,?,?,?,?)",
+                    (
+                        uuid.uuid4().hex,
+                        _iso_utc(now - timedelta(minutes=10)),
+                        "203.0.113.5",
+                        "block",
+                        "Seeded suspicious traffic",
+                        "",
+                    ),
+                )
+
+            device_count = con.execute("SELECT COUNT(1) FROM devices").fetchone()[0]
+            if int(device_count) == 0:
+                seen = _iso_utc(now - timedelta(minutes=5))
+                con.execute(
+                    "INSERT INTO devices (ip, first_seen, last_seen, name, open_ports, risk) VALUES (?,?,?,?,?,?)",
+                    ("127.0.0.1", seen, seen, "Localhost", "", "Low"),
+                )
+            # Ensure the default administrator exists so UI tests can authenticate
+            ensure_admin(
+                password=os.environ.get("ADMIN_PASSWORD", "admin"), connection=con
+            )
         con.commit()
 
 
@@ -264,11 +317,18 @@ def _hash_password(pw: str) -> str:
     return hashlib.sha256(pw.encode("utf-8")).hexdigest()
 
 
-def ensure_admin(username: str = "admin", password: Optional[str] = None) -> None:
-    pw = password or os.environ.get("ADMIN_PASSWORD")
+def ensure_admin(
+    username: str = "admin",
+    password: Optional[str] = None,
+    *,
+    connection: Optional[sqlite3.Connection] = None,
+) -> None:
+    pw = password or os.environ.get("ADMIN_PASSWORD", "admin")
     if not pw:
         return
-    with closing(_con()) as con:
+    owns_connection = connection is None
+    con = connection if connection is not None else _con()
+    try:
         r = con.execute(
             "SELECT username FROM auth_users WHERE username=?", (username,)
         ).fetchone()
@@ -277,7 +337,54 @@ def ensure_admin(username: str = "admin", password: Optional[str] = None) -> Non
                 "INSERT INTO auth_users (username, password_hash, created_at) VALUES (?, ?, ?)",
                 (username, _hash_password(pw), _iso_utc(_utcnow())),
             )
+            if owns_connection:
+                con.commit()
+    finally:
+        if owns_connection:
+            con.close()
+
+
+def create_user(username: str, password: str) -> bool:
+    username = (username or "").strip()
+    password = (password or "").strip()
+    if not username:
+        raise ValueError("username required")
+    if not password:
+        raise ValueError("password required")
+
+    now = _iso_utc(_utcnow())
+    with closing(_con()) as con:
+        try:
+            con.execute(
+                "INSERT INTO auth_users (username, password_hash, created_at) VALUES (?, ?, ?)",
+                (username, _hash_password(password), now),
+            )
             con.commit()
+            return True
+        except sqlite3.IntegrityError:
+            return False
+
+
+def set_password(username: str, password: str) -> bool:
+    username = (username or "").strip()
+    password = (password or "").strip()
+    if not username:
+        raise ValueError("username required")
+    if not password:
+        raise ValueError("password required")
+
+    with closing(_con()) as con:
+        row = con.execute(
+            "SELECT username FROM auth_users WHERE username=?", (username,)
+        ).fetchone()
+        if row is None:
+            return False
+        con.execute(
+            "UPDATE auth_users SET password_hash=? WHERE username=?",
+            (_hash_password(password), username),
+        )
+        con.commit()
+        return True
 
 
 def verify_login(username: str, password: str) -> bool:
