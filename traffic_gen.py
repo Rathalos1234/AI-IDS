@@ -14,6 +14,7 @@ import threading
 from http.server import SimpleHTTPRequestHandler
 from socketserver import TCPServer
 from typing import Tuple, List
+import textwrap
 
 # ---------------------------
 # Helpers (no external deps)
@@ -213,96 +214,172 @@ async def _udp_burst(
 
 def parse_args():
     ap = argparse.ArgumentParser(
-        description="Generate 'normal' baseline traffic (for training) and 'abnormal' bursts (for testing)."
+        prog="traffic_gen.py",
+        description=(
+            "Generate baseline ('normal') traffic for model training and targeted 'abnormal' spikes for testing.\n"
+            "All generators support long-running loops via --until-ctrl-c, so you can keep a background stream going "
+            "while the IDS trains or monitors."
+        ),
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog=textwrap.dedent("""
+            Examples
+            --------
+            # Baseline: local-only HTTP + DNS + NTP for 2 minutes
+            traffic_gen.py normal --duration 120 --pps 20
+
+            # Baseline indefinitely (until Ctrl+C), ~15 ops/sec
+            traffic_gen.py normal --until-ctrl-c --pps 15
+
+            # Baseline with a few harmless internet touches (HTTP/HTTPS)
+            traffic_gen.py normal --allow-internet --duration 60
+
+            # One pass quick port scan on localhost (20..1024)
+            traffic_gen.py portscan --target 127.0.0.1 --ports 20-1024 --rate 300
+
+            # Repeated scans until Ctrl+C with a short pause between rounds
+            traffic_gen.py portscan --target 127.0.0.1 --ports 1-65535 --rate 500 --until-ctrl-c --sleep 2
+
+            # UDP burst to random high ports (inflates unique_dports_15s)
+            traffic_gen.py udpburst --target 127.0.0.1 --count 1500 --pps 500
+
+            # Keep firing bursts until Ctrl+C
+            traffic_gen.py udpburst --target 127.0.0.1 --count 800 --pps 400 --until-ctrl-c --sleep 0.5
+
+            Notes
+            -----
+            • Use these generators only on your own machine or lab networks.
+            • 'normal' will auto-start a local HTTP server on --http-port when --local-only (default).
+            • 'pps' is an approximate rate; actual cadence varies slightly by random jitter and system load.
+        """),
     )
     sub = ap.add_subparsers(dest="mode", required=True)
 
     # normal
-    p_norm = sub.add_parser("normal", help="Generate baseline/benign traffic.")
+    p_norm = sub.add_parser(
+        "normal",
+        help="Generate baseline/benign traffic (HTTP GETs, DNS queries, NTP-like UDP, optional HTTPS connects).",
+        description=textwrap.dedent("""
+            Produce a benign blend suitable for training a 'normal' model:
+            • Local HTTP GETs to a tiny server (auto-started) when --local-only
+            • UDP DNS queries (port 53)
+            • NTP-sized UDP packets (port 123)
+            • Occasional HTTPS TCP connects (only when --allow-internet)
+        """),
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
     p_norm.add_argument(
         "--duration",
         type=int,
         default=120,
-        help="Seconds to run (ignored if --until-ctrl-c).",
+        help="How long to run, in seconds. Ignored when --until-ctrl-c is used.",
     )
     p_norm.add_argument(
-        "--pps", type=int, default=20, help="Approx operations per second."
+        "--pps",
+        type=int,
+        default=20,
+        help="Approximate operations per second across the mixed activities (default: 20).",
     )
     p_norm.add_argument(
         "--local-only",
         action="store_true",
-        help="Use only localhost targets (default).",
+        help="Restrict activity to localhost only (default behavior).",
     )
     p_norm.add_argument(
         "--allow-internet",
         action="store_true",
-        help="Allow a few harmless external requests.",
+        help="Allow a handful of harmless external HTTP/HTTPS touches (disables --local-only).",
     )
     p_norm.add_argument(
         "--http-port",
         type=int,
         default=8080,
-        help="Local HTTP server port (if local-only).",
+        help="Port for the auto-started local HTTP server when --local-only (default: 8080).",
     )
     p_norm.add_argument(
         "--until-ctrl-c",
         "--until",
         action="store_true",
-        help="Run indefinitely until Ctrl+C.",
+        help="Run indefinitely until Ctrl+C instead of stopping after --duration.",
     )
 
     # portscan
     p_scan = sub.add_parser(
-        "portscan", help="Generate an obvious port scan burst (out-of-norm)."
+        "portscan",
+        help="Generate a conspicuous TCP connect() scan across a port range (out-of-norm).",
+        description=textwrap.dedent("""
+            Fire TCP connect attempts across a contiguous port range on a target host.
+            Useful to trip 'port-scan' style signatures and raise anomaly scores.
+            Combine --until-ctrl-c with --sleep to repeat scans in a loop.
+        """),
+        formatter_class=argparse.RawTextHelpFormatter,
     )
     p_scan.add_argument(
         "--target",
         default="127.0.0.1",
-        help="Target host (use your own machine/lab only).",
+        help="Target host/IP (use only on your own machine or lab networks). Default: 127.0.0.1",
     )
     p_scan.add_argument(
-        "--ports", default="20-1024", help="Port range, e.g. 20-40 or 1000-2000."
+        "--ports",
+        default="20-1024",
+        help="Port range inclusive, e.g. 20-40 or 1000-2000. Default: 20-1024",
     )
     p_scan.add_argument(
-        "--rate", type=int, default=250, help="Rough connects per second."
+        "--rate",
+        type=int,
+        default=250,
+        help="Approximate connect attempts per second (default: 250).",
     )
     p_scan.add_argument(
         "--until-ctrl-c",
         "--until",
         action="store_true",
-        help="Repeat the scan loop until Ctrl+C.",
+        help="Repeat the scan loop until Ctrl+C instead of a single pass.",
     )
     p_scan.add_argument(
         "--sleep",
         type=float,
         default=1.0,
-        help="Pause between repeated scans (seconds).",
+        help="Pause in seconds between repeated scans when --until-ctrl-c is set (default: 1.0).",
     )
 
     # udp burst
     p_burst = sub.add_parser(
-        "udpburst", help="Fire UDP packets to many random high ports."
+        "udpburst",
+        help="Send UDP packets to random high ports (amplifies unique_dports_15s; out-of-norm).",
+        description=textwrap.dedent("""
+            Fire-and-forget UDP datagrams to random high-numbered ports on a target host.
+            Good for exercising 'unique destination ports' features and anomaly scoring.
+        """),
+        formatter_class=argparse.RawTextHelpFormatter,
     )
     p_burst.add_argument(
         "--target",
         default="127.0.0.1",
-        help="Target host (use your own machine/lab only).",
+        help="Target host/IP (use only on your own machine or lab networks). Default: 127.0.0.1",
     )
     p_burst.add_argument(
-        "--count", type=int, default=1000, help="How many packets per burst."
+        "--count",
+        type=int,
+        default=1000,
+        help="How many UDP packets to send per burst (default: 1000).",
     )
-    p_burst.add_argument("--pps", type=int, default=300, help="Packets per second.")
+    p_burst.add_argument(
+        "--pps",
+        type=int,
+        default=300,
+        help="Approximate packets per second (default: 300).",
+    )
     p_burst.add_argument(
         "--until-ctrl-c",
         "--until",
         action="store_true",
-        help="Repeat bursts until Ctrl+C.",
+        help="Repeat bursts until Ctrl+C instead of stopping after a single burst.",
     )
     p_burst.add_argument(
         "--sleep",
         type=float,
         default=1.0,
-        help="Pause between repeated bursts (seconds).",
+        help="Pause in seconds between repeated bursts when --until-ctrl-c is set (default: 1.0).",
     )
 
     return ap.parse_args()
