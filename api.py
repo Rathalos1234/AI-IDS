@@ -766,21 +766,56 @@ SAFE_KEYS.update(
 SAFE_KEYS.update({("Scan", "LastScanTs")})
 
 
+_DEFAULT_CONFIG_PATH = os.environ.get("CONFIG_DEFAULT_PATH", "config.defaults.ini")
+
+
+def _load_default_settings(path: str = _DEFAULT_CONFIG_PATH) -> dict:
+    cfg = configparser.ConfigParser()
+    cfg.read(path)
+    fallbacks = {
+        ("Logging", "LogLevel"): "INFO",
+        ("Logging", "EnableFileLogging"): "true",
+        ("Monitoring", "AlertThresholds"): "-0.10, -0.05",
+        ("Signatures", "Enable"): "true",
+        ("Retention", "AlertsDays"): "7",
+        ("Retention", "BlocksDays"): "10",
+        ("Scan", "LastScanTs"): "",
+    }
+    defaults = {}
+    for sec, key in SAFE_KEYS:
+        composed = f"{sec}.{key}"
+        value = ""
+        if cfg.has_section(sec) and cfg.has_option(sec, key):
+            value = cfg.get(sec, key, fallback=fallbacks.get((sec, key), ""))
+        else:
+            value = fallbacks.get((sec, key), "")
+        defaults[composed] = str(value)
+    return defaults
+
+
 def _load_settings(path: str = "config.ini") -> dict:
     cfg = configparser.ConfigParser()
     cfg.read(path)
+    defaults = _load_default_settings()
     out = {}
     for sec, key in SAFE_KEYS:
         if not cfg.has_section(sec) and sec != "DEFAULT":
             cfg.add_section(sec)
-        out[f"{sec}.{key}"] = cfg.get(sec, key, fallback="")
+        fallback = defaults.get(f"{sec}.{key}", "")
+        out[f"{sec}.{key}"] = cfg.get(sec, key, fallback=fallback)
     return out
 
 
 @app.get("/api/settings")
 def get_settings():
     require_auth()
-    return jsonify({"ok": True, "settings": _load_settings()})
+    return jsonify(
+        {
+            "ok": True,
+            "settings": _load_settings(),
+            "defaults": _load_default_settings(),
+        }
+    )
 
 
 @app.put("/api/settings")

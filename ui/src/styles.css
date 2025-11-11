@@ -196,6 +196,18 @@ select.input:focus {
   box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.18);
 }
 
+.input--error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(226, 77, 77, 0.22);
+}
+
+.input-error {
+  color: var(--danger);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
