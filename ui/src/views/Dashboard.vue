@@ -23,6 +23,37 @@ const unknownDevices = computed(() => devices.value.filter(d => !d?.name).length
 const alertCount = computed(() => counts.value?.alerts_200 ?? 0)
 const blockCount = computed(() => counts.value?.blocks_200 ?? 0)
 
+const scanProgress = computed(() => {
+  if (!scanInfo.value) return 0
+  const progress = scanInfo.value.progress || 0
+  return Math.min(100, Math.max(0, progress))
+})
+
+const scanStatusText = computed(() => {
+  if (!scanInfo.value) return 'No scan data'
+  const { done = 0, targets = 0, status = 'idle' } = scanInfo.value
+  
+  if (scanning.value) {
+    return `Scanning ${done} of ${targets} devices...`
+  }
+  
+  if (status === 'done') {
+    return `Completed: ${targets} devices scanned`
+  }
+  
+  if (status === 'error') {
+    return 'Scan failed'
+  }
+  
+  return 'Idle'
+})
+
+const scanStatusState = computed(() => {
+  if (!scanInfo.value) return 'idle'
+  if (scanning.value) return 'running'
+  return scanInfo.value.status || 'idle'
+})
+
 async function load () {
   if (loadingGuard.value) return
   try {
@@ -207,12 +238,31 @@ function startRealtime () {
         <button class="btn" @click="load" :disabled="loading">{{ loading ? 'Refreshing…' : 'Refresh' }}</button>
       </div>
     </div>
-
-    <div v-if="err" class="alert-banner" style="margin-bottom:16px;">{{ err }}</div>
-    <p v-if="scanInfo" class="small" style="margin-top:-6px;color:var(--muted);">
-      {{ scanning ? 'Scan in progress' : 'Last scan' }} · {{ scanInfo.progress }} / {{ scanInfo.total }} · {{ scanInfo.status }}
-    </p>
-
+    <div v-if="scanInfo" class="surface scan-status-card">
+      <div class="scan-status-card__meta">
+        <div class="scan-status-card__status">
+          <span :class="['scan-status-card__dot', `is-${scanStatusState}`]"></span>
+          <div class="scan-status-card__text">
+            <span class="scan-status-card__label">Network scan</span>
+            <span class="scan-status-card__status-text">{{ scanStatusText }}</span>
+          </div>
+        </div>
+        <div class="scan-status-card__time">
+          <span class="scan-status-card__label">Last update</span>
+          <span class="mono">{{ lastScanStr }}</span>
+        </div>
+      </div>
+      <div class="scan-status-card__progress">
+        <div class="progress-bar">
+          <div
+            class="progress-bar__fill"
+            :class="{ 'progress-bar__fill--active': scanning }"
+            :style="{ width: scanProgress + '%' }"
+          ></div>
+        </div>
+        <span class="small mono">{{ scanProgress }}%</span>
+      </div>
+    </div>
     <div class="card-grid" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr);align-items:start;gap:24px;">
       <section class="surface table-card">
         <header class="view-header" style="margin-bottom:8px;">

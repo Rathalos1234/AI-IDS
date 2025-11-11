@@ -2,10 +2,10 @@
   "cookies": [
     {
       "name": "session",
-      "value": "eyJfcGVybWFuZW50Ijp0cnVlLCJ1c2VybmFtZSI6ImFkbWluIn0.aRMksw.I-RbQaDY6Caj_5MEbu0gHT6_wOM",
+      "value": "eyJfcGVybWFuZW50Ijp0cnVlLCJ1c2VybmFtZSI6ImFkbWluIn0.aRN3lw.6xuiLnjIUC4aFXYQyiMrv_Nzn1I",
       "domain": "127.0.0.1",
       "path": "/",
-      "expires": 1762865859,
+      "expires": 1762887079,
       "httpOnly": true,
       "secure": false,
       "sameSite": "Lax"
