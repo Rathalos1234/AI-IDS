@@ -723,6 +723,11 @@ select.input:focus {
 .progress-bar__fill--active {
   animation: pulse-glow 2.2s ease-in-out infinite;
 }
+.progress-bar__fill--complete {
+  background: linear-gradient(90deg, rgba(39, 195, 131, 0.95), rgba(16, 185, 129, 0.95));
+  box-shadow: 0 10px 26px rgba(39, 195, 131, 0.42);
+  animation: success-glow 2s ease-in-out infinite;
+}
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 1;
@@ -731,6 +736,25 @@ select.input:focus {
   50% {
     opacity: 0.85;
     box-shadow: 0 10px 28px rgba(91, 140, 255, 0.4);
+  }
+}
+@keyframes success-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 10px 26px rgba(39, 195, 131, 0.42);
+  }
+  50% {
+    opacity: 0.92;
+    box-shadow: 0 12px 32px rgba(39, 195, 131, 0.55);
+  }
+}
+
+@keyframes status-success-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 6px rgba(39, 195, 131, 0.28), 0 0 12px rgba(39, 195, 131, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(39, 195, 131, 0.36), 0 0 16px rgba(39, 195, 131, 0.5);
   }
 }
 .scan-status-card {
@@ -819,7 +843,8 @@ select.input:focus {
 }
 .scan-status-card__dot.is-done {
   background: var(--success);
-  box-shadow: 0 0 0 6px rgba(39, 195, 131, 0.22);
+  box-shadow: 0 0 0 6px rgba(39, 195, 131, 0.28), 0 0 12px rgba(39, 195, 131, 0.35);
+  animation: status-success-pulse 2.2s ease-in-out infinite;
 }
 .scan-status-card__dot.is-error {
   background: var(--danger);
