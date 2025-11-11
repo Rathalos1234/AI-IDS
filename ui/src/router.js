@@ -17,14 +17,16 @@ export default createRouter({
     { path: '/signup', component: Auth, props: { mode: 'register' } },
     { path: '/reset', component: Auth, props: { mode: 'reset' } },
     {
-      path: '/', component: Layout, children: [
-        { path: '/dashboard', component: Dashboard },
-        { path: '/alerts', component: Alerts },
-        { path: '/logs', component: Logs },
-        { path: '/devices', component: Devices },
-        { path: '/banlist', component: BanList },
-        { path: '/settings', component: Settings },
-      ]
+       path: '/',
+      component: Layout,
+      children: [
+        { path: 'dashboard', component: Dashboard },
+        { path: 'alerts', component: Alerts },
+        { path: 'logs', component: Logs },
+        { path: 'devices', component: Devices },
+        { path: 'banlist', component: BanList },
+        { path: 'settings', component: Settings },
+      ],
     },
   ],
 });

@@ -45,6 +45,13 @@ watch(
 watch(mode, () => {
   msg.value = null;
   err.value = null;
+  const username = loginForm.username.trim();
+  const password = loginForm.password;
+  if (!username || !password) {
+    err.value = 'Username and password are required.';
+    return;
+  }
+  loginForm.username = username;
   loading.value = false;
 });
 
@@ -79,7 +86,13 @@ function friendlyAuthError(error, fallback, defaultMessage = 'Something went wro
   };
   if (error && map[error]) return map[error];
   if (fallback && map[fallback]) return map[fallback];
-  if (typeof fallback === 'string' && fallback) return fallback;
+  if (typeof fallback === 'string' && fallback) {
+    const normalized = fallback.toLowerCase();
+    if (normalized.includes('is not defined') || normalized.includes('referenceerror')) {
+      return defaultMessage;
+    }
+    return fallback;
+  }
   return defaultMessage;
 }
 
@@ -122,6 +135,7 @@ async function submitLogin() {
   try {
     const res = await api.login(loginForm.username, loginForm.password);
     msg.value = `Welcome ${res.user || loginForm.username}! Redirecting…`;
+    loginForm.password = '';
     setTimeout(() => router.push('/dashboard'), 400);
   } catch (e) {
     err.value = friendlyAuthError(e?.error, e?.message, 'Login failed.');
@@ -212,30 +226,28 @@ async function submitReset() {
 <template>
   <div class="hero">
     <div class="form-card">
-      <div class="actions-row" style="justify-content:flex-end;margin-bottom:8px;">
-        <button class="btn btn--link" type="button" @click="goHome">← Back to welcome</button>
-      </div>
+      <button class="btn btn--link form-card__back" type="button" @click="goHome">← Back to welcome</button>
       <h2>{{ title }}</h2>
       <p class="small" style="margin-top:0;">{{ subtitle }}</p>
 
-      <div v-if="mode === 'login'" class="stack">
+      <form v-if="mode === 'login'" class="stack" @submit.prevent="submitLogin">
         <input class="input" v-model="loginForm.username" placeholder="Username" autocomplete="username" />
         <input class="input" v-model="loginForm.password" type="password" placeholder="Password" autocomplete="current-password" />
-        <button class="btn btn--primary" type="button" @click="submitLogin" :disabled="loading">{{ primaryLabel }}</button>
-      </div>
+        <button class="btn btn--primary" type="submit" :disabled="loading">{{ primaryLabel }}</button>
+      </form>
 
-      <div v-else-if="mode === 'register'" class="stack">
+      <form v-else-if="mode === 'register'" class="stack" @submit.prevent="submitRegister">
         <input class="input" v-model="registerForm.username" placeholder="Username" autocomplete="username" />
         <input class="input" v-model="registerForm.password" type="password" placeholder="Password" autocomplete="new-password" />
         <input class="input" v-model="registerForm.confirm" type="password" placeholder="Confirm password" autocomplete="new-password" />
-        <button class="btn btn--primary" type="button" @click="submitRegister" :disabled="loading">{{ primaryLabel }}</button>
-      </div>
-      <div v-else class="stack">
+        <button class="btn btn--primary" type="submit" :disabled="loading">{{ primaryLabel }}</button>
+      </form>
+      <form v-else class="stack" @submit.prevent="submitReset">
         <input class="input" v-model="resetForm.username" placeholder="Username" autocomplete="username" />
         <input class="input" v-model="resetForm.password" type="password" placeholder="New password" autocomplete="new-password" />
         <input class="input" v-model="resetForm.confirm" type="password" placeholder="Confirm new password" autocomplete="new-password" />
-        <button class="btn btn--primary" type="button" @click="submitReset" :disabled="loading">{{ primaryLabel }}</button>
-      </div>
+        <button class="btn btn--primary" type="submit" :disabled="loading">{{ primaryLabel }}</button>
+      </form>
 
       <div class="stack" style="margin-top:14px;gap:6px;">
         <template v-if="mode === 'login'">
