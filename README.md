@@ -132,6 +132,17 @@ python3 main.py verify-model -m models/iforest.joblib
 python3 main.py monitor -i <iface> -m models/iforest.joblib [--firewall-blocking] [--simulate-traffic]
 ```
 
+### Backup
+
+```bash
+python3 main.py backup-db
+```
+
+### Retention
+
+```bash
+python3 main.py retention
+```
 ---
 
 ## Traffic generator (Sprint 3 Ops)
