@@ -15,6 +15,7 @@ const navItems = [
 
 // PD-29: health badge
 const apiHealthy = ref(true);
+const loggingOut = ref(false);
 let healthTimer = null;
 async function checkHealth () {
   try {
@@ -26,6 +27,21 @@ const isActive = (path) => route.path === path;
 
 function go (path) {
   if (route.path !== path) router.push(path);
+}
+
+async function logout () {
+  if (loggingOut.value) return;
+  loggingOut.value = true;
+  try {
+    if (typeof api.logout === 'function') {
+      await api.logout();
+    }
+  } catch (err) {
+    console.error('logout failed', err);
+  } finally {
+    loggingOut.value = false;
+    router.push('/auth');
+  }
 }
 onMounted(async () => {
   await checkHealth();
@@ -54,7 +70,7 @@ const statusTitle = computed(() => apiHealthy.value ? 'API healthy' : 'API unrea
             <span>{{ item.label }}</span>
             <span class="small">{{ item.hint }}</span>
           </button>
-          <button class="nav-link" @click="go('/auth')">
+          <button class="nav-link" @click="logout" :disabled="loggingOut">
             <span>Log Out</span>
             <span class="small">Goodbye</span>
           </button>

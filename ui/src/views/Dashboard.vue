@@ -12,16 +12,72 @@ const loading = ref(false)
 const apiBase = window.API_BASE || localStorage.getItem('API_BASE') || ''
 const scanning = ref(false)
 const scanInfo = ref(null)
+const completionHold = ref(false)
 const realtimeStops = []
 
 // single passive poller, started ONLY while a scan is running
 let statusTimer = null
+let completionTimer = null
 let lastScanStatus = null
 const loadingGuard = ref(false)
 
 const unknownDevices = computed(() => devices.value.filter(d => !d?.name).length)
 const alertCount = computed(() => counts.value?.alerts_200 ?? 0)
 const blockCount = computed(() => counts.value?.blocks_200 ?? 0)
+
+function clearCompletionHold () {
+  completionHold.value = false
+  if (completionTimer) {
+    clearTimeout(completionTimer)
+    completionTimer = null
+  }
+}
+
+function startCompletionHold () {
+  clearCompletionHold()
+  completionHold.value = true
+  completionTimer = setTimeout(() => {
+    completionHold.value = false
+    completionTimer = null
+  }, 3500)
+}
+
+const scanProgress = computed(() => {
+  if (completionHold.value) return 100
+  const info = scanInfo.value
+  if (!info) return 0
+  const status = info.status || 'idle'
+  const isActive = scanning.value || status === 'running'
+  if (!isActive) return 0
+  const progress = Number(info.progress) || 0
+  return Math.min(100, Math.max(0, progress))
+})
+
+const scanStatusText = computed(() => {
+  if (!scanInfo.value) return 'No scan data'
+  const { done = 0, targets = 0, status = 'idle' } = scanInfo.value
+  if (completionHold.value) {
+    return `Completed: ${targets} devices scanned`
+  }
+  if (scanning.value) {
+    return `Scanning ${done} of ${targets} devices...`
+  }
+  if (status === 'error') {
+    return 'Scan failed'
+  }
+  return 'Idle'
+})
+
+const scanStatusState = computed(() => {
+  if (completionHold.value) return 'done'
+  if (!scanInfo.value) return 'idle'
+  if (scanning.value) return 'running'
+  const status = scanInfo.value.status || 'idle'
+  if (status === 'error' || status === 'canceled') {
+    return status
+  }
+  return 'idle'
+})
 
 async function load () {
   if (loadingGuard.value) return
@@ -55,6 +111,11 @@ function startStatusPolling () {
       // React only to status transitions
       if (status !== lastScanStatus) {
         lastScanStatus = status
+        if (status === 'done') {
+          startCompletionHold()
+        } else {
+          clearCompletionHold()
+        }
         if (status === 'done' || status === 'error' || status === 'canceled') {
           // stop polling and refresh once
           clearInterval(statusTimer); statusTimer = null
@@ -119,6 +180,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   if (statusTimer) clearInterval(statusTimer)
+  if (completionTimer) clearTimeout(completionTimer)
   while (realtimeStops.length) {
     const off = realtimeStops.pop()
     try { if (typeof off === 'function') off() } catch (e) { console.error(e) }
@@ -128,6 +190,7 @@ onBeforeUnmount(() => {
 // ---- Start a scan from the UI ----
 async function runScan () {
   try {
+    clearCompletionHold()
     scanning.value = true
     lastScanStatus = 'running'
     await triggerScan()
@@ -180,8 +243,16 @@ function startRealtime () {
       if (!scan) return
       scanInfo.value = scan
       const status = scan?.status || 'idle'
+      const previousStatus = lastScanStatus
       lastScanStatus = status
       scanning.value = status === 'running'
+      if (status === 'done' && status !== previousStatus) {
+        startCompletionHold()
+      } else if (status === 'running' || status === 'error' || status === 'canceled') {
+        clearCompletionHold()
+      } else if (status === 'idle' && !completionHold.value) {
+        clearCompletionHold()
+      }
       if (statusTimer && status !== 'running') {
         clearInterval(statusTimer); statusTimer = null
       }
@@ -207,12 +278,31 @@ function startRealtime () {
         <button class="btn" @click="load" :disabled="loading">{{ loading ? 'Refreshing…' : 'Refresh' }}</button>
       </div>
     </div>
-
-    <div v-if="err" class="alert-banner" style="margin-bottom:16px;">{{ err }}</div>
-    <p v-if="scanInfo" class="small" style="margin-top:-6px;color:var(--muted);">
-      {{ scanning ? 'Scan in progress' : 'Last scan' }} · {{ scanInfo.progress }} / {{ scanInfo.total }} · {{ scanInfo.status }}
-    </p>
-
+    <div v-if="scanInfo" class="surface scan-status-card">
+      <div class="scan-status-card__meta">
+        <div class="scan-status-card__status">
+          <span :class="['scan-status-card__dot', `is-${scanStatusState}`]"></span>
+          <div class="scan-status-card__text">
+            <span class="scan-status-card__label">Network scan</span>
+            <span class="scan-status-card__status-text">{{ scanStatusText }}</span>
+          </div>
+        </div>
+        <div class="scan-status-card__time">
+          <span class="scan-status-card__label">Last update</span>
+          <span class="mono">{{ lastScanStr }}</span>
+        </div>
+      </div>
+      <div class="scan-status-card__progress">
+        <div class="progress-bar">
+          <div
+            class="progress-bar__fill"
+            :class="{ 'progress-bar__fill--active': scanning, 'progress-bar__fill--complete': completionHold }"
+            :style="{ width: scanProgress + '%' }"
+          ></div>
+        </div>
+        <span class="small mono">{{ scanProgress }}%</span>
+      </div>
+    </div>
     <div class="card-grid" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr);align-items:start;gap:24px;">
       <section class="surface table-card">
         <header class="view-header" style="margin-bottom:8px;">
