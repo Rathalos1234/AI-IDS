@@ -33,33 +33,36 @@ def _rand_user_agent() -> str:
 
 def _tcp_connect_and_http_get(host: str, port: int, path="/", timeout=1.5) -> None:
     """Small TCP GET to host:port (works with our local test server or real sites)."""
-    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.settimeout(timeout)
-        s.connect((host, port))
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(timeout)
+        try:
+            sock.connect((host, port))
+        except (TimeoutError, socket.timeout, OSError):
+            return
         req = (
             f"GET {path} HTTP/1.1\r\n"
             f"Host: {host}\r\n"
             f"User-Agent: {_rand_user_agent()}\r\n"
             "Connection: close\r\n\r\n"
         )
-        s.sendall(req.encode("ascii", "ignore"))
+        sock.sendall(req.encode("ascii", "ignore"))
         with contextlib.suppress(TimeoutError, socket.timeout, OSError):
-            s.recv(1024)
+            sock.recv(1024)
 
 
 def _tcp_connect_only(host: str, port: int, timeout=0.4) -> None:
     """Bare TCP connect; close immediately. Good for scans and lightweight probes."""
-    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.settimeout(timeout)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(timeout)
         with contextlib.suppress(Exception):
-            s.connect((host, port))
+            sock.connect((host, port))
 
 
 def _udp_fire_and_forget(host: str, port: int, payload: bytes) -> None:
     """Transmit a UDP datagram; do not wait for replies."""
-    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
-        s.settimeout(0.5)
-        s.sendto(payload, (host, port))
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        sock.settimeout(0.5)
+        sock.sendto(payload, (host, port))
 
 
 def _build_dns_query(qname: str, qtype: int = 1) -> bytes:
@@ -95,8 +98,28 @@ def _random_payload(n: int = 48) -> bytes:
 
 
 class _QuietHandler(SimpleHTTPRequestHandler):
+    server_version = "LocalHTTP/1.0"
+
     def log_message(self, fmt, *args):  # silence console
         pass
+
+    def do_GET(self) -> None:  # noqa: D401 - simple test handler
+        path = self.path or "/"
+        if path in {"/", "/health", "/healthz"}:
+            body = b"ok"
+        elif path.startswith("/parallel/"):
+            body = path.encode("utf-8", "ignore")
+        else:
+            # Fallback to default static file handling
+            super().do_GET()
+            return
+
+        body += b"\n"
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
 
 def start_local_http_server(
@@ -114,7 +137,7 @@ def start_local_http_server(
 
 
 async def _normal_mix(
-    duration_s: int | None,
+    duration_s: float | int | None,
     local_only: bool,
     http_host_port=("127.0.0.1", 8080),
     ext_http_hosts: List[Tuple[str, int]] | None = None,

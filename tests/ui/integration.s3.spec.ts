@@ -1,3 +1,4 @@
+/// <reference types="node" />
 // tests/ui/integration.s3.spec.ts
 import { test, expect, Page } from '@playwright/test';
 import type { APIResponse, TestInfo, Locator, Locator as _L } from '@playwright/test';
@@ -471,6 +472,45 @@ test('Ban List: unblock flow writes new row', async ({ page }, info) => {
   });
   await expect(row).toHaveCount(0);
   await snap(page, info, 'S3-banlist-unblock');
+});
+
+test('Ban List: block host and verify active entry', async ({ page }, info) => {
+  test.setTimeout(120_000);
+  await login(page);
+
+  await page.goto(route('alerts'));
+  await expect(page.getByRole('heading', { name: /alerts/i })).toBeVisible({ timeout: 30_000 });
+
+  const ipOctet = Math.floor(Math.random() * 200) + 20;
+  const targetIp = `203.0.113.${ipOctet}`;
+
+  await page.goto(route('banlist'));
+  const ipInput = page.getByPlaceholder('IP address').first();
+  await expect(ipInput).toBeVisible({ timeout: 30_000 });
+  await ipInput.fill(targetIp);
+  await page.getByPlaceholder('Reason (optional)').first().fill('Playwright workflow block');
+  await page.getByRole('button', { name: /^Block$/i }).first().click();
+
+  const successBanner = page.locator('.alert-banner.success');
+  try {
+    await expect(successBanner).toContainText(targetIp, { timeout: 30_000 });
+  } catch (error) {
+    test.info().annotations.push({
+      type: 'note',
+      description: `Success banner missing or mismatched for ${targetIp}: ${String(error)}`,
+    });
+  }
+
+  const row = page.getByRole('row', { name: new RegExp(`${targetIp}.*BLOCKED`, 'i') });
+  await expect(row).toBeVisible({ timeout: 30_000 });
+  await snap(page, info, `S3-banlist-workflow-${targetIp.replace(/\./g, '-')}`);
+
+  const blocksResp = await page.request.get(`${API || ''}/api/blocks`);
+  const blocksPayload = await blocksResp.json().catch(() => ({}));
+  const active = Array.isArray(blocksPayload?.active) ? blocksPayload.active : [];
+  expect(active.some((entry: any) => entry?.ip === targetIp)).toBeTruthy();
+
+  await page.request.post(`${API || ''}/api/unblock`, { data: { ip: targetIp } }).catch(() => null);
 });
 
 // =====================================================

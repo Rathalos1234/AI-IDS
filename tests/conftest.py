@@ -1,7 +1,11 @@
+import importlib
+import os
+import random
+import sys
 import time
+
 import pandas as pd
 import pytest
-import random
 
 
 def build_packets(
@@ -84,12 +88,62 @@ def _reset_api_state():
     Clear trusted IPs, blocks, alerts, and devices before each test.
     Fixes the case where /api/blocks returns 400 (trusted_ip) due to prior state.
     """
-    try:
-        import api  # local Flask app
+    if "api" not in sys.modules:
+        yield
+        return
 
-        c = api.app.test_client()
+    try:
+        api_mod = sys.modules["api"]
+        c = api_mod.app.test_client()
+        resp = c.post("/api/ops/reset")
         # Best-effort; returns 200 when supported (dev), or 501 on minimal webdb.
-        c.post("/api/ops/reset")
-    except Exception:
+        # Only ignore 501
+        if resp.status_code not in (200, 501):
+            import warnings
+
+            warnings.warn(
+                f"API reset returned {resp.status_code}, tests may be polluted"
+            )
+    except ImportError:
         pass
+    except Exception as e:
+        import warnings
+
+        warnings.warn(f"API reset failed: {e}, tests may be polluted")
     yield
+
+
+@pytest.fixture
+def api_harness(monkeypatch, tmp_path):
+    """Provide a fresh Flask test client and isolated SQLite database for API tests."""
+
+    db_path = tmp_path / "api.sqlite"
+    monkeypatch.setenv("SQLITE_DB", str(db_path))
+
+    import webdb  # Imported lazily so reload picks up new path
+
+    webdb = importlib.reload(webdb)
+    webdb.init()
+    webdb.wipe_all()
+
+    if "api" in sys.modules:
+        api_mod = importlib.reload(sys.modules["api"])
+    else:
+        import api as api_mod  # type: ignore[import]
+
+    require_auth = os.environ.get("REQUIRE_AUTH", "0") == "1"
+    setattr(api_mod, "REQUIRE_AUTH", require_auth)
+    if hasattr(api_mod, "_RATE_LIMITER"):
+        getattr(api_mod, "_RATE_LIMITER").clear()
+
+    def make_client():
+        client = api_mod.app.test_client()
+        if not hasattr(client, "close") and hasattr(client, "__exit__"):
+
+            def _close() -> None:
+                client.__exit__(None, None, None)
+
+            setattr(client, "close", _close)
+        return client
+
+    yield {"make_client": make_client, "webdb": webdb, "api": api_mod}

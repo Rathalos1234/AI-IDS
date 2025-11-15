@@ -1,38 +1,68 @@
 # tests/test_train_until_ctrl_c.py
+import importlib
 import sys
-import types
 import time
+import types
 import configparser
 from pathlib import Path
 
 import pytest
 
+_ORIGINAL_MODULES = {
+    name: sys.modules.get(name) for name in ("scapy", "scapy.all", "config_validation")
+}
+
 # --- Bootstrap: stub out external deps BEFORE importing project modules ---
 # Fake webdb to avoid DB dependency in CI
-fake_webdb = types.SimpleNamespace(
-    init=lambda: None,
-    record_device=lambda *a, **k: None,
-    insert_alert=lambda *a, **k: None,
-    delete_action_by_ip=lambda *a, **k: None,
-    insert_block=lambda *a, **k: None,
-    is_trusted=lambda ip: False,
-)
-sys.modules.setdefault("webdb", fake_webdb)
+fake_webdb = types.ModuleType("webdb")
+setattr(fake_webdb, "init", lambda: None)
+setattr(fake_webdb, "record_device", lambda *a, **k: None)
+setattr(fake_webdb, "insert_alert", lambda *a, **k: None)
+setattr(fake_webdb, "delete_action_by_ip", lambda *a, **k: None)
+setattr(fake_webdb, "insert_block", lambda *a, **k: None)
+setattr(fake_webdb, "is_trusted", lambda ip: False)
+setattr(fake_webdb, "list_blocks", lambda *a, **k: [])
+setattr(fake_webdb, "list_devices", lambda *a, **k: [])
+setattr(fake_webdb, "expire_bans", lambda *a, **k: None)
 
 # Fake scapy so importing network_monitor doesn't fail in environments without scapy
-fake_scapy_all = types.SimpleNamespace(sniff=lambda **kwargs: None)
-sys.modules.setdefault("scapy", types.SimpleNamespace(all=fake_scapy_all))
-sys.modules.setdefault("scapy.all", fake_scapy_all)
+fake_scapy_all = types.ModuleType("scapy.all")
+setattr(fake_scapy_all, "sniff", lambda **kwargs: None)
+fake_scapy = types.ModuleType("scapy")
+setattr(fake_scapy, "all", fake_scapy_all)
+sys.modules["scapy"] = fake_scapy
+sys.modules["scapy.all"] = fake_scapy_all
 
 # Fake config_validation used by main.py (if your repo already has it, this is harmless)
-sys.modules.setdefault(
-    "config_validation",
-    types.SimpleNamespace(validate_config=lambda cfg: None),
-)
+fake_config_validation = types.ModuleType("config_validation")
+setattr(fake_config_validation, "validate_config", lambda cfg: None)
+sys.modules["config_validation"] = fake_config_validation
 
 # Now we can import the project
 import network_monitor as nm  # noqa: E402
 # from packet_processor import IP, TCP, UDP  # noqa: E402
+
+setattr(fake_webdb, "DB", Path("ids_web.db"))
+setattr(nm, "webdb", fake_webdb)
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _restore_imports():
+    """Restore real modules after this test module finishes."""
+    yield
+    for name, original in _ORIGINAL_MODULES.items():
+        if original is None:
+            sys.modules.pop(name, None)
+        else:
+            sys.modules[name] = original
+
+    # Ensure downstream tests see real implementations again
+    importlib.invalidate_caches()
+
+    if "network_monitor" in sys.modules:
+        importlib.reload(sys.modules["network_monitor"])
+    if "main" in sys.modules:
+        importlib.reload(sys.modules["main"])
 
 
 @pytest.mark.unit
@@ -97,6 +127,8 @@ def test_cli_train_until_flag_routes_to_indefinite(monkeypatch, tmp_path):
     """
     # Import main after our stubs (above)
     import main as cli
+
+    monkeypatch.setattr(cli, "webdb", fake_webdb, raising=False)
 
     called = {"until": False}
 

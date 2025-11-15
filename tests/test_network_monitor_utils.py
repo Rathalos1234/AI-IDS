@@ -12,7 +12,8 @@ import pytest
 def network_monitor_module(monkeypatch, tmp_path):
     fake_scapy = types.ModuleType("scapy")
     fake_scapy_all = types.ModuleType("scapy.all")
-    fake_scapy_all.sniff = lambda *args, **kwargs: None
+    setattr(fake_scapy_all, "sniff", lambda *args, **kwargs: None)
+    setattr(fake_scapy, "all", fake_scapy_all)
     monkeypatch.setitem(sys.modules, "scapy", fake_scapy)
     monkeypatch.setitem(sys.modules, "scapy.all", fake_scapy_all)
     monkeypatch.setenv("SQLITE_DB", str(tmp_path / "ids_test.db"))
