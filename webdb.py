@@ -1,4 +1,5 @@
 import hashlib
+import html
 import os
 import sqlite3
 import uuid
@@ -6,6 +7,8 @@ from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+MAX_ALERT_FIELD_LEN = 100_000
 
 
 def _utcnow() -> datetime:
@@ -21,6 +24,7 @@ def _iso_utc(dt: datetime) -> str:
 # DB = Path("ids_web.db")
 DB = Path(os.environ.get("SQLITE_DB", "ids_web.db"))
 
+
 def _should_seed_defaults() -> bool:
     """Return True when the configured DB path is the default production path."""
     configured = Path(os.environ.get("SQLITE_DB", "ids_web.db"))
@@ -29,6 +33,8 @@ def _should_seed_defaults() -> bool:
     except FileNotFoundError:
         # resolve(strict=False) on some Python versions may still raise; fall back.
         return os.path.abspath(DB) == os.path.abspath(configured)
+
+
 SCHEMA = """
 PRAGMA journal_mode=WAL;
 CREATE TABLE IF NOT EXISTS alerts (
@@ -214,32 +220,150 @@ def insert_block(b):
 
 
 def add_alert(
-    *,
     src_ip: str,
-    dest_ip: str = "",  # ignored by current schema (kept for API compatibility)
-    dport: int = 0,  # ignored
-    severity: str,
-    kind: str,
     label: str = "",
-    message: str = "",  # ignored
+    severity: str = "",
+    kind: str = "",
+    *,
+    dest_ip: str = "",
+    dport: int = 0,
+    message: str = "",
     ts: Optional[str] = None,
 ) -> str:
     """
-    Rich signature compatible with the API sink, but stores only the 6 columns your table has.
+    Store an alert in the database, accepting both positional and keyword arguments.
+
+    The previous implementation required keyword only arguments, which broke
+    a number of call sites (including the comprehensive test suite) that pass
+    positional values.  To retain backwards compatibility we accept positional
+    parameters for the common fields while keeping keyword only fallbacks for
+    the legacy arguments that are ignored by the current schema.
     """
     rid = uuid.uuid4().hex
     ts = ts or _iso_utc(_utcnow())
+
+    trimmed_label = label[:MAX_ALERT_FIELD_LEN]
+    trimmed_kind = kind[:MAX_ALERT_FIELD_LEN]
+
     insert_alert(
         {
             "id": rid,
             "ts": ts,
             "src_ip": src_ip,
-            "label": label or kind,
+            "label": trimmed_label,
             "severity": severity,
-            "kind": kind,
+            "kind": trimmed_kind,
         }
     )
     return rid
+
+
+def add_block(
+    ip: str,
+    action: str = "block",
+    reason: str = "",
+    *,
+    expires_at: str = "",
+    ts: Optional[str] = None,
+) -> str:
+    """Create a block record and return its identifier."""
+    if not ip:
+        raise ValueError("ip is required")
+
+    rid = uuid.uuid4().hex
+    ts = ts or _iso_utc(_utcnow())
+    insert_block(
+        {
+            "id": rid,
+            "ts": ts,
+            "ip": ip,
+            "action": action,
+            "reason": reason or "",
+            "expires_at": expires_at or "",
+        }
+    )
+    return rid
+
+
+def remove_block(
+    block_id: str, *, reason: str = "removed", ts: Optional[str] = None
+) -> bool:
+    """
+    Mark a block as removed.  We insert a matching "unblock" record so that
+    historical data is preserved while the helper that lists active blocks can
+    filter it out.
+    """
+    if not block_id:
+        return False
+
+    with closing(_con()) as con:
+        row = con.execute("SELECT * FROM blocks WHERE id = ?", (block_id,)).fetchone()
+        if row is None:
+            return False
+        ip = row["ip"]
+
+    unblock_ts = ts or _iso_utc(_utcnow())
+    insert_block(
+        {
+            "id": uuid.uuid4().hex,
+            "ts": unblock_ts,
+            "ip": ip,
+            "action": "unblock",
+            "reason": reason or "",
+            "expires_at": "",
+        }
+    )
+    return True
+
+
+def get_alerts(*, limit: Optional[int] = None, cursor: Optional[str] = None):
+    """Return alerts ordered from newest to oldest."""
+    query = "SELECT * FROM alerts"
+    params: list[Any] = []
+    if cursor:
+        query += " WHERE ts < ?"
+        params.append(cursor)
+    query += " ORDER BY ts DESC"
+    if limit:
+        query += " LIMIT ?"
+        params.append(int(limit))
+
+    with closing(_con()) as con:
+        rows = con.execute(query, tuple(params)).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_blocks(*, limit: Optional[int] = None, include_history: bool = False):
+    """Return blocks, optionally restricted to currently active entries."""
+    params: list[Any] = []
+    if include_history:
+        query = "SELECT * FROM blocks ORDER BY ts DESC"
+        if limit:
+            query += " LIMIT ?"
+            params.append(int(limit))
+    else:
+        query = """
+            SELECT b.*
+              FROM blocks b
+             WHERE b.action = 'block'
+               AND NOT EXISTS (
+                    SELECT 1
+                      FROM blocks b2
+                     WHERE b2.ip = b.ip
+                       AND (
+                            b2.ts > b.ts
+                         OR (b2.ts = b.ts AND b2.rowid > b.rowid)
+                       )
+               )
+             ORDER BY b.ts DESC, b.rowid DESC
+        """
+        if limit:
+            query += " LIMIT ?"
+            params.append(int(limit))
+
+    with closing(_con()) as con:
+        rows = con.execute(query, tuple(params)).fetchall()
+        return [dict(r) for r in rows]
 
 
 # ---- Device inventory (additive table; safe) ----
@@ -442,6 +566,32 @@ def is_locked(username: str) -> Optional[str]:
         return lu
 
 
+def _increment_lockout_counter(
+    username: str,
+    *,
+    lock_after: int = 5,
+    lock_minutes: int = 15,
+) -> None:
+    """Backwards compatible helper for tests exercising brute force logic."""
+
+    register_failure(username, lock_after=lock_after, lock_minutes=lock_minutes)
+
+
+def _is_locked_out(username: str) -> bool:
+    """Return True when username is currently locked out."""
+
+    locked_until = is_locked(username)
+    if not locked_until:
+        return False
+    if isinstance(locked_until, datetime):
+        return locked_until > _utcnow()
+    try:
+        dt = datetime.fromisoformat(str(locked_until).replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return dt > _utcnow()
+
+
 # ---------------- Devices ----------------
 
 
@@ -508,9 +658,10 @@ def set_device_scan(ip: str, ports_csv: str, risk: str = ""):
 
 def upsert_trusted_ip(ip: str, note: str = ""):
     with closing(_con()) as con:
+        safe_note = html.escape(note or "", quote=True)
         con.execute(
             "INSERT OR REPLACE INTO trusted_ips (ip, note, created_ts) VALUES (?, ?, datetime('now'))",
-            (ip, note or ""),
+            (ip, safe_note),
         )
         con.commit()
 
@@ -598,7 +749,13 @@ def wipe_all() -> Dict[str, int]:
     cleared: Dict[str, int] = {}
     with closing(_con()) as con:
         for table, key in tables:
-            cur = con.execute(f"DELETE FROM {table}")
+            try:
+                cur = con.execute(f"DELETE FROM {table}")
+            except sqlite3.OperationalError as exc:
+                if "no such table" not in str(exc).lower():
+                    raise
+                con.executescript(SCHEMA)
+                cur = con.execute(f"DELETE FROM {table}")
             cleared[key] = cur.rowcount
         con.commit()
     return cleared

@@ -47,7 +47,9 @@ def test_register_creates_user_and_allows_login():
     assert body.get("user") == username
     assert body.get("token")
 
-    r_login = c.post("/api/auth/login", json={"username": username, "password": password})
+    r_login = c.post(
+        "/api/auth/login", json={"username": username, "password": password}
+    )
     assert r_login.status_code == 200
     assert (r_login.get_json() or {}).get("ok") is True
 
@@ -58,9 +60,13 @@ def test_register_duplicate_user_rejected():
     username = _rand_user("dup")
     password = "hunter22"
 
-    first = c.post("/api/auth/register", json={"username": username, "password": password})
+    first = c.post(
+        "/api/auth/register", json={"username": username, "password": password}
+    )
     assert first.status_code == 201
-    second = c.post("/api/auth/register", json={"username": username, "password": password})
+    second = c.post(
+        "/api/auth/register", json={"username": username, "password": password}
+    )
     assert second.status_code == 409
     assert (second.get_json() or {}).get("error") == "user_exists"
 
@@ -82,6 +88,8 @@ def test_reset_password_updates_credentials():
     assert r_reset.status_code == 200
     assert (r_reset.get_json() or {}).get("ok") is True
 
-    r_login = c.post("/api/auth/login", json={"username": username, "password": new_password})
+    r_login = c.post(
+        "/api/auth/login", json={"username": username, "password": new_password}
+    )
     assert r_login.status_code == 200
     assert (r_login.get_json() or {}).get("ok") is True

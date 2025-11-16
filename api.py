@@ -1,3 +1,4 @@
+from collections import deque
 from datetime import datetime, timedelta, timezone
 import configparser
 import csv
@@ -11,7 +12,8 @@ import threading
 import time
 import uuid
 from io import StringIO
-from typing import Optional, TypedDict
+from typing import Dict, Optional, TypedDict
+import sqlite3
 
 from flask import (
     Flask,
@@ -37,8 +39,65 @@ CORS(app, supports_credentials=True)
 webdb.init()
 
 
+class RateLimiter:
+    def __init__(self) -> None:
+        self._hits: dict[str, deque[float]] = {}
+        self._lock = threading.Lock()
+
+    def check(self, key: str, limit: int, window: float) -> tuple[bool, float]:
+        now = time.time()
+        with self._lock:
+            history = self._hits.setdefault(key, deque())
+            while history and now - history[0] > window:
+                history.popleft()
+            if len(history) >= limit:
+                retry = max(0.0, window - (now - history[0])) if history else window
+                return False, retry
+            history.append(now)
+        return True, 0.0
+
+    def clear(self) -> None:
+        with self._lock:
+            self._hits.clear()
+
+
+RATE_LIMITS: Dict[str, tuple[int, float]] = {
+    "block": (
+        int(os.environ.get("BLOCK_RATE_LIMIT", "60")),
+        float(os.environ.get("BLOCK_RATE_WINDOW", "60")),
+    ),
+    "trusted": (
+        int(os.environ.get("TRUSTED_RATE_LIMIT", "30")),
+        float(os.environ.get("TRUSTED_RATE_WINDOW", "60")),
+    ),
+}
+
+_RATE_LIMITER = RateLimiter()
+
+
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _maybe_rate_limit(bucket: str):
+    limit, window = RATE_LIMITS.get(bucket, (0, 0))
+    if limit <= 0 or window <= 0:
+        return None
+    remote = request.remote_addr or "local"
+    allowed, retry_after = _RATE_LIMITER.check(f"{bucket}:{remote}", limit, window)
+    if allowed:
+        return None
+    resp = jsonify({"ok": False, "error": "rate_limited", "retry_after": retry_after})
+    resp.status_code = 429
+    return resp
+
+
+def _handle_disk_full(exc: sqlite3.OperationalError):
+    if "database or disk is full" in str(exc).lower():
+        resp = jsonify({"ok": False, "error": "disk_full"})
+        resp.status_code = 507
+        return resp
+    return None
 
 
 def _iso_utc(dt: datetime) -> str:
@@ -157,9 +216,13 @@ def _compute_expiry(body: dict) -> tuple[str, int]:
     return _iso_utc(expires), mins * 60
 
 
-class FirewallResult(TypedDict):
+class FirewallResultBase(TypedDict):
     applied: bool
     error: Optional[str]
+
+
+class FirewallResult(FirewallResultBase, total=False):
+    capabilities: dict[str, object]
 
 
 class LockState(TypedDict, total=False):
@@ -254,13 +317,17 @@ def _verify_login(username: str, password: str) -> bool:
     return username == ADMIN_USER and password == ADMIN_PASSWORD
 
 
-def _cleanup_tokens(now: Optional[datetime] = None) -> None:
+def _cleanup_tokens(
+    now: Optional[datetime] = None, *, skip_token: Optional[str] = None
+) -> None:
     """Remove expired tokens from the in-memory registry."""
     now = now or _utcnow()
     with _TOKENS_LOCK:
         for token, meta in list(_TOKENS.items()):
             expires_at = meta.get("expires_at")
             if isinstance(expires_at, datetime) and expires_at <= now:
+                if skip_token and token == skip_token:
+                    continue
                 _TOKENS.pop(token, None)
 
 
@@ -319,8 +386,8 @@ def _current_user() -> Optional[str]:
     if hasattr(g, "_auth_user"):
         return g._auth_user
 
-    _cleanup_tokens()
     token = _token_from_request()
+    _cleanup_tokens(skip_token=token)
     username, expires_at, reason = _resolve_token(token)
     if username:
         g._auth_user = username
@@ -328,6 +395,13 @@ def _current_user() -> Optional[str]:
         g._auth_expires = expires_at
         g._auth_error = None
         return username
+
+    if token and reason:
+        g._auth_user = None
+        g._auth_token = token
+        g._auth_expires = None
+        g._auth_error = reason
+        return None
 
     username = session.get("username")
     if username:
@@ -557,7 +631,7 @@ def blocks():
                     _TEMP_BANS.pop(ip, None)
         except Exception:
             pass
-    
+
     history_limit = int(request.args.get("limit", 100))
     # Fetch a generous slice so we can compute the latest action per IP without
     # missing older unblock rows. The client can still page the history via
@@ -579,6 +653,9 @@ def blocks():
 
 @app.post("/api/block")
 def post_block():
+    limited = _maybe_rate_limit("block")
+    if limited:
+        return limited
     body = request.get_json(force=True) or {}
     ip = (body.get("ip") or "").strip()
     if not ip:
@@ -592,19 +669,25 @@ def post_block():
     #    expires_at = _compute_expiry(body)
     expires_at, ttl_sec = _compute_expiry(body)
 
-    webdb.delete_action_by_ip(ip, "unblock")
-    webdb.delete_action_by_ip(ip, "block")
-    webdb.insert_block(
-        {
-            "id": str(uuid.uuid4()),
-            "ts": _iso_utc(_utcnow()),
-            "ip": ip,
-            "action": "block",
-            "reason": (body.get("reason") or "").strip(),
-            # If webdb has no 'expires_at' column, this extra key is ignored.
-            "expires_at": expires_at,
-        }
-    )
+    try:
+        webdb.delete_action_by_ip(ip, "unblock")
+        webdb.delete_action_by_ip(ip, "block")
+        webdb.insert_block(
+            {
+                "id": str(uuid.uuid4()),
+                "ts": _iso_utc(_utcnow()),
+                "ip": ip,
+                "action": "block",
+                "reason": (body.get("reason") or "").strip(),
+                # If webdb has no 'expires_at' column, this extra key is ignored.
+                "expires_at": expires_at,
+            }
+        )
+    except sqlite3.OperationalError as exc:
+        handled = _handle_disk_full(exc)
+        if handled:
+            return handled
+        raise
     #    webdb.insert_block(
     #        {
     #            "id": str(uuid.uuid4()),
@@ -626,6 +709,9 @@ def post_block():
 @app.post("/api/blocks")
 def post_block_with_reason():
     """Canonical block endpoint that explicitly supports 'reason'."""
+    limited = _maybe_rate_limit("block")
+    if limited:
+        return limited
     body = request.get_json(force=True) or {}
     ip = (body.get("ip") or "").strip()
     if not ip:
@@ -640,18 +726,24 @@ def post_block_with_reason():
     #    expires_at = _compute_expiry(body)
     expires_at, ttl_sec = _compute_expiry(body)
 
-    webdb.delete_action_by_ip(ip, "unblock")
-    webdb.delete_action_by_ip(ip, "block")
-    webdb.insert_block(
-        {
-            "id": str(uuid.uuid4()),
-            "ts": _iso_utc(_utcnow()),
-            "ip": ip,
-            "action": "block",
-            "reason": reason,
-            "expires_at": expires_at,  # <-- persist temp ban
-        }
-    )
+    try:
+        webdb.delete_action_by_ip(ip, "unblock")
+        webdb.delete_action_by_ip(ip, "block")
+        webdb.insert_block(
+            {
+                "id": str(uuid.uuid4()),
+                "ts": _iso_utc(_utcnow()),
+                "ip": ip,
+                "action": "block",
+                "reason": reason,
+                "expires_at": expires_at,  # <-- persist temp ban
+            }
+        )
+    except sqlite3.OperationalError as exc:
+        handled = _handle_disk_full(exc)
+        if handled:
+            return handled
+        raise
     if expires_at and not _supports_expire_bans():
         _TEMP_BANS[ip] = expires_at
     fw = _firewall_apply("block", ip, reason)
@@ -961,6 +1053,9 @@ def get_trusted():
 @app.post("/api/trusted")
 def add_trusted():
     require_auth()
+    limited = _maybe_rate_limit("trusted")
+    if limited:
+        return limited
     body = request.get_json(force=True) or {}
     ip = (body.get("ip") or "").strip()
     note = (body.get("note") or "").strip()
@@ -977,10 +1072,16 @@ def add_trusted():
                 "message": "Unblock this IP before adding it to Trusted.",
             }
         ), 409
-    if _supports_trusted_db():
-        webdb.upsert_trusted_ip(ip, note)
-    else:
-        _TRUSTED_MEM.add(ip)
+    try:
+        if _supports_trusted_db():
+            webdb.upsert_trusted_ip(ip, note)
+        else:
+            _TRUSTED_MEM.add(ip)
+    except sqlite3.OperationalError as exc:
+        handled = _handle_disk_full(exc)
+        if handled:
+            return handled
+        raise
     return jsonify({"ok": True})
 
 
@@ -1014,6 +1115,7 @@ _SCAN_LOCK = threading.Lock()
 # Initialize from disk so a reboot shows the last known scan time
 _LAST_SCAN_TS: Optional[str] = _read_last_scan_ts()
 
+
 def _cached_last_scan_ts() -> Optional[str]:
     """Return the best-known last scan timestamp without mutating runtime state."""
 
@@ -1024,6 +1126,7 @@ def _cached_last_scan_ts() -> Optional[str]:
     if cached:
         _LAST_SCAN_TS = cached
     return cached
+
 
 TOP_PORTS = [22, 23, 53, 80, 110, 139, 143, 443, 445, 3306, 3389, 5900]
 
@@ -1211,14 +1314,20 @@ def healthz_api():
 def get_logs():
     require_auth()
     q = request.args
-    items = webdb.list_log_events_filtered(
-        limit=int(q.get("limit", 200)),
-        ip=q.get("ip") or None,
-        severity=q.get("severity") or None,
-        kind=q.get("type") or None,
-        ts_from=q.get("from") or None,
-        ts_to=q.get("to") or None,
-    )
+    try:
+        items = webdb.list_log_events_filtered(
+            limit=int(q.get("limit", 200)),
+            ip=q.get("ip") or None,
+            severity=q.get("severity") or None,
+            kind=q.get("type") or None,
+            ts_from=q.get("from") or None,
+            ts_to=q.get("to") or None,
+        )
+    except sqlite3.OperationalError as exc:
+        handled = _handle_disk_full(exc)
+        if handled:
+            return handled
+        raise
     return jsonify({"ok": True, "items": items})
 
 
@@ -1227,14 +1336,20 @@ def export_logs():
     require_auth()
     q = request.args
     fmt = (q.get("format") or "csv").lower()
-    items = webdb.list_log_events_filtered(
-        limit=int(q.get("limit", 10000)),
-        ip=q.get("ip") or None,
-        severity=q.get("severity") or None,
-        kind=q.get("type") or None,
-        ts_from=q.get("from") or None,
-        ts_to=q.get("to") or None,
-    )
+    try:
+        items = webdb.list_log_events_filtered(
+            limit=int(q.get("limit", 10000)),
+            ip=q.get("ip") or None,
+            severity=q.get("severity") or None,
+            kind=q.get("type") or None,
+            ts_from=q.get("from") or None,
+            ts_to=q.get("to") or None,
+        )
+    except sqlite3.OperationalError as exc:
+        handled = _handle_disk_full(exc)
+        if handled:
+            return handled
+        raise
     if fmt == "json":
         resp = app.response_class(
             response=json.dumps(items),

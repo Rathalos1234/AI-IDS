@@ -155,17 +155,24 @@ def build_arg_parser(cfg: configparser.ConfigParser) -> argparse.ArgumentParser:
     _ = sub.add_parser("config-validate", help="Validate configuration and exit.")
 
     # --- tiny ops helpers ---
-    pbd = sub.add_parser("backup-db", help="Create a timestamped copy of the web database")
+    pbd = sub.add_parser(
+        "backup-db", help="Create a timestamped copy of the web database"
+    )
     pbd.add_argument("-o", "--outdir", default="backups", help="destination directory")
 
     pr = sub.add_parser(
         "retention-run",
         help="Prune old alerts/blocks per config.ini (or CLI overrides)",
     )
-    pr.add_argument("--alerts-days", type=int, default=None, help="override Retention.AlertsDays")
-    pr.add_argument("--blocks-days", type=int, default=None, help="override Retention.BlocksDays")
+    pr.add_argument(
+        "--alerts-days", type=int, default=None, help="override Retention.AlertsDays"
+    )
+    pr.add_argument(
+        "--blocks-days", type=int, default=None, help="override Retention.BlocksDays"
+    )
 
     return p
+
 
 def cmd_backup_db(args) -> int:
     """Write a timestamped copy of the SQLite DB into args.outdir."""
@@ -182,6 +189,7 @@ def cmd_backup_db(args) -> int:
     print(f"[backup-db] wrote {dest}")
     return 0
 
+
 def cmd_retention_run(args) -> int:
     """Invoke webdb.prune_old using config.ini or CLI overrides and print a JSON result."""
     cfg = _load_config("config.ini")
@@ -192,12 +200,21 @@ def cmd_retention_run(args) -> int:
     if blocks_days is None:
         blocks_days = cfg.getint("Retention", "BlocksDays", fallback=0)
     if hasattr(webdb, "prune_old"):
-        res = webdb.prune_old(days_alerts=int(alerts_days), days_blocks=int(blocks_days))
-        print(json.dumps({
-            "ok": True,
-            "deleted": res,
-            "settings": {"alerts_days": int(alerts_days), "blocks_days": int(blocks_days)},
-        }))
+        res = webdb.prune_old(
+            days_alerts=int(alerts_days), days_blocks=int(blocks_days)
+        )
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "deleted": res,
+                    "settings": {
+                        "alerts_days": int(alerts_days),
+                        "blocks_days": int(blocks_days),
+                    },
+                }
+            )
+        )
         return 0
     print(json.dumps({"ok": False, "error": "retention_unsupported"}))
     return 1
@@ -268,7 +285,7 @@ def main(argv=None) -> int:
         elif args.mode == "backup-db":
             return cmd_backup_db(args)
         elif args.mode == "retention-run":
-            return cmd_retention_run(args)        
+            return cmd_retention_run(args)
         else:
             print("Unknown mode. Use 'train' or 'monitor'.")
             return 2

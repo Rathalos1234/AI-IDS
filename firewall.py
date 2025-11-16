@@ -1,13 +1,14 @@
 """Linux firewall helpers for runtime blocking."""
 
 from __future__ import annotations
+import ipaddress
 import logging
 import os
 import platform
 import shutil
 import subprocess
 import threading
-from typing import Tuple
+from typing import Tuple, Optional
 
 _LOG = logging.getLogger("ids.firewall")
 _CHAIN = os.environ.get("IDS_FIREWALL_CHAIN", "INPUT")
@@ -125,3 +126,36 @@ def capabilities() -> dict:
         "iptables": bool(_IPTABLES),
         "requires_root": True,
     }
+
+
+class Firewall:
+    """High level firewall interface with input validation."""
+
+    def __init__(self) -> None:
+        self._lock = _LOCK
+
+    @staticmethod
+    def _validate_ip(ip: str) -> str:
+        try:
+            addr = ipaddress.ip_address(ip)
+        except ValueError as exc:
+            raise ValueError("Invalid IP address") from exc
+        return str(addr)
+
+    def apply(
+        self, ip: str, *, action: str = "block", reason: Optional[str] = None
+    ) -> bool:
+        clean_ip = self._validate_ip(ip)
+        action = (action or "block").lower()
+        if action == "block":
+            success, error = ensure_block(clean_ip, reason)
+        elif action == "unblock":
+            success, error = ensure_unblock(clean_ip)
+        else:
+            raise ValueError("Unsupported firewall action")
+        if not success and error:
+            raise RuntimeError(error)
+        return success
+
+    def remove(self, ip: str) -> bool:
+        return self.apply(ip, action="unblock")

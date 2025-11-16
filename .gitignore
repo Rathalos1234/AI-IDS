@@ -60,4 +60,6 @@ test-results/
 TEST_PLAN.md
 models/
 data/
+playwright-report/tests/ui/.auth/
 playwright-report/
+selected_tests.txt
