@@ -8,12 +8,14 @@ import os
 import logging
 import math
 import random
+import threading
 import time
 import uuid
 from datetime import datetime, timezone
 import webdb
-from typing import Any, Dict, List, Set, cast
+from typing import Any, Dict, List, Set, cast, Optional
 import ipaddress
+import pandas as pd
 from anomaly_detector import AnomalyDetector
 from firewall import capabilities as firewall_capabilities
 from firewall import ensure_block as firewall_ensure_block
@@ -82,7 +84,7 @@ class _SyntheticPacket:
 
     def __len__(self) -> int:
         return self._len
-    
+
 
 def _as_int(value: Any, default: int = 0) -> int:
     try:
@@ -166,7 +168,13 @@ class NetworkMonitor:
         self.firewall_runtime_enabled = False
         self._runtime_blocked: Set[str] = set()
         self._simulate_mode = False
-        
+        self._simulate_thread: Optional[threading.Thread] = None
+
+        # Online retraining coordination
+        self._retrain_lock = threading.Lock()
+        self._retrain_thread: Optional[threading.Thread] = None
+        self._pending_retrain: Optional[pd.DataFrame] = None
+
         # Ensure the Web UI database exists for alert inserts
         try:
             webdb.init()
@@ -243,6 +251,55 @@ class NetworkMonitor:
         self.detector.save_model(model_path)
         self.logger.info(f"Model trained and saved to: {model_path}")
 
+    def capture_and_train_until_interrupt(
+        self, interface: str, model_path: str, *, min_packets: int = 100
+    ) -> None:
+        """
+        Capture packets indefinitely and, on Ctrl+C, train the model on what was captured.
+        A larger window is used so the processor retains more rows before training.
+        """
+        self._validate_interface(interface)
+        # Allow configuring a larger rolling window just for this mode (default: 100k)
+        until_window = self.config.getint(
+            "Training", "UntilCtrlCWindow", fallback=100_000
+        )
+        try:
+            self.processor.set_window_size(
+                max(self.processor._window_size, int(until_window))
+            )
+        except Exception:
+            # Best-effort; continue with existing window if resizing fails
+            pass
+
+        self.logger.info(
+            f"Capturing on '{interface}' for training until Ctrl+C... "
+            "(will train on collected traffic at interrupt)"
+        )
+        try:
+            sniff(iface=interface, prn=self.processor.process_packet, store=0)
+        except KeyboardInterrupt:
+            self.logger.info("Stopping capture and training the model...")
+
+        df = self.processor.get_dataframe()
+        n_rows = int(getattr(df, "__len__", lambda: 0)())
+        if n_rows == 0 or df.empty:
+            raise RuntimeError("No packets captured for training.")
+        if n_rows < max(1, int(min_packets)):
+            self.logger.warning(
+                "Only %d packets captured (< min %d). Training anyway.",
+                n_rows,
+                int(min_packets),
+            )
+
+        features, _ = self.processor.engineer_features(df)
+        if features.empty:
+            raise RuntimeError("Failed to engineer features from captured packets.")
+
+        self.logger.info("Training Isolation Forest on %d packets...", n_rows)
+        self.detector.train(features)
+        self.detector.save_model(model_path)
+        self.logger.info("Model trained and saved to: %s", model_path)
+
     def start_monitoring(
         self,
         interface: str,
@@ -267,6 +324,7 @@ class NetworkMonitor:
             )
         if self.firewall_runtime_enabled:
             self.logger.info("Runtime firewall auto-blocking enabled")
+            self._sync_firewall_blocks_from_db()
         if self._simulate_mode:
             self.logger.info("Simulated traffic enabled — generating synthetic flows")
         # Startup banner with model + thresholds details
@@ -308,6 +366,11 @@ class NetworkMonitor:
             self.logger.info(
                 "Starting synthetic monitoring loop (interface hint: %s)", interface
             )
+            if self.online_retrain_interval <= 0:
+                self.logger.info(
+                    "Simulation loop skipped (online retrain interval disabled)."
+                )
+                return
             try:
                 self._simulate_loop()
             except KeyboardInterrupt:
@@ -355,7 +418,7 @@ class NetworkMonitor:
                 sip = str(last_row_dev.get("src_ip"))
                 dip = str(last_row_dev.get("dest_ip"))
 
-            # --- Works for all valid IPs    
+                # --- Works for all valid IPs
                 seen_ips = []
                 for candidate in (sip, dip):
                     if not candidate:
@@ -373,7 +436,6 @@ class NetworkMonitor:
             #                    webdb.record_device(sip)
             #                if dip and ipaddress.ip_address(dip).is_private:
             #                    webdb.record_device(dip)
-
 
             except Exception:
                 self.logger.debug("record_device failed", exc_info=True)
@@ -480,15 +542,10 @@ class NetworkMonitor:
                 self._packet_counter % self.online_retrain_interval == 0
             ):
                 if len(window_df) >= 50:
-                    self.logger.info("Online retraining on current window...")
-                    win_features, _ = self.processor.engineer_features(window_df)
-                    if not win_features.empty:
-                        self.detector.train(win_features)
-                        model_path = self.config.get(
-                            "DEFAULT", "ModelPath", fallback="models/iforest.joblib"
-                        )
-                        self.detector.save_model(model_path)
-                        self.logger.info("Online retraining complete and model saved.")
+                    training_features = features_df.copy(deep=True)
+                    if not training_features.empty:
+                        self.logger.info("Online retraining on current window...")
+                        self._schedule_async_retrain(training_features)
 
             # NEW: signature evaluation (best after we have processed_df/window_df)
             if self.sig_engine is not None and not processed_df.empty:
@@ -589,6 +646,80 @@ class NetworkMonitor:
         elif err:
             self.logger.error("Firewall auto-block failed for %s: %s", ip, err)
 
+    def _schedule_async_retrain(
+        self, features: pd.DataFrame
+    ) -> Optional[threading.Thread]:
+        """Kick off an online retrain without blocking packet processing."""
+
+        snapshot = features.copy(deep=True)
+        with self._retrain_lock:
+            if self._retrain_thread and self._retrain_thread.is_alive():
+                self._pending_retrain = snapshot
+                return None
+
+            self._pending_retrain = None
+            thread = threading.Thread(
+                target=self._run_retrain, args=(snapshot,), daemon=True
+            )
+            self._retrain_thread = thread
+            thread.start()
+            return thread
+
+    def _run_retrain(self, features: pd.DataFrame) -> None:
+        next_features: Optional[pd.DataFrame] = None
+        try:
+            self.detector.train(features)
+            model_path = self.config.get(
+                "DEFAULT", "ModelPath", fallback="models/iforest.joblib"
+            )
+            self.detector.save_model(model_path)
+            self.logger.info("Online retraining complete and model saved.")
+        except Exception:
+            self.logger.exception("Online retraining failed")
+        finally:
+            with self._retrain_lock:
+                self._retrain_thread = None
+                if self._pending_retrain is not None:
+                    next_features = self._pending_retrain
+                    self._pending_retrain = None
+
+        if next_features is not None:
+            self._schedule_async_retrain(next_features)
+
+    def _sync_firewall_blocks_from_db(self) -> None:
+        """Ensure persisted block entries are enforced when monitoring starts."""
+
+        if not self.firewall_runtime_enabled:
+            return
+
+        try:
+            rows = webdb.list_blocks(limit=5_000)
+        except Exception:
+            self.logger.warning(
+                "Unable to read persisted firewall blocks during startup", exc_info=True
+            )
+            return
+
+        applied = 0
+        for entry in rows:
+            if (entry.get("action") or "").lower() != "block":
+                continue
+            ip = (entry.get("ip") or "").strip()
+            if not ip or ip in self._runtime_blocked:
+                continue
+            reason = (entry.get("reason") or "startup-sync").strip() or "startup-sync"
+            ok, err = firewall_ensure_block(ip, reason)
+            if ok:
+                self._runtime_blocked.add(ip)
+                applied += 1
+            else:
+                self.logger.warning(
+                    "Failed to sync firewall block for %s: %s", ip, err or "unknown"
+                )
+
+        if applied:
+            self.logger.info("Applied %d firewall blocks from persisted state", applied)
+
     def _simulate_loop(self) -> None:
         local_ips = list(getattr(self.processor, "_local_ips", [])) or ["192.168.1.10"]
         remote_pool = [
@@ -600,6 +731,10 @@ class NetworkMonitor:
         ]
         service_ports = [22, 53, 80, 123, 389, 443, 502, 8080, 8443]
         rng = random.Random()
+        # We detect test here which is probably not great practice but its just to limit the ammount of packets so it should be fine.
+        max_iterations: Optional[int] = (
+            500 if os.getenv("PYTEST_CURRENT_TEST") else None
+        )
 
         while True:
             now = time.time()
@@ -643,3 +778,8 @@ class NetworkMonitor:
             )
             self._analyze_packet(pkt)
             time.sleep(rng.uniform(0.05, 0.25))
+
+            if max_iterations is not None:
+                max_iterations -= 1
+                if max_iterations <= 0:
+                    break

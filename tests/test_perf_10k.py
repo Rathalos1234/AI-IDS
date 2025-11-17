@@ -1,4 +1,5 @@
 # tests/test_perf_10k.py
+import logging
 import time
 import tracemalloc
 import pytest
@@ -8,6 +9,11 @@ from anomaly_detector import AnomalyDetector
 
 TARGET_SECONDS = 3.0  # start generous for S1; tighten in S2
 TARGET_MB = 350
+
+pytestmark = [pytest.mark.perf, pytest.mark.slow]
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def _make_df(n=10_000):
@@ -28,7 +34,7 @@ def _make_df(n=10_000):
 
 
 @pytest.mark.perf
-def test_process_10k_under_budget():
+def test_process_10k_under_budget(record_property):
     pp = PacketProcessor(window_size=15_000)
     pp._local_ips = set()
     tracemalloc.start()
@@ -47,4 +53,9 @@ def test_process_10k_under_budget():
 
     assert elapsed <= TARGET_SECONDS, f"10k took {elapsed:.3f}s > {TARGET_SECONDS}s"
     assert peak_mb <= TARGET_MB, f"Peak {peak_mb:.1f}MB > {TARGET_MB}MB"
-    print(f"rows/sec={rows_sec:.0f}  time={elapsed:.3f}s  peakMB={peak_mb:.1f}")
+    msg = f"rows/sec={rows_sec:.0f}  time={elapsed:.3f}s  peakMB={peak_mb:.1f}"
+    LOGGER.info(msg)
+    print(msg)
+    record_property("perf10k_rows_per_sec", round(rows_sec, 2))
+    record_property("perf10k_elapsed_s", round(elapsed, 6))
+    record_property("perf10k_peak_mb", round(peak_mb, 3))

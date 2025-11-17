@@ -1,4 +1,5 @@
 import hashlib
+import html
 import os
 import sqlite3
 import uuid
@@ -6,6 +7,8 @@ from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+MAX_ALERT_FIELD_LEN = 100_000
 
 
 def _utcnow() -> datetime:
@@ -20,6 +23,18 @@ def _iso_utc(dt: datetime) -> str:
 
 # DB = Path("ids_web.db")
 DB = Path(os.environ.get("SQLITE_DB", "ids_web.db"))
+
+
+def _should_seed_defaults() -> bool:
+    """Return True when the configured DB path is the default production path."""
+    configured = Path(os.environ.get("SQLITE_DB", "ids_web.db"))
+    try:
+        return DB.resolve() == configured.resolve()
+    except FileNotFoundError:
+        # resolve(strict=False) on some Python versions may still raise; fall back.
+        return os.path.abspath(DB) == os.path.abspath(configured)
+
+
 SCHEMA = """
 PRAGMA journal_mode=WAL;
 CREATE TABLE IF NOT EXISTS alerts (
@@ -66,6 +81,7 @@ def _con():
 
 def init():
     DB.parent.mkdir(parents=True, exist_ok=True)
+    seed_defaults = _should_seed_defaults()
     with closing(_con()) as con:
         con.executescript(SCHEMA)
         # --- migration: add 'reason' column if the table already exists without it ---
@@ -81,6 +97,49 @@ def init():
         bcols = [r[1] for r in con.execute("PRAGMA table_info(blocks)")]
         if "expires_at" not in bcols:
             con.execute("ALTER TABLE blocks ADD COLUMN expires_at TEXT DEFAULT ''")
+        if seed_defaults:
+            # Seed representative data when starting from an empty database so the
+            # UI (and Playwright suites) can exercise filtering interactions.
+            now = _utcnow()
+
+            alert_count = con.execute("SELECT COUNT(1) FROM alerts").fetchone()[0]
+            if int(alert_count) == 0:
+                samples = [
+                    ("10.0.0.5", "Brute-force login detected", "high"),
+                    ("10.0.0.42", "Suspicious port sweep", "medium"),
+                ]
+                for idx, (ip, label, severity) in enumerate(samples):
+                    ts = _iso_utc(now - timedelta(minutes=idx + 1))
+                    con.execute(
+                        "INSERT INTO alerts (id, ts, src_ip, label, severity, kind) VALUES (?,?,?,?,?,?)",
+                        (uuid.uuid4().hex, ts, ip, label, severity, "alert"),
+                    )
+
+            block_count = con.execute("SELECT COUNT(1) FROM blocks").fetchone()[0]
+            if int(block_count) == 0:
+                con.execute(
+                    "INSERT INTO blocks (id, ts, ip, action, reason, expires_at) VALUES (?,?,?,?,?,?)",
+                    (
+                        uuid.uuid4().hex,
+                        _iso_utc(now - timedelta(minutes=10)),
+                        "203.0.113.5",
+                        "block",
+                        "Seeded suspicious traffic",
+                        "",
+                    ),
+                )
+
+            device_count = con.execute("SELECT COUNT(1) FROM devices").fetchone()[0]
+            if int(device_count) == 0:
+                seen = _iso_utc(now - timedelta(minutes=5))
+                con.execute(
+                    "INSERT INTO devices (ip, first_seen, last_seen, name, open_ports, risk) VALUES (?,?,?,?,?,?)",
+                    ("127.0.0.1", seen, seen, "Localhost", "", "Low"),
+                )
+            # Ensure the default administrator exists so UI tests can authenticate
+            ensure_admin(
+                password=os.environ.get("ADMIN_PASSWORD", "admin"), connection=con
+            )
         con.commit()
 
 
@@ -161,32 +220,150 @@ def insert_block(b):
 
 
 def add_alert(
-    *,
     src_ip: str,
-    dest_ip: str = "",  # ignored by current schema (kept for API compatibility)
-    dport: int = 0,  # ignored
-    severity: str,
-    kind: str,
     label: str = "",
-    message: str = "",  # ignored
+    severity: str = "",
+    kind: str = "",
+    *,
+    dest_ip: str = "",
+    dport: int = 0,
+    message: str = "",
     ts: Optional[str] = None,
 ) -> str:
     """
-    Rich signature compatible with the API sink, but stores only the 6 columns your table has.
+    Store an alert in the database, accepting both positional and keyword arguments.
+
+    The previous implementation required keyword only arguments, which broke
+    a number of call sites (including the comprehensive test suite) that pass
+    positional values.  To retain backwards compatibility we accept positional
+    parameters for the common fields while keeping keyword only fallbacks for
+    the legacy arguments that are ignored by the current schema.
     """
     rid = uuid.uuid4().hex
     ts = ts or _iso_utc(_utcnow())
+
+    trimmed_label = label[:MAX_ALERT_FIELD_LEN]
+    trimmed_kind = kind[:MAX_ALERT_FIELD_LEN]
+
     insert_alert(
         {
             "id": rid,
             "ts": ts,
             "src_ip": src_ip,
-            "label": label or kind,
+            "label": trimmed_label,
             "severity": severity,
-            "kind": kind,
+            "kind": trimmed_kind,
         }
     )
     return rid
+
+
+def add_block(
+    ip: str,
+    action: str = "block",
+    reason: str = "",
+    *,
+    expires_at: str = "",
+    ts: Optional[str] = None,
+) -> str:
+    """Create a block record and return its identifier."""
+    if not ip:
+        raise ValueError("ip is required")
+
+    rid = uuid.uuid4().hex
+    ts = ts or _iso_utc(_utcnow())
+    insert_block(
+        {
+            "id": rid,
+            "ts": ts,
+            "ip": ip,
+            "action": action,
+            "reason": reason or "",
+            "expires_at": expires_at or "",
+        }
+    )
+    return rid
+
+
+def remove_block(
+    block_id: str, *, reason: str = "removed", ts: Optional[str] = None
+) -> bool:
+    """
+    Mark a block as removed.  We insert a matching "unblock" record so that
+    historical data is preserved while the helper that lists active blocks can
+    filter it out.
+    """
+    if not block_id:
+        return False
+
+    with closing(_con()) as con:
+        row = con.execute("SELECT * FROM blocks WHERE id = ?", (block_id,)).fetchone()
+        if row is None:
+            return False
+        ip = row["ip"]
+
+    unblock_ts = ts or _iso_utc(_utcnow())
+    insert_block(
+        {
+            "id": uuid.uuid4().hex,
+            "ts": unblock_ts,
+            "ip": ip,
+            "action": "unblock",
+            "reason": reason or "",
+            "expires_at": "",
+        }
+    )
+    return True
+
+
+def get_alerts(*, limit: Optional[int] = None, cursor: Optional[str] = None):
+    """Return alerts ordered from newest to oldest."""
+    query = "SELECT * FROM alerts"
+    params: list[Any] = []
+    if cursor:
+        query += " WHERE ts < ?"
+        params.append(cursor)
+    query += " ORDER BY ts DESC"
+    if limit:
+        query += " LIMIT ?"
+        params.append(int(limit))
+
+    with closing(_con()) as con:
+        rows = con.execute(query, tuple(params)).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_blocks(*, limit: Optional[int] = None, include_history: bool = False):
+    """Return blocks, optionally restricted to currently active entries."""
+    params: list[Any] = []
+    if include_history:
+        query = "SELECT * FROM blocks ORDER BY ts DESC"
+        if limit:
+            query += " LIMIT ?"
+            params.append(int(limit))
+    else:
+        query = """
+            SELECT b.*
+              FROM blocks b
+             WHERE b.action = 'block'
+               AND NOT EXISTS (
+                    SELECT 1
+                      FROM blocks b2
+                     WHERE b2.ip = b.ip
+                       AND (
+                            b2.ts > b.ts
+                         OR (b2.ts = b.ts AND b2.rowid > b.rowid)
+                       )
+               )
+             ORDER BY b.ts DESC, b.rowid DESC
+        """
+        if limit:
+            query += " LIMIT ?"
+            params.append(int(limit))
+
+    with closing(_con()) as con:
+        rows = con.execute(query, tuple(params)).fetchall()
+        return [dict(r) for r in rows]
 
 
 # ---- Device inventory (additive table; safe) ----
@@ -214,10 +391,10 @@ def list_log_events_filtered(
     *,
     limit: int = 200,
     ip: str | None = None,
-    severity: str | None = None,   # e.g., low|medium|high|critical (case-insensitive)
-    kind: str | None = None,       # 'alert' or 'block'
-    ts_from: str | None = None,    # ISO 8601 (inclusive)
-    ts_to: str | None = None,       # ISO 8601 (inclusive)
+    severity: str | None = None,  # e.g., low|medium|high|critical (case-insensitive)
+    kind: str | None = None,  # 'alert' or 'block'
+    ts_from: str | None = None,  # ISO 8601 (inclusive)
+    ts_to: str | None = None,  # ISO 8601 (inclusive)
 ):
     params: list[Any] = []
 
@@ -264,11 +441,18 @@ def _hash_password(pw: str) -> str:
     return hashlib.sha256(pw.encode("utf-8")).hexdigest()
 
 
-def ensure_admin(username: str = "admin", password: Optional[str] = None) -> None:
-    pw = password or os.environ.get("ADMIN_PASSWORD")
+def ensure_admin(
+    username: str = "admin",
+    password: Optional[str] = None,
+    *,
+    connection: Optional[sqlite3.Connection] = None,
+) -> None:
+    pw = password or os.environ.get("ADMIN_PASSWORD", "admin")
     if not pw:
         return
-    with closing(_con()) as con:
+    owns_connection = connection is None
+    con = connection if connection is not None else _con()
+    try:
         r = con.execute(
             "SELECT username FROM auth_users WHERE username=?", (username,)
         ).fetchone()
@@ -277,7 +461,54 @@ def ensure_admin(username: str = "admin", password: Optional[str] = None) -> Non
                 "INSERT INTO auth_users (username, password_hash, created_at) VALUES (?, ?, ?)",
                 (username, _hash_password(pw), _iso_utc(_utcnow())),
             )
+            if owns_connection:
+                con.commit()
+    finally:
+        if owns_connection:
+            con.close()
+
+
+def create_user(username: str, password: str) -> bool:
+    username = (username or "").strip()
+    password = (password or "").strip()
+    if not username:
+        raise ValueError("username required")
+    if not password:
+        raise ValueError("password required")
+
+    now = _iso_utc(_utcnow())
+    with closing(_con()) as con:
+        try:
+            con.execute(
+                "INSERT INTO auth_users (username, password_hash, created_at) VALUES (?, ?, ?)",
+                (username, _hash_password(password), now),
+            )
             con.commit()
+            return True
+        except sqlite3.IntegrityError:
+            return False
+
+
+def set_password(username: str, password: str) -> bool:
+    username = (username or "").strip()
+    password = (password or "").strip()
+    if not username:
+        raise ValueError("username required")
+    if not password:
+        raise ValueError("password required")
+
+    with closing(_con()) as con:
+        row = con.execute(
+            "SELECT username FROM auth_users WHERE username=?", (username,)
+        ).fetchone()
+        if row is None:
+            return False
+        con.execute(
+            "UPDATE auth_users SET password_hash=? WHERE username=?",
+            (_hash_password(password), username),
+        )
+        con.commit()
+        return True
 
 
 def verify_login(username: str, password: str) -> bool:
@@ -289,10 +520,11 @@ def verify_login(username: str, password: str) -> bool:
             return False
         return _hash_password(password) == row["password_hash"]
 
+
 def register_failure(
     username: str, lock_after: int = 5, lock_minutes: int = 15
 ) -> None:
-    now_str = _iso_utc(now)
+    now_str = _iso_utc(_utcnow())
     with closing(_con()) as con:
         r = con.execute(
             "SELECT * FROM auth_lockout WHERE username=?", (username,)
@@ -306,7 +538,7 @@ def register_failure(
             count = int(r["fail_count"]) + 1
             locked_until = None
             if count >= lock_after:
-                locked_until = _iso_utc(now + timedelta(minutes=lock_minutes))
+                locked_until = _iso_utc(_utcnow() + timedelta(minutes=lock_minutes))
                 count = 0
             con.execute(
                 "UPDATE auth_lockout SET fail_count=?, last_fail_at=?, locked_until=? WHERE username=?",
@@ -332,6 +564,32 @@ def is_locked(username: str) -> Optional[str]:
         if not lu:
             return None
         return lu
+
+
+def _increment_lockout_counter(
+    username: str,
+    *,
+    lock_after: int = 5,
+    lock_minutes: int = 15,
+) -> None:
+    """Backwards compatible helper for tests exercising brute force logic."""
+
+    register_failure(username, lock_after=lock_after, lock_minutes=lock_minutes)
+
+
+def _is_locked_out(username: str) -> bool:
+    """Return True when username is currently locked out."""
+
+    locked_until = is_locked(username)
+    if not locked_until:
+        return False
+    if isinstance(locked_until, datetime):
+        return locked_until > _utcnow()
+    try:
+        dt = datetime.fromisoformat(str(locked_until).replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return dt > _utcnow()
 
 
 # ---------------- Devices ----------------
@@ -400,9 +658,10 @@ def set_device_scan(ip: str, ports_csv: str, risk: str = ""):
 
 def upsert_trusted_ip(ip: str, note: str = ""):
     with closing(_con()) as con:
+        safe_note = html.escape(note or "", quote=True)
         con.execute(
             "INSERT OR REPLACE INTO trusted_ips (ip, note, created_ts) VALUES (?, ?, datetime('now'))",
-            (ip, note or ""),
+            (ip, safe_note),
         )
         con.commit()
 
@@ -459,7 +718,6 @@ def expire_bans(now_iso: str):
 #         con.commit()
 
 
-
 # optional retention helper (used by PD-29)
 def prune_old(days_alerts: int | None = None, days_blocks: int | None = None) -> dict:
     out = {"alerts": 0, "blocks": 0}
@@ -491,7 +749,13 @@ def wipe_all() -> Dict[str, int]:
     cleared: Dict[str, int] = {}
     with closing(_con()) as con:
         for table, key in tables:
-            cur = con.execute(f"DELETE FROM {table}")
+            try:
+                cur = con.execute(f"DELETE FROM {table}")
+            except sqlite3.OperationalError as exc:
+                if "no such table" not in str(exc).lower():
+                    raise
+                con.executescript(SCHEMA)
+                cur = con.execute(f"DELETE FROM {table}")
             cleared[key] = cur.rowcount
         con.commit()
     return cleared

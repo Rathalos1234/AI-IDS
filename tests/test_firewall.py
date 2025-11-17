@@ -5,6 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import sys
 import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import firewall
 
@@ -84,4 +85,21 @@ def test_ensure_unblock_retries_until_missing(monkeypatch):
     assert ok is True
     assert err is None
     assert calls[0][1] == "-D"
-    
+
+
+def test_ensure_block_reports_unsupported(monkeypatch):
+    monkeypatch.setattr(firewall, "_supported", lambda: False)
+
+    ok, err = firewall.ensure_block("203.0.113.8")
+
+    assert ok is False
+    assert err == "unsupported_os"
+
+
+def test_ensure_unblock_requires_root(monkeypatch):
+    monkeypatch.setattr(firewall, "_has_privileges", lambda: False)
+
+    ok, err = firewall.ensure_unblock("198.51.100.20")
+
+    assert ok is False
+    assert err == "root_required"

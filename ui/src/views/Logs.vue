@@ -9,6 +9,8 @@ const limit = 50;
 const err = ref(null);
 const loading = ref(false);
 const stopFns = [];
+// Track IDs we've already rendered to avoid accidental duplicates.
+const seenIds = new Set();
 
 function parseLabel(alert) {
   const label = alert?.label || '';
@@ -35,15 +37,26 @@ async function load(cursor = null) {
     loading.value = true;
     err.value = null;
     const data = await api.alerts(limit, cursor);
+
+    // Helper: map + de-dup by id
+    const consume = (arr) => {
+      const mapped = arr.map(parseLabel);
+      const fresh = mapped.filter(r => r && r.id && !seenIds.has(r.id));
+      fresh.forEach(r => seenIds.add(r.id));
+      return fresh;
+    };
+
+    if (!cursor) seenIds.clear(); // fresh load resets de-dup set
+
     if (Array.isArray(data)) {
-      const mapped = data.map(parseLabel);
-      items.value = cursor ? items.value.concat(mapped) : mapped;
-      nextCursor.value = data.length ? data[data.length - 1].ts : null;
+      const fresh = consume(data);
+      items.value = cursor ? items.value.concat(fresh) : fresh;
+      nextCursor.value = fresh.length ? fresh[fresh.length - 1].ts : null;
     } else {
-      const page = data.items || [];
-      const mapped = page.map(parseLabel);
-      items.value = cursor ? items.value.concat(mapped) : mapped;
-      nextCursor.value = data.next_cursor || (items.value[items.value.length - 1]?.ts || null);
+      const page = Array.isArray(data.items) ? data.items : [];
+      const fresh = consume(page);
+      items.value = cursor ? items.value.concat(fresh) : fresh;
+      nextCursor.value = data.next_cursor || (fresh.length ? fresh[fresh.length - 1].ts : null);
     }
   } catch (e) {
     err.value = e?.error || e?.message || 'Failed to load log history';

@@ -5,14 +5,18 @@ from __future__ import annotations
 
 import argparse
 import configparser
+import json
 import os
+import shutil
 import socket
 import sys
 import threading
+from datetime import datetime
 from network_monitor import NetworkMonitor
 from anomaly_detector import AnomalyDetector
 from config_validation import validate_config
 from typing import Any, Dict, List, cast
+import webdb
 
 _API_THREAD: threading.Thread | None = None
 
@@ -83,6 +87,19 @@ def build_arg_parser(cfg: configparser.ConfigParser) -> argparse.ArgumentParser:
         help="Number of packets to capture for training.",
     )
     pt.add_argument(
+        "--until-ctrl-c",
+        "--until",
+        dest="until_ctrl_c",
+        action="store_true",
+        help="Capture indefinitely; stop with Ctrl+C, then train on collected traffic.",
+    )
+    pt.add_argument(
+        "--min-packets",
+        type=int,
+        default=100,
+        help="Soft minimum packets before training (only used with --until-ctrl-c).",
+    )
+    pt.add_argument(
         "--model",
         "-m",
         default=default_model,
@@ -137,7 +154,70 @@ def build_arg_parser(cfg: configparser.ConfigParser) -> argparse.ArgumentParser:
 
     _ = sub.add_parser("config-validate", help="Validate configuration and exit.")
 
+    # --- tiny ops helpers ---
+    pbd = sub.add_parser(
+        "backup-db", help="Create a timestamped copy of the web database"
+    )
+    pbd.add_argument("-o", "--outdir", default="backups", help="destination directory")
+
+    pr = sub.add_parser(
+        "retention-run",
+        help="Prune old alerts/blocks per config.ini (or CLI overrides)",
+    )
+    pr.add_argument(
+        "--alerts-days", type=int, default=None, help="override Retention.AlertsDays"
+    )
+    pr.add_argument(
+        "--blocks-days", type=int, default=None, help="override Retention.BlocksDays"
+    )
+
     return p
+
+
+def cmd_backup_db(args) -> int:
+    """Write a timestamped copy of the SQLite DB into args.outdir."""
+    try:
+        db_path = str(webdb.DB)
+    except Exception as e:
+        print(f"[backup-db] cannot locate DB: {e}", file=sys.stderr)
+        return 1
+    outdir = args.outdir
+    os.makedirs(outdir, exist_ok=True)
+    ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    dest = os.path.join(outdir, f"ids_web_{ts}.sqlite")
+    shutil.copyfile(db_path, dest)
+    print(f"[backup-db] wrote {dest}")
+    return 0
+
+
+def cmd_retention_run(args) -> int:
+    """Invoke webdb.prune_old using config.ini or CLI overrides and print a JSON result."""
+    cfg = _load_config("config.ini")
+    alerts_days = args.alerts_days
+    blocks_days = args.blocks_days
+    if alerts_days is None:
+        alerts_days = cfg.getint("Retention", "AlertsDays", fallback=0)
+    if blocks_days is None:
+        blocks_days = cfg.getint("Retention", "BlocksDays", fallback=0)
+    if hasattr(webdb, "prune_old"):
+        res = webdb.prune_old(
+            days_alerts=int(alerts_days), days_blocks=int(blocks_days)
+        )
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "deleted": res,
+                    "settings": {
+                        "alerts_days": int(alerts_days),
+                        "blocks_days": int(blocks_days),
+                    },
+                }
+            )
+        )
+        return 0
+    print(json.dumps({"ok": False, "error": "retention_unsupported"}))
+    return 1
 
 
 def main(argv=None) -> int:
@@ -147,9 +227,18 @@ def main(argv=None) -> int:
     monitor = NetworkMonitor(cfg)
     try:
         if args.mode == "train":
-            monitor.capture_and_train(
-                interface=args.interface, packet_count=args.count, model_path=args.model
-            )
+            if getattr(args, "until_ctrl_c", False):
+                monitor.capture_and_train_until_interrupt(
+                    interface=args.interface,
+                    model_path=args.model,
+                    min_packets=getattr(args, "min_packets", 100),
+                )
+            else:
+                monitor.capture_and_train(
+                    interface=args.interface,
+                    packet_count=args.count,
+                    model_path=args.model,
+                )
         elif args.mode == "monitor":
             _start_api_server_in_background()
             monitor.start_monitoring(
@@ -193,7 +282,10 @@ def main(argv=None) -> int:
         elif args.mode == "config-validate":  # NEW
             print("Config OK")
             return 0
-
+        elif args.mode == "backup-db":
+            return cmd_backup_db(args)
+        elif args.mode == "retention-run":
+            return cmd_retention_run(args)
         else:
             print("Unknown mode. Use 'train' or 'monitor'.")
             return 2

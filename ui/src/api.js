@@ -139,6 +139,26 @@ export const login = async (username, password) => {
   return res;
 };
 
+export const register = async (username, password) => {
+  const res = await fetch(prefix('/api/auth/register'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  }).then(parseJson);
+  if (res?.token) {
+    storeToken(res.token, res.expires_at, res.ttl_seconds);
+  }
+  return res;
+};
+
+export const resetPassword = async (username, password) =>
+  fetch(prefix('/api/auth/reset-password'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  }).then(parseJson);
+
+
 export const logout = async () => {
   try {
     await authJson('/api/auth/logout', { method: 'POST' });
@@ -271,6 +291,8 @@ export const api = {
 
   // Auth (optional)
   login: typeof login === 'function' ? login : undefined,
+  register: typeof register === 'function' ? register : undefined,
+  resetPassword: typeof resetPassword === 'function' ? resetPassword : undefined,
   logout: typeof logout === 'function' ? logout : undefined,
 
   // Ops helpers
